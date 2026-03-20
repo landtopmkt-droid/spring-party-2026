@@ -332,27 +332,66 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
-  let data = [];
+<script type="module">
+  // 1. 引入 Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-  function load() {
-    data = JSON.parse(localStorage.getItem('springFest_dataA') || '[]');
-  }
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
+    authDomain: "springfestival-4aaea.firebaseapp.com",
+    projectId: "springfestival-4aaea",
+    databaseURL: "https://springfestival-4aaea-default-rtdb.firebaseio.com",
+    storageBucket: "springfestival-4aaea.firebasestorage.app",
+    messagingSenderId: "64196762294",
+    appId: "1:64196762294:web:2fb6e766f38f8d47332417",
+    measurementId: "G-4MZF0HPLJV"
+  };
 
-  function refresh() { load(); renderTable(); updateStats(); showToast('已重新整理 ✓'); }
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-  function updateStats() {
-    document.getElementById('totalCount').textContent = data.length;
+  // ── 變數定義 ──
+  let allData = []; // 存放從雲端抓下來的原始陣列
+
+  // ── 核心：即時監聽雲端報名資料 ──
+  const registrationsRef = ref(db, 'registrations');
+
+  onValue(registrationsRef, (snapshot) => {
+    const val = snapshot.val();
+    if (!val) {
+      allData = [];
+    } else {
+      // Firebase 物件轉為陣列，並保留 key (firebaseId) 方便刪除
+      allData = Object.keys(val).map(key => ({
+        ...val[key],
+        firebaseId: key 
+      }));
+      // 依時間排序（新的在上面）
+      allData.sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt));
+    }
+    
+    renderTable();
+    updateStats();
+  });
+
+  // ── 功能函式 ──
+  window.updateStats = function() {
+    document.getElementById('totalCount').textContent = allData.length;
+    
     const today = new Date().toLocaleDateString('zh-TW');
-    const todayItems = data.filter(d => d.registeredAt && d.registeredAt.includes(today));
+    const todayItems = allData.filter(d => d.registeredAt && d.registeredAt.includes(today));
     document.getElementById('todayCount').textContent = todayItems.length;
-    const units = new Set(data.map(d => d.unitName));
+    
+    const units = new Set(allData.map(d => d.unitName));
     document.getElementById('unitCount').textContent = units.size;
-  }
+  };
 
-  function renderTable() {
+  window.renderTable = function() {
     const q = document.getElementById('searchInput').value.trim().toLowerCase();
-    const filtered = data.filter(d =>
+    
+    // 進行搜尋過濾
+    const filtered = allData.filter(d =>
       !q ||
       (d.ytAccount && d.ytAccount.toLowerCase().includes(q)) ||
       (d.realName && d.realName.toLowerCase().includes(q)) ||
@@ -361,52 +400,57 @@
 
     const tbody = document.getElementById('tableBody');
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">${data.length === 0 ? '尚無報名資料' : '找不到符合的資料'}</div></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">${allData.length === 0 ? '尚無報名資料' : '找不到符合的資料'}</div></div></td></tr>`;
       return;
     }
 
     tbody.innerHTML = filtered.map((d, i) => `
       <tr>
         <td class="row-num">${i + 1}</td>
-        <td><span class="yt-account">@${d.ytAccount}</span></td>
-        <td>${d.realName}</td>
-        <td><span class="badge badge-gold">${d.unitName}</span></td>
+        <td><span class="yt-account">@${esc(d.ytAccount)}</span></td>
+        <td>${esc(d.realName)}</td>
+        <td><span class="badge badge-gold">${esc(d.unitName)}</span></td>
         <td style="color:var(--text-muted);font-size:1.23rem">${d.registeredAt || '-'}</td>
-        <td><button class="delete-btn" onclick="deleteRow(${d.id})">✕ 刪除</button></td>
+        <td><button class="delete-btn" onclick="deleteRow('${d.firebaseId}')">✕ 刪除</button></td>
       </tr>
     `).join('');
-  }
+  };
 
-  function deleteRow(id) {
-    if (!confirm('確定要刪除此筆資料？')) return;
-    data = data.filter(d => d.id !== id);
-    localStorage.setItem('springFest_dataA', JSON.stringify(data));
-    renderTable();
-    updateStats();
-    showToast('已刪除 ✓');
-  }
+  // ── 刪除單筆資料 ──
+  window.deleteRow = function(firebaseId) {
+    if (!confirm('確定要刪除此筆資料？這會同步移除雲端紀錄。')) return;
+    const itemRef = ref(db, `registrations/${firebaseId}`);
+    remove(itemRef).then(() => {
+      showToast('已刪除 ✓');
+    });
+  };
 
-  function clearAll() {
-    if (!confirm('確定要清除全部報名資料？此操作無法復原！')) return;
-    localStorage.removeItem('springFest_dataA');
-    data = [];
-    renderTable();
-    updateStats();
-    showToast('已清除全部資料');
-  }
+  // ── 清除全部資料 ──
+  window.clearAll = function() {
+    if (!confirm('確定要【清空雲端】所有報名資料？此操作無法復原！')) return;
+    remove(registrationsRef).then(() => {
+      showToast('已清空所有報名資料');
+    });
+  };
 
-  function exportCSV() {
-    if (data.length === 0) { showToast('沒有資料可以匯出'); return; }
+  // ── 匯出 CSV ──
+  window.exportCSV = function() {
+    if (allData.length === 0) { showToast('沒有資料可以匯出'); return; }
     const headers = ['#', 'YouTube帳號', '真實姓名', '單位名稱', '報到時間'];
-    const rows = data.map((d, i) => [i+1, d.ytAccount, d.realName, d.unitName, d.registeredAt]);
+    const rows = allData.map((d, i) => [i+1, d.ytAccount, d.realName, d.unitName, d.registeredAt]);
     const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = '春酒報名名單.csv'; a.click();
+    a.href = url; a.download = `春酒報名名單_${new Date().getTime()}.csv`; a.click();
     showToast('CSV 匯出完成 ✓');
-  }
+  };
 
+  window.refresh = function() {
+    showToast('雲端已即時同步中...');
+  };
+
+  // ── UI 與防禦 ──
   let toastTimer;
   function showToast(msg) {
     const t = document.getElementById('toast');
@@ -416,13 +460,13 @@
     toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
   }
 
-  // Init
-  load();
-  renderTable();
-  updateStats();
+  function esc(s) {
+    if (!s) return "";
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
 
-  // Auto-refresh every 10s
-  setInterval(() => { load(); renderTable(); updateStats(); }, 10000);
+  // 綁定搜尋事件
+  document.getElementById('searchInput').addEventListener('input', renderTable);
 </script>
 </body>
 </html>

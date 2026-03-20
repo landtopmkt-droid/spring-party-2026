@@ -45,7 +45,6 @@
   .page-title { font-family: 'Noto Serif TC', serif; font-size: 2.25rem; font-weight: 900; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 6px; }
   .page-subtitle { color: var(--text-muted); font-size: 1.275rem; margin-bottom: 40px; }
 
-  /* Status display */
   .status-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -69,190 +68,52 @@
     pointer-events: none;
   }
 
-  .status-emoji {
-    font-size: 7.5rem;
-    display: block;
-    margin-bottom: 16px;
-    transition: transform 0.3s ease;
-  }
-  .status-card.active-state .status-emoji {
-    animation: bounce 0.6s ease-in-out infinite alternate;
-  }
+  .status-emoji { font-size: 7.5rem; display: block; margin-bottom: 16px; transition: transform 0.3s ease; }
+  .status-card.active-state .status-emoji { animation: bounce 0.6s ease-in-out infinite alternate; }
   @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 
-  .status-label {
-    font-size: 1.2rem;
-    color: var(--text-muted);
-    letter-spacing: 0.3em;
-    margin-bottom: 8px;
-  }
-  .status-value {
-    font-family: 'Noto Serif TC', serif;
-    font-size: 3rem;
-    font-weight: 900;
-    letter-spacing: 0.15em;
-    transition: color 0.3s ease;
-  }
+  .status-label { font-size: 1.2rem; color: var(--text-muted); letter-spacing: 0.3em; margin-bottom: 8px; }
+  .status-value { font-family: 'Noto Serif TC', serif; font-size: 3rem; font-weight: 900; letter-spacing: 0.15em; transition: color 0.3s ease; }
   .status-value.on { color: var(--red-light); text-shadow: 0 0 20px rgba(192,39,45,0.4); }
   .status-value.off { color: var(--text-muted); }
 
-  /* Live indicator */
-  .live-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 1.17rem;
-    letter-spacing: 0.1em;
-    margin-top: 12px;
-    transition: all 0.3s ease;
-  }
-  .live-badge.live {
-    background: rgba(192,39,45,0.15);
-    color: var(--red-light);
-    border: 1px solid rgba(192,39,45,0.3);
-  }
-  .live-badge.offline {
-    background: rgba(255,255,255,0.04);
-    color: var(--text-muted);
-    border: 1px solid rgba(255,255,255,0.06);
-  }
-  .live-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: currentColor;
-  }
+  .live-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 20px; font-size: 1.17rem; letter-spacing: 0.1em; margin-top: 12px; transition: all 0.3s ease; }
+  .live-badge.live { background: rgba(192,39,45,0.15); color: var(--red-light); border: 1px solid rgba(192,39,45,0.3); }
+  .live-badge.offline { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.06); }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
   .live-badge.live .live-dot { animation: blink 1s infinite; }
   @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
 
-  /* Control buttons */
-  .control-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 32px;
-  }
-  .control-title {
-    font-size: 1.2rem;
-    color: var(--text-muted);
-    letter-spacing: 0.25em;
-    margin-bottom: 24px;
-    text-transform: uppercase;
-  }
-  .btn-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .btn-control {
-    padding: 28px 20px;
-    border-radius: 6px;
-    border: none;
-    font-family: 'Noto Serif TC', serif;
-    font-size: 1.65rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-control::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.05);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
+  .control-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; }
+  .control-title { font-size: 1.2rem; color: var(--text-muted); letter-spacing: 0.25em; margin-bottom: 24px; text-transform: uppercase; }
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .btn-control { padding: 28px 20px; border-radius: 6px; border: none; font-family: 'Noto Serif TC', serif; font-size: 1.65rem; font-weight: 600; letter-spacing: 0.2em; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; overflow: hidden; }
+  .btn-control::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.05); opacity: 0; transition: opacity 0.2s; }
   .btn-control:hover::after { opacity: 1; }
   .btn-control:active { transform: scale(0.97); }
 
-  .btn-start {
-    background: linear-gradient(135deg, #8b1a1e, var(--red));
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 4px 20px rgba(192,39,45,0.3);
-  }
-  .btn-start:hover {
-    box-shadow: 0 8px 30px rgba(192,39,45,0.5);
-    transform: translateY(-2px);
-  }
-  .btn-start:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
+  .btn-start { background: linear-gradient(135deg, #8b1a1e, var(--red)); color: #fff; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(192,39,45,0.3); }
+  .btn-start:hover { box-shadow: 0 8px 30px rgba(192,39,45,0.5); transform: translateY(-2px); }
+  .btn-start:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  .btn-stop {
-    background: var(--surface2);
-    color: var(--text-muted);
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-  .btn-stop:hover {
-    color: var(--text);
-    border-color: rgba(255,255,255,0.2);
-  }
-  .btn-stop:disabled {
-    opacity: 0.25;
-    cursor: not-allowed;
-  }
+  .btn-stop { background: var(--surface2); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); }
+  .btn-stop:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .btn-stop:disabled { opacity: 0.25; cursor: not-allowed; }
 
   .btn-icon { font-size: 2.25rem; }
 
-  /* Log */
-  .log-section {
-    margin-top: 28px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 24px;
-  }
-  .log-title {
-    font-size: 1.2rem;
-    color: var(--text-muted);
-    letter-spacing: 0.25em;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-  }
+  .log-section { margin-top: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+  .log-title { font-size: 1.2rem; color: var(--text-muted); letter-spacing: 0.25em; margin-bottom: 16px; text-transform: uppercase; }
   .log-list { display: flex; flex-direction: column; gap: 8px; }
-  .log-item {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    font-size: 1.275rem;
-  }
+  .log-item { display: flex; gap: 12px; align-items: center; font-size: 1.275rem; }
   .log-time { color: var(--text-muted); font-size: 1.17rem; white-space: nowrap; min-width: 90px; }
   .log-action { color: var(--text); }
   .log-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .log-dot.start { background: var(--red-light); }
   .log-dot.stop { background: var(--text-muted); }
 
-  .note {
-    margin-top: 16px;
-    padding: 12px 16px;
-    background: rgba(212,168,67,0.05);
-    border: 1px solid rgba(212,168,67,0.1);
-    border-radius: 4px;
-    font-size: 1.2rem;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
-    line-height: 1.6;
-  }
+  .note { margin-top: 16px; padding: 12px 16px; background: rgba(212,168,67,0.05); border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; font-size: 1.2rem; color: var(--text-muted); letter-spacing: 0.05em; line-height: 1.6; }
 
-  @media (max-width: 500px) {
-    .btn-row { grid-template-columns: 1fr; }
-    .main { padding: 20px 16px; }
-    .nav { padding: 0 16px; }
-  }
-
-  /* ── RWD ── */
   @media (max-width: 900px) {
     .nav { padding: 8px 16px; height: auto; flex-wrap: wrap; }
     .nav-brand { margin-right: 16px; font-size: 0.9rem; }
@@ -276,7 +137,6 @@
   @media (max-width: 400px) {
     .btn-row { grid-template-columns: 1fr; }
   }
-
 </style>
 </head>
 <body>
@@ -295,7 +155,6 @@
   <div class="page-title">紅包雨控制台</div>
   <div class="page-subtitle">控制前台紅包雨頁面的播放狀態</div>
 
-  <!-- Status -->
   <div class="status-card" id="statusCard">
     <span class="status-emoji" id="statusEmoji">🧧</span>
     <div class="status-label">當前狀態</div>
@@ -308,7 +167,6 @@
     </div>
   </div>
 
-  <!-- Controls -->
   <div class="control-panel">
     <div class="control-title">操作控制</div>
     <div class="btn-row">
@@ -322,28 +180,84 @@
   </div>
 
   <div class="note">
-    ℹ️ 前台頁面需要在瀏覽器中開啟 <strong>frontend-2-redpacket.html</strong>，此控制台透過 localStorage 即時傳送指令給前台頁面。確保前台頁面已開啟，控制才會生效。
+    ℹ️ 前台頁面需要在瀏覽器中開啟 <strong>frontend-2-redpacket.html</strong>，此控制台透過 Firebase 即時傳送指令給前台頁面（含 OBS 瀏覽器來源）。
   </div>
 
-  <!-- Log -->
   <div class="log-section">
     <div class="log-title">操作記錄</div>
     <div class="log-list" id="logList">
-      <div style="color:var(--text-muted);font-size:1.275rem">尚無操作記錄</div>
+      <div style="color:var(--text-muted);font-size:1.275rem">載入中...</div>
     </div>
   </div>
 </div>
 
-<script>
-  let isActive = false;
-  let logs = JSON.parse(localStorage.getItem('springFest_redpacketLog') || '[]');
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getDatabase, ref, set, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-  function sendCommand(cmd) {
-    localStorage.setItem('springFest_redpacket', cmd);
-    isActive = (cmd === 'start');
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
+    authDomain: "springfestival-4aaea.firebaseapp.com",
+    projectId: "springfestival-4aaea",
+    databaseURL: "https://springfestival-4aaea-default-rtdb.firebaseio.com",
+    storageBucket: "springfestival-4aaea.firebasestorage.app",
+    messagingSenderId: "64196762294",
+    appId: "1:64196762294:web:2fb6e766f38f8d47332417",
+    measurementId: "G-4MZF0HPLJV"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let isActive = false;
+
+  // ── 監聽當前紅包雨狀態（同步顯示）──
+  onValue(ref(db, 'redpacket_status'), (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+    isActive = (data.action === 'start');
     updateUI();
-    addLog(cmd);
+  });
+
+  // ── 監聽操作記錄（最新 20 筆）──
+  const logQuery = query(ref(db, 'redpacket_log'), orderByChild('timestamp'), limitToLast(20));
+  onValue(logQuery, (snapshot) => {
+    const val = snapshot.val();
+    if (!val) {
+      document.getElementById('logList').innerHTML = '<div style="color:var(--text-muted);font-size:1.275rem">尚無操作記錄</div>';
+      return;
+    }
+    // 轉成陣列並反向排序（新的在上）
+    const logs = Object.values(val).sort((a, b) => b.timestamp - a.timestamp);
+    renderLogs(logs);
+  });
+
+  // ── 送出指令到 Firebase ──
+  async function sendCommand(cmd) {
+    try {
+      // 1. 更新狀態節點（前台監聽這個）
+      await set(ref(db, 'redpacket_status'), {
+        action: cmd,
+        time: Date.now()
+      });
+
+      // 2. 寫入記錄到 Firebase（取代 localStorage）
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      push(ref(db, 'redpacket_log'), {
+        time: timeStr,
+        action: cmd === 'start' ? '開始紅包雨' : '停止紅包雨',
+        type: cmd,
+        timestamp: Date.now()
+      });
+
+    } catch (e) {
+      console.error("傳送失敗:", e);
+      alert("連線失敗，請檢查網路");
+    }
   }
+
+  window.sendCommand = sendCommand;
 
   function updateUI() {
     const card = document.getElementById('statusCard');
@@ -375,18 +289,9 @@
     }
   }
 
-  function addLog(cmd) {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    logs.unshift({ time: timeStr, action: cmd === 'start' ? '開始紅包雨' : '停止紅包雨', type: cmd });
-    if (logs.length > 20) logs.pop();
-    localStorage.setItem('springFest_redpacketLog', JSON.stringify(logs));
-    renderLogs();
-  }
-
-  function renderLogs() {
+  function renderLogs(logs) {
     const list = document.getElementById('logList');
-    if (logs.length === 0) {
+    if (!logs || logs.length === 0) {
       list.innerHTML = '<div style="color:var(--text-muted);font-size:1.275rem">尚無操作記錄</div>';
       return;
     }
@@ -399,11 +304,8 @@
     `).join('');
   }
 
-  // Sync state from localStorage on load
-  const currentCtrl = localStorage.getItem('springFest_redpacket');
-  isActive = (currentCtrl === 'start');
+  // 初始化 UI
   updateUI();
-  renderLogs();
 </script>
 </body>
 </html>

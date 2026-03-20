@@ -35,7 +35,6 @@
   .page-subtitle { color: var(--text-muted); font-size: 1.275rem; margin-bottom: 32px; }
 
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } .main { padding: 16px; } .nav { padding: 0 16px; } }
 
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 28px; margin-bottom: 20px; }
   .panel-title { font-size: 1.2rem; color: var(--gold); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
@@ -65,7 +64,6 @@
   .btn-full { width: 100%; padding: 14px; }
   .btn-sm { padding: 6px 12px; font-size: 1.17rem; }
 
-  /* Upload zone */
   .upload-zone {
     border: 2px dashed rgba(212,168,67,0.25); border-radius: 6px; padding: 28px 20px;
     text-align: center; cursor: pointer; transition: all 0.25s; position: relative;
@@ -76,7 +74,6 @@
   .upload-label { font-size: 1.275rem; color: var(--text-muted); line-height: 1.7; }
   .upload-label strong { color: var(--gold); }
 
-  /* Column mapping */
   .map-panel { background: var(--surface2); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; padding: 16px; margin-top: 14px; display: none; }
   .map-panel.show { display: block; }
   .map-title { font-size: 1.17rem; color: var(--gold); letter-spacing: 0.15em; margin-bottom: 12px; }
@@ -85,7 +82,6 @@
   .map-select:focus { border-color: var(--gold); }
   .map-label { font-size: 1.17rem; color: var(--text-muted); margin-bottom: 5px; }
 
-  /* Personnel stats */
   .personnel-stats { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
   .stat-chip { padding: 5px 14px; background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.15); border-radius: 20px; font-size: 1.2rem; color: var(--gold); }
   .stat-chip.excluded { background: rgba(192,39,45,0.08); border-color: rgba(192,39,45,0.2); color: #e57373; }
@@ -97,29 +93,17 @@
   td { padding: 8px 12px; font-size: 1.26rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover { background: rgba(212,168,67,0.02); }
-  .excluded-row td { opacity: 0.4; text-decoration: line-through; }
-  .excluded-tag { font-size: 1.05rem; color: #e57373; background: rgba(192,39,45,0.15); padding: 1px 6px; border-radius: 8px; margin-left: 6px; }
 
-  /* Prize list */
   .prize-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
-  .prize-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 16px; background: var(--surface2);
-    border: 1px solid rgba(255,255,255,0.05); border-radius: 4px;
-    transition: all 0.2s;
-  }
+  .prize-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface2); border: 1px solid rgba(255,255,255,0.05); border-radius: 4px; transition: all 0.2s; }
   .prize-item.drawn { border-color: rgba(192,39,45,0.2); background: rgba(192,39,45,0.05); }
   .prize-order { width: 26px; height: 26px; border-radius: 50%; background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.11rem; color: var(--gold); flex-shrink: 0; }
   .prize-name { flex: 1; font-size: 1.35rem; }
   .prize-count { font-size: 1.17rem; color: var(--text-muted); white-space: nowrap; }
   .prize-drawn-badge { font-size: 1.08rem; color: #e57373; background: rgba(192,39,45,0.12); padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
-  .prize-delete-btn {
-    background: transparent; border: none; color: rgba(192,39,45,0.45);
-    cursor: pointer; font-size: 1.275rem; padding: 4px 6px; border-radius: 3px; transition: all 0.2s; flex-shrink: 0;
-  }
+  .prize-delete-btn { background: transparent; border: none; color: rgba(192,39,45,0.45); cursor: pointer; font-size: 1.275rem; padding: 4px 6px; border-radius: 3px; transition: all 0.2s; flex-shrink: 0; }
   .prize-delete-btn:hover { color: #e57373; background: rgba(192,39,45,0.1); }
 
-  /* Draw control */
   .select-wrapper { position: relative; margin-bottom: 16px; }
   .form-select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 36px; }
   .select-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--gold); pointer-events: none; font-size: 1.125rem; }
@@ -145,7 +129,6 @@
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 20px; color: var(--text); font-size: 1.32rem; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); max-width: 340px; }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  /* ── RWD ── */
   @media (max-width: 900px) {
     .grid-2 { grid-template-columns: 1fr; }
     .nav { padding: 8px 16px; height: auto; flex-wrap: wrap; }
@@ -172,7 +155,6 @@
     table { min-width: 360px; }
     .personnel-table-wrap { overflow-x: auto; }
   }
-
 </style>
 </head>
 <body>
@@ -195,12 +177,8 @@
 
     <!-- ─── LEFT ─── -->
     <div>
-
-      <!-- Excel Import -->
       <div class="panel">
-        <div class="panel-title">
-          <span>人員名單匯入（Excel）</span>
-        </div>
+        <div class="panel-title"><span>人員名單匯入（Excel）</span></div>
 
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="onFileSelect(event)">
@@ -212,9 +190,6 @@
           </div>
         </div>
 
-
-
-        <!-- Column mapping -->
         <div class="map-panel" id="mapPanel">
           <div class="map-title">欄位對應（請選擇哪欄是姓名、哪欄是單位）</div>
           <div class="map-row">
@@ -230,7 +205,6 @@
           <button class="btn btn-gold" style="width:100%;margin-top:4px" onclick="confirmImport()">確認匯入</button>
         </div>
 
-        <!-- Stats & preview -->
         <div id="personnelStats" style="display:none">
           <div class="personnel-stats">
             <div class="stat-chip" id="statAvailable"></div>
@@ -240,14 +214,13 @@
           </div>
           <div class="personnel-table-wrap" id="previewTableWrap">
             <table>
-              <thead><tr><th>#</th><th>姓名</th><th>單位</th><th>狀態</th></tr></thead>
+              <thead><tr><th>#</th><th>姓名</th><th>單位</th></tr></thead>
               <tbody id="previewTableBody"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- Prize Setup -->
       <div class="panel">
         <div class="panel-title">獎品設定</div>
         <div class="row-inline">
@@ -276,12 +249,9 @@
 
     <!-- ─── RIGHT ─── -->
     <div>
-
-      <!-- Draw Control -->
       <div class="panel">
         <div class="panel-title">抽獎操作</div>
 
-        <!-- 防呆提示 -->
         <div id="resetWarning" style="display:none;padding:12px 16px;background:rgba(192,39,45,0.12);border:1px solid rgba(192,39,45,0.35);border-radius:6px;margin-bottom:16px;font-size:1.275rem;color:#ff8a80;line-height:1.6">
           ⚠️ 前台正在顯示得獎名單<br>
           <strong>請先按下方「重置前台空白畫面」</strong>，才能進行下一輪抽獎
@@ -319,13 +289,11 @@
         </div>
       </div>
 
-      <!-- Reset -->
       <div class="panel">
         <div class="panel-title">前台控制</div>
         <button class="btn btn-outline btn-full" onclick="resetFrontend()">重置前台至空白畫面</button>
       </div>
 
-      <!-- History -->
       <div class="panel">
         <div class="panel-title">
           <span>抽獎紀錄</span>
@@ -335,45 +303,68 @@
           <div class="empty-msg">尚無抽獎紀錄</div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script>
-  // ── State ──
-  let prizes      = JSON.parse(localStorage.getItem('springFest_prizes')      || '[]');
-  let personnel   = JSON.parse(localStorage.getItem('springFest_personnel')   || '[]');
-  let winners     = JSON.parse(localStorage.getItem('springFest_winners')     || '[]'); // cumulative past winners (by realName+unitName key)
-  let drawHistory = JSON.parse(localStorage.getItem('springFest_drawHistory') || '[]');
-  let pendingResult = null;
-  let needsReset = false; // 防呆：開始抽獎後必須先重置前台才能再抽
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-  // Raw excel data
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
+    authDomain: "springfestival-4aaea.firebaseapp.com",
+    projectId: "springfestival-4aaea",
+    databaseURL: "https://springfestival-4aaea-default-rtdb.firebaseio.com",
+    storageBucket: "springfestival-4aaea.firebasestorage.app",
+    messagingSenderId: "64196762294",
+    appId: "1:64196762294:web:2fb6e766f38f8d47332417",
+    measurementId: "G-4MZF0HPLJV"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // ── State（全部由 Firebase 維護，不用 localStorage）──
+  let prizes = [];
+  let personnel = [];
+  let winners = [];
+  let drawHistory = [];
+  let pendingResult = null;
+  let needsReset = false;
   let rawSheet = [], rawHeaders = [];
   let previewVisible = false;
 
-  // ──────────────────────────────────────────────
-  // Excel / CSV import
-  // ──────────────────────────────────────────────
-  function onFileSelect(e) {
-    const file = e.target.files[0];
-    if (file) readFile(file);
-    // Reset input so same file can be re-selected
-    e.target.value = '';
+  // ── 從 Firebase 即時同步資料 ──
+  onValue(ref(db, 'lottery_data'), (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      prizes      = data.prizes      || [];
+      personnel   = data.personnel   || [];
+      winners     = data.winners     || [];
+      drawHistory = data.drawHistory || [];
+      needsReset  = data.needsReset  || false;
+    } else {
+      prizes = []; personnel = []; winners = []; drawHistory = []; needsReset = false;
+    }
+    refreshAllUI();
+  });
+
+  // ── 儲存至 Firebase ──
+  function syncToFirebase() {
+    set(ref(db, 'lottery_data'), { prizes, personnel, winners, drawHistory, needsReset });
   }
 
-  const zone = document.getElementById('uploadZone');
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault();
-    zone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
+  // ──────────────────────────────────────────────
+  // Excel Import
+  // ──────────────────────────────────────────────
+  window.onFileSelect = function(e) {
+    const file = e.target.files[0];
     if (file) readFile(file);
-  });
+    e.target.value = '';
+  };
 
   function readFile(file) {
     const reader = new FileReader();
@@ -382,20 +373,13 @@
         const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-
-        // Filter out completely empty rows first
         const nonEmptyRows = rows.filter(r => r.some(c => String(c).trim() !== ''));
-        if (nonEmptyRows.length === 0) { showToast('檔案為空，請確認內容'); return; }
-
-        // Always treat first row as header
+        if (nonEmptyRows.length === 0) { showToast('檔案為空'); return; }
         rawHeaders = nonEmptyRows[0].map((h, i) => String(h).trim() || `欄${i+1}`);
-        rawSheet   = nonEmptyRows.slice(1);
-
-        if (rawSheet.length === 0) { showToast('沒有資料列（只有標題行），請確認 Excel 內容'); return; }
-
+        rawSheet = nonEmptyRows.slice(1);
         populateColSelects();
         document.getElementById('mapPanel').classList.add('show');
-        showToast(`已讀取 ${rawSheet.length} 筆資料，請確認欄位對應`);
+        showToast(`已讀取 ${rawSheet.length} 筆資料`);
       } catch(err) { showToast('讀取失敗：' + err.message); }
     };
     reader.readAsArrayBuffer(file);
@@ -404,110 +388,146 @@
   function populateColSelects() {
     ['colName','colUnit'].forEach(id => {
       document.getElementById(id).innerHTML = rawHeaders
-        .map((h,i) => `<option value="${i}">${h || '欄'+(i+1)}</option>`).join('');
+        .map((h,i) => `<option value="${i}">${h}</option>`).join('');
     });
-    // Auto-detect
     rawHeaders.forEach((h,i) => {
       if (/姓名|名字|name/i.test(h)) document.getElementById('colName').value = i;
       if (/單位|部門|unit|dept/i.test(h)) document.getElementById('colUnit').value = i;
     });
   }
 
-  function confirmImport() {
+  window.confirmImport = function() {
     const ni = parseInt(document.getElementById('colName').value);
     const ui = parseInt(document.getElementById('colUnit').value);
-    const imported = rawSheet
+    personnel = rawSheet
       .map(r => ({ realName: String(r[ni]||'').trim(), unitName: String(r[ui]||'').trim() }))
       .filter(p => p.realName);
-    if (!imported.length) { showToast('沒有有效資料，請確認欄位'); return; }
-    personnel = imported;
-    localStorage.setItem('springFest_personnel', JSON.stringify(personnel));
     document.getElementById('mapPanel').classList.remove('show');
+    syncToFirebase();
     renderPersonnelStats();
     showToast(`✓ 已匯入 ${personnel.length} 位人員`);
-  }
+  };
+
+  window.clearPersonnel = function() {
+    if (!confirm('確定清除人員名單？')) return;
+    personnel = [];
+    syncToFirebase();
+    renderPersonnelStats();
+  };
+
+  window.togglePreview = function() {
+    previewVisible = !previewVisible;
+    const wrap = document.getElementById('previewTableWrap');
+    wrap.classList.toggle('show', previewVisible);
+    if (previewVisible) {
+      document.getElementById('previewTableBody').innerHTML = personnel.map((p, i) => `
+        <tr><td>${i+1}</td><td>${p.realName}</td><td>${p.unitName}</td></tr>
+      `).join('');
+    }
+  };
 
   function getAvailablePool() {
-    // Exclude anyone who has already won
     return personnel.filter(p => !winners.some(w => w.realName === p.realName && w.unitName === p.unitName));
   }
 
-  function renderPersonnelStats() {
-    const statsEl = document.getElementById('personnelStats');
-    if (!personnel.length) { statsEl.style.display = 'none'; return; }
-    statsEl.style.display = 'block';
-
-    const available = getAvailablePool().length;
-    const excluded  = personnel.length - available;
-
-    document.getElementById('statAvailable').textContent = `可抽人數：${available} 人`;
-
-    const exEl = document.getElementById('statExcluded');
-    if (excluded > 0) {
-      exEl.textContent = `已中獎排除：${excluded} 人`;
-      exEl.style.display = 'inline-block';
-    } else {
-      exEl.style.display = 'none';
-    }
-
-    const tbody = document.getElementById('previewTableBody');
-    tbody.innerHTML = personnel.map((p, i) => {
-      const isExcluded = winners.some(w => w.realName === p.realName && w.unitName === p.unitName);
-      return `<tr class="${isExcluded ? 'excluded-row' : ''}">
-        <td style="color:var(--text-muted)">${i+1}</td>
-        <td>${esc(p.realName)}</td>
-        <td>${esc(p.unitName)}</td>
-        <td>${isExcluded ? '<span class="excluded-tag">已中獎</span>' : '<span style="color:var(--green);font-size:1.17rem">可抽</span>'}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  function togglePreview() {
-    previewVisible = !previewVisible;
-    document.getElementById('previewTableWrap').classList.toggle('show', previewVisible);
-  }
-
-  function clearPersonnel() {
-    if (!confirm('確定清除人員名單？（中獎紀錄也會一併清除）')) return;
-    personnel = [];
-    winners   = [];
-    localStorage.removeItem('springFest_personnel');
-    localStorage.removeItem('springFest_winners');
-    document.getElementById('personnelStats').style.display = 'none';
-    previewVisible = false;
-    document.getElementById('previewTableWrap').classList.remove('show');
-    showToast('已清除人員名單');
-  }
-
   // ──────────────────────────────────────────────
-  // Prizes
+  // Prize Management
   // ──────────────────────────────────────────────
-  function addPrize() {
-    const name  = document.getElementById('prizeName').value.trim();
+  window.addPrize = function() {
+    const name = document.getElementById('prizeName').value.trim();
     const count = parseInt(document.getElementById('prizeCount').value) || 1;
     if (!name) { showToast('請輸入獎項名稱'); return; }
     prizes.push({ id: Date.now(), name, count, drawn: false, order: prizes.length + 1 });
-    savePrizes();
-    document.getElementById('prizeName').value  = '';
+    document.getElementById('prizeName').value = '';
     document.getElementById('prizeCount').value = '';
-    showToast(`已新增：${name}`);
-  }
+    syncToFirebase();
+    refreshPrizeUI();
+  };
 
-  function deletePrize(id) {
+  window.deletePrize = function(id) {
     if (!confirm('確定刪除此獎項？')) return;
     prizes = prizes.filter(p => p.id !== id);
-    savePrizes();
-  }
+    syncToFirebase();
+    refreshPrizeUI();
+  };
 
-  function clearAllPrizes() {
+  window.clearAllPrizes = function() {
     if (!confirm('確定清除所有獎項？')) return;
     prizes = [];
-    savePrizes();
-    showToast('已清除所有獎項');
+    syncToFirebase();
+    refreshPrizeUI();
+  };
+
+  // ──────────────────────────────────────────────
+  // Draw Logic
+  // ──────────────────────────────────────────────
+  window.previewDraw = function() {
+    const prize = getSelectedPrize();
+    if (!prize) return;
+    const pool = getAvailablePool();
+    if (!pool.length) { showToast('所有人都已中獎'); return; }
+    let shuffled = [...pool].sort(() => Math.random() - 0.5);
+    const newWinners = shuffled.slice(0, Math.min(prize.count, pool.length));
+    pendingResult = { prize, winners: newWinners };
+    document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
+      `<div class="result-winner-chip">${w.realName}・${w.unitName}</div>`
+    ).join('');
+    document.getElementById('resultPreview').classList.add('show');
+  };
+
+  window.startDraw = function() {
+    if (needsReset) { showToast('請先重置前台'); return; }
+    if (!pendingResult) previewDraw();
+    if (!pendingResult) return;
+
+    const { prize, winners: newWinners } = pendingResult;
+
+    set(ref(db, 'lottery_control'), {
+      status: 'start',
+      prizeName: prize.name,
+      winners: newWinners,
+      timestamp: Date.now()
+    });
+
+    prizes = prizes.map(p => p.id == prize.id ? { ...p, drawn: true } : p);
+    winners = [...winners, ...newWinners];
+    drawHistory.unshift({
+      time: new Date().toLocaleString('zh-TW'),
+      prizeName: prize.name,
+      winners: newWinners.map(w => `${w.realName}(${w.unitName})`).join('、')
+    });
+    needsReset = true;
+    pendingResult = null;
+
+    syncToFirebase();
+    showToast(`🎉 已啟動：${prize.name}`);
+  };
+
+  window.resetFrontend = function() {
+    set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
+    needsReset = false;
+    syncToFirebase();
+    updateResetWarning();
+    showToast('已重置前台');
+  };
+
+  window.clearHistory = function() {
+    if (!confirm('確定清除抽獎紀錄？')) return;
+    drawHistory = [];
+    syncToFirebase();
+    renderHistory();
+  };
+
+  // ── UI Renderers ──
+  function refreshAllUI() {
+    refreshPrizeUI();
+    renderPersonnelStats();
+    renderHistory();
+    updateResetWarning();
+    onPrizeSelect();
   }
 
-  function savePrizes() {
-    localStorage.setItem('springFest_prizes', JSON.stringify(prizes));
+  function refreshPrizeUI() {
     renderPrizeList();
     renderPrizeSelect();
   }
@@ -518,10 +538,10 @@
     el.innerHTML = prizes.map(p => `
       <div class="prize-item ${p.drawn ? 'drawn' : ''}">
         <div class="prize-order">${p.order}</div>
-        <div class="prize-name">${esc(p.name)}</div>
+        <div class="prize-name">${p.name}</div>
         <div class="prize-count">${p.count} 人</div>
         ${p.drawn ? '<div class="prize-drawn-badge">✓ 已抽出</div>' : ''}
-        <button class="prize-delete-btn" onclick="deletePrize(${p.id})" title="刪除此獎項">🗑</button>
+        <button class="prize-delete-btn" onclick="deletePrize(${p.id})">🗑</button>
       </div>
     `).join('');
   }
@@ -530,195 +550,65 @@
     const sel = document.getElementById('prizeSelect');
     const cur = sel.value;
     sel.innerHTML = '<option value="">— 請選擇獎項 —</option>';
-    // All prizes appear in dropdown (including drawn), but drawn ones are disabled
     prizes.forEach(p => {
       const o = document.createElement('option');
       o.value = p.id;
-      o.textContent = p.drawn ? `${p.name}（已抽出）` : `${p.name}（${p.count} 人）`;
+      o.textContent = p.name + (p.drawn ? ' (已抽)' : ` (${p.count}人)`);
       o.disabled = p.drawn;
       sel.appendChild(o);
     });
-    // Restore selection if still valid
     if (cur) sel.value = cur;
   }
 
-  function onPrizeSelect() {
+  window.onPrizeSelect = function() {
     const prize = getSelectedPrize();
-    const infoEl    = document.getElementById('infoBox');
-    const previewEl = document.getElementById('resultPreview');
-
+    const infoEl = document.getElementById('infoBox');
     if (prize && !prize.drawn) {
       const pool = getAvailablePool();
       infoEl.classList.add('show');
       document.getElementById('poolCount').textContent = pool.length;
       document.getElementById('selectedCountText').textContent = Math.min(prize.count, pool.length);
-      document.getElementById('btnDraw').disabled    = false;
+      document.getElementById('btnDraw').disabled = false;
       document.getElementById('btnPreview').disabled = false;
-      previewDraw();
     } else {
       infoEl.classList.remove('show');
-      previewEl.classList.remove('show');
-      document.getElementById('btnDraw').disabled    = true;
+      document.getElementById('btnDraw').disabled = true;
       document.getElementById('btnPreview').disabled = true;
-      pendingResult = null;
     }
-  }
-
-  // ──────────────────────────────────────────────
-  // Draw logic — excludes past winners
-  // ──────────────────────────────────────────────
-  function pickWinners(prize) {
-    const pool = getAvailablePool();
-    if (!pool.length) return [];
-    // Fisher-Yates shuffle
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    return pool.slice(0, Math.min(prize.count, pool.length));
-  }
-
-  function previewDraw() {
-    const prize = getSelectedPrize();
-    if (!prize) return;
-    const pool = getAvailablePool();
-    if (!pool.length) { showToast('可抽名單為空（所有人都已中獎）'); return; }
-    const newWinners = pickWinners(prize);
-    pendingResult = { prize, winners: newWinners };
-
-    const previewEl  = document.getElementById('resultPreview');
-    document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
-      `<div class="result-winner-chip">${esc(w.realName)}・${esc(w.unitName)}</div>`
-    ).join('');
-    previewEl.classList.add('show');
-  }
-
-  function startDraw() {
-    if (needsReset) { showToast('請先重置前台空白畫面，才能進行下一輪抽獎'); return; }
-    const prize = getSelectedPrize();
-    if (!prize) return;
-    if (!personnel.length) { showToast('人員名單為空，無法抽獎'); return; }
-    if (!pendingResult) previewDraw();
-    if (!pendingResult || !pendingResult.winners.length) { showToast('可抽人數不足'); return; }
-
-    const { winners: newWinners } = pendingResult;
-
-    // Save result for frontend
-    localStorage.setItem('springFest_lotteryResult', JSON.stringify({
-      prizeName: prize.name,
-      prizeCount: prize.count,
-      winners: newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))
-    }));
-    localStorage.setItem('springFest_lottery', 'start');
-
-    // Mark prize as drawn
-    prizes = prizes.map(p => p.id == prize.id ? { ...p, drawn: true } : p);
-    savePrizes();
-
-    // Add new winners to cumulative exclusion list
-    winners = [...winners, ...newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))];
-    localStorage.setItem('springFest_winners', JSON.stringify(winners));
-
-    // History
-    drawHistory.unshift({
-      time: new Date().toLocaleString('zh-TW'),
-      prizeName: prize.name,
-      winners: newWinners.map(w => `${w.realName}（${w.unitName}）`).join('、')
-    });
-    localStorage.setItem('springFest_drawHistory', JSON.stringify(drawHistory));
-
-    renderHistory();
-    renderPersonnelStats();
-
-    // 防呆：鎖住抽獎，等待重置前台
-    needsReset = true;
-    updateResetWarning();
-
-    // Reset UI
-    document.getElementById('prizeSelect').value = '';
-    document.getElementById('infoBox').classList.remove('show');
-    document.getElementById('resultPreview').classList.remove('show');
-    document.getElementById('btnDraw').disabled    = true;
-    document.getElementById('btnPreview').disabled = true;
-    pendingResult = null;
-
-    showToast(`🎉 已啟動抽獎：${prize.name}，前台播放中！`);
-  }
-
-  function getSelectedPrize() {
-    const val = document.getElementById('prizeSelect').value;
-    return prizes.find(p => p.id == val) || null;
-  }
-
-  function resetFrontend() {
-    localStorage.setItem('springFest_lottery', 'reset');
-    needsReset = false;
-    updateResetWarning();
-    showToast('已重置前台，可進行下一輪抽獎');
-  }
+  };
 
   function updateResetWarning() {
-    const warning = document.getElementById('resetWarning');
-    const prizeSelect = document.getElementById('prizeSelect');
-    warning.style.display = needsReset ? 'block' : 'none';
-    // 鎖住選單與按鈕
-    prizeSelect.disabled = needsReset;
-    if (needsReset) {
-      document.getElementById('btnDraw').disabled    = true;
-      document.getElementById('btnPreview').disabled = true;
-      document.getElementById('infoBox').classList.remove('show');
-      document.getElementById('resultPreview').classList.remove('show');
-    }
+    document.getElementById('resetWarning').style.display = needsReset ? 'block' : 'none';
+    document.getElementById('prizeSelect').disabled = needsReset;
   }
 
-  // ──────────────────────────────────────────────
-  // History
-  // ──────────────────────────────────────────────
   function renderHistory() {
     const el = document.getElementById('historyList');
-    if (!drawHistory.length) { el.innerHTML = '<div class="empty-msg">尚無抽獎紀錄</div>'; return; }
     el.innerHTML = drawHistory.map(h => `
       <div class="history-item">
-        <div class="history-prize">🏆 ${esc(h.prizeName)}
-          <span style="color:var(--text-muted);font-size:1.125rem;margin-left:8px">${h.time}</span>
-        </div>
-        <div class="history-winners">${esc(h.winners)}</div>
+        <div class="history-prize">🏆 ${h.prizeName} <small>${h.time}</small></div>
+        <div class="history-winners">${h.winners}</div>
       </div>
-    `).join('');
+    `).join('') || '<div class="empty-msg">尚無抽獎紀錄</div>';
   }
 
-  function clearHistory() {
-    if (!confirm('確定清除抽獎紀錄？（不會影響已中獎排除名單）')) return;
-    drawHistory = [];
-    localStorage.removeItem('springFest_drawHistory');
-    renderHistory();
-    showToast('已清除紀錄');
+  function renderPersonnelStats() {
+    const statsEl = document.getElementById('personnelStats');
+    if (!personnel.length) { statsEl.style.display = 'none'; return; }
+    statsEl.style.display = 'block';
+    const available = getAvailablePool().length;
+    document.getElementById('statAvailable').textContent = `可抽：${available} 人`;
+    document.getElementById('statExcluded').style.display = (personnel.length - available > 0) ? 'inline-block' : 'none';
+    document.getElementById('statExcluded').textContent = `排除：${personnel.length - available} 人`;
   }
 
-  // ──────────────────────────────────────────────
-  // Helpers
-  // ──────────────────────────────────────────────
-  function esc(s) {
-    return String(s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+  function getSelectedPrize() { return prizes.find(p => p.id == document.getElementById('prizeSelect').value); }
 
-  let toastTimer;
   function showToast(msg) {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
   }
-
-  // ── Init ──
-  renderPrizeList();
-  renderPrizeSelect();
-  renderPersonnelStats();
-  renderHistory();
-  updateResetWarning();
 </script>
 </body>
 </html>
