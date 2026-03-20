@@ -48,9 +48,8 @@
   position: fixed; 
   inset: 0; 
   z-index: 10;
-  background: transparent !important; 
+  background: transparent !important; /* 確保背景全透 */
   display: none;
-  /* 使用 Flexbox 確保內容置中 */
   align-items: center;
   justify-content: center;
 }
@@ -60,13 +59,15 @@
 }
 
 #drawVideo { 
-  /* 設定最大寬度或高度，例如佔螢幕的 80% */
   max-width: 80%; 
   max-height: 80%; 
   width: auto;
   height: auto;
-  object-fit: contain; /* 確保影片比例正確且完整顯示 */
+  object-fit: contain;
+  /* 如果你的 WebM 邊緣還是有一點黑邊，可以取消註解下面這行 */
+  /* mix-blend-mode: screen; */ 
 }
+
   /* ── 得獎結果畫面 ── */
   #resultScreen {
     position: fixed; inset: 0; z-index: 20;
@@ -142,8 +143,9 @@
 </div>
 
 <div id="drawScreen">
-  <video id="drawVideo" muted playsinline>
-    <source src="lottery-draw.mov" type="video/quicktime">
+  <video id="drawVideo" muted playsinline preload="auto">
+    <source src="lottery-draw.webm" type="video/webm">
+    <source src="lottery-draw.mp4" type="video/mp4">
   </video>
 </div>
 
