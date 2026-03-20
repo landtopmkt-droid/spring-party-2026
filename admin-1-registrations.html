@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>後台1 — 報名名單</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: rgba(212,168,67,0.15);
+    --gold: #d4a843;
+    --gold-light: #f0c96a;
+    --red: #c0272d;
+    --text: #e8e0d0;
+    --text-muted: rgba(232,224,208,0.45);
+    --green: #4caf50;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; }
+
+  /* Nav */
+  .nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    margin-right: 32px;
+    white-space: nowrap;
+  }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link {
+    padding: 8px 16px;
+    border-radius: 4px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 1.275rem;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--gold); background: rgba(212,168,67,0.08); }
+
+  /* Main */
+  .main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .page-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+  .page-subtitle { color: var(--text-muted); font-size: 1.275rem; margin-top: 4px; }
+
+  .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  /* Stats cards */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+  }
+  .stat-label { font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.15em; margin-bottom: 6px; }
+  .stat-value { font-size: 3rem; font-weight: 500; color: var(--gold); font-family: 'Noto Sans TC'; }
+
+  /* Search & filter */
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 16px;
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 1.35rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--gold); }
+  .search-input::placeholder { color: var(--text-muted); }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    border: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 1.275rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, #a07820, var(--gold));
+    color: #1a0a00;
+    font-weight: 500;
+  }
+  .btn-gold:hover { filter: brightness(1.1); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-danger {
+    background: transparent;
+    border: 1px solid rgba(192,39,45,0.4);
+    color: #e57373;
+  }
+  .btn-danger:hover { background: rgba(192,39,45,0.1); }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface2); }
+  th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 1.17rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 14px 20px;
+    font-size: 1.35rem;
+    color: var(--text);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(212,168,67,0.03); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 1.125rem;
+    letter-spacing: 0.05em;
+  }
+  .badge-gold { background: rgba(212,168,67,0.15); color: var(--gold); }
+  .badge-red { background: rgba(192,39,45,0.15); color: #e57373; }
+
+  .row-num { color: var(--text-muted); font-size: 1.2rem; }
+  .yt-account { color: var(--gold-light); font-size: 1.32rem; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 4.5rem; margin-bottom: 12px; }
+  .empty-text { font-size: 1.35rem; letter-spacing: 0.1em; }
+
+  /* Delete confirm */
+  .delete-btn {
+    background: transparent;
+    border: none;
+    color: rgba(192,39,45,0.5);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+  }
+  .delete-btn:hover { color: #e57373; background: rgba(192,39,45,0.1); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 20px;
+    color: var(--text);
+    font-size: 1.32rem;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 600px) {
+    .main { padding: 16px; }
+    .nav { padding: 0 16px; }
+    td, th { padding: 10px 12px; }
+  }
+
+  /* ── RWD ── */
+  @media (max-width: 900px) {
+    .nav { padding: 0 16px; gap: 0; height: auto; min-height: 56px; flex-wrap: wrap; padding: 8px 16px; }
+    .nav-brand { margin-right: 16px; font-size: 0.9rem; }
+    .nav-link { padding: 6px 10px; font-size: 0.78rem; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .main { padding: 12px; }
+    .nav { padding: 8px 12px; }
+    .nav-links { flex-wrap: wrap; gap: 2px; }
+    .nav-link { padding: 5px 8px; font-size: 0.72rem; }
+    .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .header-actions { width: 100%; justify-content: flex-start; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-value { font-size: 1.8rem; }
+    .page-title { font-size: 1.2rem; }
+    th, td { padding: 8px 10px; font-size: 0.8rem; }
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 500px; }
+  }
+  @media (max-width: 400px) {
+    .btn { padding: 7px 12px; font-size: 0.78rem; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+  }
+
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">🏮 春酒後台</div>
+  <div class="nav-links">
+    <a href="admin-1-registrations.html" class="nav-link active">報名名單</a>
+    <a href="admin-2-redpacket.html" class="nav-link">紅包雨</a>
+    <a href="admin-3-lottery.html" class="nav-link">抽獎管理</a>
+    <a href="admin-4-youtube.html" class="nav-link">YT 監控</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">報名名單</div>
+      <div class="page-subtitle">前台報到登記的所有參與者資料</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="exportCSV()">匯出 CSV</button>
+      <button class="btn btn-danger" onclick="clearAll()">清除全部</button>
+      <button class="btn btn-gold" onclick="refresh()">🔄 重新整理</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">總報名人數</div>
+      <div class="stat-value" id="totalCount">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">今日報名</div>
+      <div class="stat-value" id="todayCount">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">單位數量</div>
+      <div class="stat-value" id="unitCount">0</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" class="search-input" id="searchInput" placeholder="搜尋姓名、YT帳號、單位名稱..." oninput="renderTable()">
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>YouTube 帳號</th>
+          <th>真實姓名</th>
+          <th>單位名稱</th>
+          <th>報到時間</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">尚無報名資料</div></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let data = [];
+
+  function load() {
+    data = JSON.parse(localStorage.getItem('springFest_dataA') || '[]');
+  }
+
+  function refresh() { load(); renderTable(); updateStats(); showToast('已重新整理 ✓'); }
+
+  function updateStats() {
+    document.getElementById('totalCount').textContent = data.length;
+    const today = new Date().toLocaleDateString('zh-TW');
+    const todayItems = data.filter(d => d.registeredAt && d.registeredAt.includes(today));
+    document.getElementById('todayCount').textContent = todayItems.length;
+    const units = new Set(data.map(d => d.unitName));
+    document.getElementById('unitCount').textContent = units.size;
+  }
+
+  function renderTable() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const filtered = data.filter(d =>
+      !q ||
+      (d.ytAccount && d.ytAccount.toLowerCase().includes(q)) ||
+      (d.realName && d.realName.toLowerCase().includes(q)) ||
+      (d.unitName && d.unitName.toLowerCase().includes(q))
+    );
+
+    const tbody = document.getElementById('tableBody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">${data.length === 0 ? '尚無報名資料' : '找不到符合的資料'}</div></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map((d, i) => `
+      <tr>
+        <td class="row-num">${i + 1}</td>
+        <td><span class="yt-account">@${d.ytAccount}</span></td>
+        <td>${d.realName}</td>
+        <td><span class="badge badge-gold">${d.unitName}</span></td>
+        <td style="color:var(--text-muted);font-size:1.23rem">${d.registeredAt || '-'}</td>
+        <td><button class="delete-btn" onclick="deleteRow(${d.id})">✕ 刪除</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function deleteRow(id) {
+    if (!confirm('確定要刪除此筆資料？')) return;
+    data = data.filter(d => d.id !== id);
+    localStorage.setItem('springFest_dataA', JSON.stringify(data));
+    renderTable();
+    updateStats();
+    showToast('已刪除 ✓');
+  }
+
+  function clearAll() {
+    if (!confirm('確定要清除全部報名資料？此操作無法復原！')) return;
+    localStorage.removeItem('springFest_dataA');
+    data = [];
+    renderTable();
+    updateStats();
+    showToast('已清除全部資料');
+  }
+
+  function exportCSV() {
+    if (data.length === 0) { showToast('沒有資料可以匯出'); return; }
+    const headers = ['#', 'YouTube帳號', '真實姓名', '單位名稱', '報到時間'];
+    const rows = data.map((d, i) => [i+1, d.ytAccount, d.realName, d.unitName, d.registeredAt]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = '春酒報名名單.csv'; a.click();
+    showToast('CSV 匯出完成 ✓');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Init
+  load();
+  renderTable();
+  updateStats();
+
+  // Auto-refresh every 10s
+  setInterval(() => { load(); renderTable(); updateStats(); }, 10000);
+</script>
+</body>
+</html>

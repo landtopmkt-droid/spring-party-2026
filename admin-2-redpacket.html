@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>後台2 — 紅包雨控制</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: rgba(212,168,67,0.15);
+    --gold: #d4a843;
+    --gold-light: #f0c96a;
+    --red: #c0272d;
+    --red-light: #e8474e;
+    --text: #e8e0d0;
+    --text-muted: rgba(232,224,208,0.45);
+    --green: #4caf50;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; }
+
+  .nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; font-weight: 900; color: var(--gold); letter-spacing: 0.2em; margin-right: 32px; white-space: nowrap; }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link { padding: 8px 16px; border-radius: 4px; color: var(--text-muted); text-decoration: none; font-size: 1.275rem; letter-spacing: 0.05em; transition: all 0.2s; white-space: nowrap; }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--gold); background: rgba(212,168,67,0.08); }
+
+  .main { padding: 40px 32px; max-width: 800px; margin: 0 auto; }
+
+  .page-title { font-family: 'Noto Serif TC', serif; font-size: 2.25rem; font-weight: 900; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 6px; }
+  .page-subtitle { color: var(--text-muted); font-size: 1.275rem; margin-bottom: 40px; }
+
+  /* Status display */
+  .status-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.4s ease;
+  }
+  .status-card.active-state {
+    border-color: rgba(192,39,45,0.5);
+    box-shadow: 0 0 40px rgba(192,39,45,0.1);
+  }
+  .status-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(192,39,45,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .status-emoji {
+    font-size: 7.5rem;
+    display: block;
+    margin-bottom: 16px;
+    transition: transform 0.3s ease;
+  }
+  .status-card.active-state .status-emoji {
+    animation: bounce 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+
+  .status-label {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    letter-spacing: 0.3em;
+    margin-bottom: 8px;
+  }
+  .status-value {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    transition: color 0.3s ease;
+  }
+  .status-value.on { color: var(--red-light); text-shadow: 0 0 20px rgba(192,39,45,0.4); }
+  .status-value.off { color: var(--text-muted); }
+
+  /* Live indicator */
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 1.17rem;
+    letter-spacing: 0.1em;
+    margin-top: 12px;
+    transition: all 0.3s ease;
+  }
+  .live-badge.live {
+    background: rgba(192,39,45,0.15);
+    color: var(--red-light);
+    border: 1px solid rgba(192,39,45,0.3);
+  }
+  .live-badge.offline {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-muted);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .live-badge.live .live-dot { animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
+
+  /* Control buttons */
+  .control-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+  }
+  .control-title {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    letter-spacing: 0.25em;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .btn-control {
+    padding: 28px 20px;
+    border-radius: 6px;
+    border: none;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-control::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.05);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .btn-control:hover::after { opacity: 1; }
+  .btn-control:active { transform: scale(0.97); }
+
+  .btn-start {
+    background: linear-gradient(135deg, #8b1a1e, var(--red));
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 20px rgba(192,39,45,0.3);
+  }
+  .btn-start:hover {
+    box-shadow: 0 8px 30px rgba(192,39,45,0.5);
+    transform: translateY(-2px);
+  }
+  .btn-start:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-stop {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .btn-stop:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .btn-stop:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+
+  .btn-icon { font-size: 2.25rem; }
+
+  /* Log */
+  .log-section {
+    margin-top: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  .log-title {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    letter-spacing: 0.25em;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .log-list { display: flex; flex-direction: column; gap: 8px; }
+  .log-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 1.275rem;
+  }
+  .log-time { color: var(--text-muted); font-size: 1.17rem; white-space: nowrap; min-width: 90px; }
+  .log-action { color: var(--text); }
+  .log-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .log-dot.start { background: var(--red-light); }
+  .log-dot.stop { background: var(--text-muted); }
+
+  .note {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: rgba(212,168,67,0.05);
+    border: 1px solid rgba(212,168,67,0.1);
+    border-radius: 4px;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 500px) {
+    .btn-row { grid-template-columns: 1fr; }
+    .main { padding: 20px 16px; }
+    .nav { padding: 0 16px; }
+  }
+
+  /* ── RWD ── */
+  @media (max-width: 900px) {
+    .nav { padding: 8px 16px; height: auto; flex-wrap: wrap; }
+    .nav-brand { margin-right: 16px; font-size: 0.9rem; }
+    .nav-link { padding: 6px 10px; font-size: 0.78rem; }
+  }
+  @media (max-width: 600px) {
+    .main { padding: 16px; }
+    .nav { padding: 8px 12px; }
+    .nav-links { flex-wrap: wrap; gap: 2px; }
+    .nav-link { padding: 5px 8px; font-size: 0.72rem; }
+    .status-card { padding: 28px 16px; }
+    .status-emoji { font-size: 3.5rem; }
+    .status-value { font-size: 1.5rem; }
+    .control-panel { padding: 20px 16px; }
+    .btn-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-control { padding: 20px 12px; font-size: 0.95rem; }
+    .btn-icon { font-size: 1.2rem; }
+    .log-section { padding: 16px; }
+    .page-title { font-size: 1.2rem; }
+  }
+  @media (max-width: 400px) {
+    .btn-row { grid-template-columns: 1fr; }
+  }
+
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">🏮 春酒後台</div>
+  <div class="nav-links">
+    <a href="admin-1-registrations.html" class="nav-link">報名名單</a>
+    <a href="admin-2-redpacket.html" class="nav-link active">紅包雨</a>
+    <a href="admin-3-lottery.html" class="nav-link">抽獎管理</a>
+    <a href="admin-4-youtube.html" class="nav-link">YT 監控</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-title">紅包雨控制台</div>
+  <div class="page-subtitle">控制前台紅包雨頁面的播放狀態</div>
+
+  <!-- Status -->
+  <div class="status-card" id="statusCard">
+    <span class="status-emoji" id="statusEmoji">🧧</span>
+    <div class="status-label">當前狀態</div>
+    <div class="status-value off" id="statusValue">未開始</div>
+    <div>
+      <div class="live-badge offline" id="liveBadge">
+        <div class="live-dot"></div>
+        <span id="liveBadgeText">待機中</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="control-panel">
+    <div class="control-title">操作控制</div>
+    <div class="btn-row">
+      <button class="btn-control btn-start" id="btnStart" onclick="sendCommand('start')">
+        <span class="btn-icon">▶</span> 開始
+      </button>
+      <button class="btn-control btn-stop" id="btnStop" onclick="sendCommand('stop')" disabled>
+        <span class="btn-icon">■</span> 停止
+      </button>
+    </div>
+  </div>
+
+  <div class="note">
+    ℹ️ 前台頁面需要在瀏覽器中開啟 <strong>frontend-2-redpacket.html</strong>，此控制台透過 localStorage 即時傳送指令給前台頁面。確保前台頁面已開啟，控制才會生效。
+  </div>
+
+  <!-- Log -->
+  <div class="log-section">
+    <div class="log-title">操作記錄</div>
+    <div class="log-list" id="logList">
+      <div style="color:var(--text-muted);font-size:1.275rem">尚無操作記錄</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let isActive = false;
+  let logs = JSON.parse(localStorage.getItem('springFest_redpacketLog') || '[]');
+
+  function sendCommand(cmd) {
+    localStorage.setItem('springFest_redpacket', cmd);
+    isActive = (cmd === 'start');
+    updateUI();
+    addLog(cmd);
+  }
+
+  function updateUI() {
+    const card = document.getElementById('statusCard');
+    const emoji = document.getElementById('statusEmoji');
+    const val = document.getElementById('statusValue');
+    const badge = document.getElementById('liveBadge');
+    const badgeText = document.getElementById('liveBadgeText');
+    const btnStart = document.getElementById('btnStart');
+    const btnStop = document.getElementById('btnStop');
+
+    if (isActive) {
+      card.classList.add('active-state');
+      emoji.textContent = '🎊';
+      val.textContent = '進行中';
+      val.className = 'status-value on';
+      badge.className = 'live-badge live';
+      badgeText.textContent = 'LIVE 直播中';
+      btnStart.disabled = true;
+      btnStop.disabled = false;
+    } else {
+      card.classList.remove('active-state');
+      emoji.textContent = '🧧';
+      val.textContent = '未開始';
+      val.className = 'status-value off';
+      badge.className = 'live-badge offline';
+      badgeText.textContent = '待機中';
+      btnStart.disabled = false;
+      btnStop.disabled = true;
+    }
+  }
+
+  function addLog(cmd) {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    logs.unshift({ time: timeStr, action: cmd === 'start' ? '開始紅包雨' : '停止紅包雨', type: cmd });
+    if (logs.length > 20) logs.pop();
+    localStorage.setItem('springFest_redpacketLog', JSON.stringify(logs));
+    renderLogs();
+  }
+
+  function renderLogs() {
+    const list = document.getElementById('logList');
+    if (logs.length === 0) {
+      list.innerHTML = '<div style="color:var(--text-muted);font-size:1.275rem">尚無操作記錄</div>';
+      return;
+    }
+    list.innerHTML = logs.map(l => `
+      <div class="log-item">
+        <div class="log-dot ${l.type}"></div>
+        <div class="log-time">${l.time}</div>
+        <div class="log-action">${l.action}</div>
+      </div>
+    `).join('');
+  }
+
+  // Sync state from localStorage on load
+  const currentCtrl = localStorage.getItem('springFest_redpacket');
+  isActive = (currentCtrl === 'start');
+  updateUI();
+  renderLogs();
+</script>
+</body>
+</html>

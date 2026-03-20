@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>春酒活動 — 報到登記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #c0272d;
+    --red-dark: #8b1a1e;
+    --red-light: #e8474e;
+    --gold: #d4a843;
+    --gold-light: #f0c96a;
+    --gold-dark: #a07820;
+    --cream: #fdf6e3;
+    --ink: #1a0a00;
+    --ink-light: #4a2c0a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background-color: #1a0500;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(192,39,45,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(212,168,67,0.1) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4a843' fill-opacity='0.04'%3E%3Cpath d='M30 0 L60 30 L30 60 L0 30Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    font-family: 'Noto Sans TC', sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+    padding: 40px 0;
+  }
+
+  /* Floating lanterns */
+  .lantern {
+    position: fixed;
+    font-size: 3rem;
+    animation: floatLantern linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+  @keyframes floatLantern {
+    0% { transform: translateY(100vh) rotate(-10deg); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-10vh) rotate(10deg); opacity: 0; }
+  }
+
+  /* Falling petals */
+  .petal {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: var(--red-light);
+    border-radius: 50% 0 50% 0;
+    animation: fall linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-20px) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(720deg); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 520px;
+    padding: 20px;
+  }
+
+  /* Top ornament */
+  .ornament {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .ornament-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+  .ornament-line span {
+    color: var(--gold);
+    font-size: 2.1rem;
+  }
+  .ornament-line::before,
+  .ornament-line::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-dark), transparent);
+  }
+
+  /* Main card */
+  .card {
+    background: linear-gradient(145deg, #2a0a02, #1a0500);
+    border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 4px;
+    padding: 48px 44px;
+    position: relative;
+    box-shadow:
+      0 0 60px rgba(192,39,45,0.2),
+      0 0 120px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(212,168,67,0.1);
+  }
+
+  /* Corner decorations */
+  .card::before, .card::after {
+    content: '❈';
+    position: absolute;
+    color: var(--gold-dark);
+    font-size: 1.8rem;
+    opacity: 0.6;
+  }
+  .card::before { top: 12px; left: 16px; }
+  .card::after { bottom: 12px; right: 16px; }
+
+  .corner-tr, .corner-bl {
+    position: absolute;
+    color: var(--gold-dark);
+    font-size: 1.8rem;
+    opacity: 0.6;
+  }
+  .corner-tr { top: 12px; right: 16px; }
+  .corner-bl { bottom: 12px; left: 16px; }
+
+  /* Title */
+  .title-cn {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 3.9rem;
+    font-weight: 900;
+    color: var(--gold-light);
+    text-align: center;
+    letter-spacing: 0.15em;
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(212,168,67,0.4);
+    margin-bottom: 4px;
+  }
+  .title-sub {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: rgba(212,168,67,0.6);
+    text-align: center;
+    letter-spacing: 0.4em;
+    margin-bottom: 36px;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(212,168,67,0.4), transparent);
+  }
+  .divider span {
+    color: var(--gold);
+    font-size: 1.5rem;
+  }
+
+  /* Form */
+  .form-group {
+    margin-bottom: 22px;
+  }
+  .form-label {
+    display: block;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.275rem;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .form-label span {
+    color: rgba(212,168,67,0.4);
+    font-size: 1.125rem;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0;
+    margin-left: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 2px;
+    padding: 14px 18px;
+    color: var(--cream);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 1.425rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+  .form-input::placeholder {
+    color: rgba(253,246,227,0.2);
+    font-size: 1.275rem;
+  }
+  .form-input:focus {
+    background: rgba(192,39,45,0.08);
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212,168,67,0.1), 0 0 20px rgba(212,168,67,0.05);
+  }
+  .form-input:focus::placeholder { opacity: 0; }
+
+  /* Submit button */
+  .btn-submit {
+    width: 100%;
+    margin-top: 10px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--red-dark), var(--red), var(--red-dark));
+    background-size: 200% 100%;
+    border: 1px solid rgba(212,168,67,0.4);
+    border-radius: 2px;
+    color: var(--gold-light);
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-submit::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+  .btn-submit:hover {
+    background-position: 100% 0;
+    box-shadow: 0 0 30px rgba(192,39,45,0.4), 0 0 60px rgba(192,39,45,0.1);
+    letter-spacing: 0.4em;
+  }
+  .btn-submit:hover::before { transform: translateX(100%); }
+  .btn-submit:active { transform: scale(0.99); }
+
+  /* Success state */
+  .success-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, #2a0a02, #1a0500);
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 20;
+  }
+  .success-overlay.show { display: flex; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+  .success-icon {
+    font-size: 6rem;
+    animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes bounceIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .success-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 2.7rem;
+    font-weight: 900;
+    color: var(--gold-light);
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 20px rgba(212,168,67,0.4);
+  }
+  .success-name {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 1.5rem;
+    color: rgba(253,246,227,0.7);
+    letter-spacing: 0.1em;
+  }
+  .btn-again {
+    margin-top: 10px;
+    padding: 10px 28px;
+    background: transparent;
+    border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 2px;
+    color: var(--gold);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 1.275rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .btn-again:hover { background: rgba(212,168,67,0.1); }
+
+  /* Error message */
+  .error-msg {
+    color: #ff6b6b;
+    font-size: 1.2rem;
+    margin-top: 6px;
+    display: none;
+    letter-spacing: 0.05em;
+  }
+  .error-msg.show { display: block; animation: shake 0.3s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* Registered count */
+  .reg-count {
+    text-align: center;
+    margin-top: 20px;
+    color: rgba(212,168,67,0.4);
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+  }
+
+  /* ── RWD ── */
+  @media (max-width: 600px) {
+    body { padding: 16px 0 40px; align-items: flex-start; }
+    .container { padding: 12px; }
+    .card { padding: 32px 20px; }
+    .title-cn { font-size: 2.6rem; }
+    .title-sub { font-size: 1.1rem; margin-bottom: 24px; }
+    .form-label { font-size: 1rem; }
+    .form-label span { font-size: 0.9rem; }
+    .form-input { font-size: 1.1rem; padding: 12px 14px; }
+    .form-input::placeholder { font-size: 1rem; }
+    .btn-submit { font-size: 1.2rem; padding: 14px; }
+    .success-title { font-size: 1.9rem; }
+    .success-name { font-size: 1.1rem; }
+    .success-icon { font-size: 4rem; }
+    .reg-count { font-size: 1rem; }
+    .card::before, .card::after,
+    .corner-tr, .corner-bl { font-size: 1.2rem; }
+  }
+  @media (max-width: 380px) {
+    .title-cn { font-size: 2.1rem; }
+    .card { padding: 24px 14px; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="ornament">
+    <div class="ornament-line"><span>🏮</span></div>
+  </div>
+
+  <div class="card">
+    <div class="corner-tr">❈</div>
+    <div class="corner-bl">❈</div>
+
+    <div class="title-cn">春酒活動</div>
+    <div class="title-sub">報到登記</div>
+
+    <div class="divider"><span>✦</span></div>
+
+    <div class="form-group">
+      <label class="form-label">YouTube 帳號 <span>YT Channel Name</span></label>
+      <input type="text" id="ytAccount" class="form-input" placeholder="請輸入您的 YouTube 帳號名稱">
+      <div class="error-msg" id="err-yt">請填寫 YouTube 帳號</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">真實姓名 <span>Real Name</span></label>
+      <input type="text" id="realName" class="form-input" placeholder="請輸入您的真實姓名">
+      <div class="error-msg" id="err-name">請填寫真實姓名</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">單位名稱 <span>Department / Unit</span></label>
+      <input type="text" id="unitName" class="form-input" placeholder="請輸入您的單位名稱">
+      <div class="error-msg" id="err-unit">請填寫單位名稱</div>
+    </div>
+
+    <button class="btn-submit" onclick="handleSubmit()">完成報到</button>
+
+    <!-- Success overlay -->
+    <div class="success-overlay" id="successOverlay">
+      <div class="success-icon">🎊</div>
+      <div class="success-title">報到成功！</div>
+      <div class="success-name" id="successMsg"></div>
+      <button class="btn-again" onclick="resetForm()">繼續登記</button>
+    </div>
+  </div>
+
+  <div class="reg-count" id="regCount"></div>
+</div>
+
+<script>
+  // Create floating lanterns
+  const lanternEmojis = ['🏮','🧧','🌸','✨'];
+  for (let i = 0; i < 6; i++) {
+    const l = document.createElement('div');
+    l.className = 'lantern';
+    l.textContent = lanternEmojis[i % lanternEmojis.length];
+    l.style.left = (Math.random() * 100) + 'vw';
+    l.style.animationDuration = (8 + Math.random() * 12) + 's';
+    l.style.animationDelay = (Math.random() * 10) + 's';
+    l.style.fontSize = (1.2 + Math.random() * 1.5) + 'rem';
+    document.body.appendChild(l);
+  }
+
+  // Create petals
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.left = (Math.random() * 100) + 'vw';
+    p.style.animationDuration = (5 + Math.random() * 8) + 's';
+    p.style.animationDelay = (Math.random() * 8) + 's';
+    p.style.width = (6 + Math.random() * 6) + 'px';
+    p.style.height = p.style.width;
+    p.style.opacity = 0.2 + Math.random() * 0.3;
+    document.body.appendChild(p);
+  }
+
+  // Update count
+  function updateCount() {
+    const data = JSON.parse(localStorage.getItem('springFest_dataA') || '[]');
+    const el = document.getElementById('regCount');
+    el.textContent = data.length > 0 ? `已有 ${data.length} 位貴賓完成報到` : '';
+  }
+  updateCount();
+
+  function handleSubmit() {
+    const yt = document.getElementById('ytAccount').value.trim();
+    const name = document.getElementById('realName').value.trim();
+    const unit = document.getElementById('unitName').value.trim();
+
+    let valid = true;
+
+    ['err-yt','err-name','err-unit'].forEach(id => {
+      document.getElementById(id).classList.remove('show');
+    });
+
+    if (!yt) { document.getElementById('err-yt').classList.add('show'); valid = false; }
+    if (!name) { document.getElementById('err-name').classList.add('show'); valid = false; }
+    if (!unit) { document.getElementById('err-unit').classList.add('show'); valid = false; }
+
+    if (!valid) return;
+
+    const dataA = JSON.parse(localStorage.getItem('springFest_dataA') || '[]');
+    dataA.push({
+      id: Date.now(),
+      ytAccount: yt,
+      realName: name,
+      unitName: unit,
+      registeredAt: new Date().toLocaleString('zh-TW')
+    });
+    localStorage.setItem('springFest_dataA', JSON.stringify(dataA));
+
+    document.getElementById('successMsg').textContent = `${name}（${unit}）報到完成 🎉`;
+    document.getElementById('successOverlay').classList.add('show');
+    updateCount();
+  }
+
+  function resetForm() {
+    document.getElementById('ytAccount').value = '';
+    document.getElementById('realName').value = '';
+    document.getElementById('unitName').value = '';
+    document.getElementById('successOverlay').classList.remove('show');
+  }
+
+  // Enter key support
+  document.querySelectorAll('.form-input').forEach((input, i, arr) => {
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        if (i < arr.length - 1) arr[i+1].focus();
+        else handleSubmit();
+      }
+    });
+  });
+</script>
+</body>
+</html>

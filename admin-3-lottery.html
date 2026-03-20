@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>後台3 — 抽獎管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: rgba(212,168,67,0.15);
+    --gold: #d4a843;
+    --gold-light: #f0c96a;
+    --red: #c0272d;
+    --red-light: #e8474e;
+    --text: #e8e0d0;
+    --text-muted: rgba(232,224,208,0.45);
+    --green: #4caf50;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; }
+
+  .nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; font-weight: 900; color: var(--gold); letter-spacing: 0.2em; margin-right: 32px; white-space: nowrap; }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link { padding: 8px 16px; border-radius: 4px; color: var(--text-muted); text-decoration: none; font-size: 1.275rem; transition: all 0.2s; white-space: nowrap; }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--gold); background: rgba(212,168,67,0.08); }
+
+  .main { padding: 32px; max-width: 1100px; margin: 0 auto; }
+  .page-title { font-family: 'Noto Serif TC', serif; font-size: 2.25rem; font-weight: 900; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 4px; }
+  .page-subtitle { color: var(--text-muted); font-size: 1.275rem; margin-bottom: 32px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } .main { padding: 16px; } .nav { padding: 0 16px; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 28px; margin-bottom: 20px; }
+  .panel-title { font-size: 1.2rem; color: var(--gold); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 1.2rem; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .form-input, .form-select {
+    width: 100%; background: var(--surface2); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px; padding: 10px 14px; color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif; font-size: 1.35rem; outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--gold); }
+  .form-input::placeholder { color: var(--text-muted); font-size: 1.275rem; }
+
+  .row-inline { display: grid; grid-template-columns: 1fr 90px; gap: 10px; align-items: end; }
+
+  .btn { padding: 10px 20px; border-radius: 4px; border: none; font-family: 'Noto Sans TC', sans-serif; font-size: 1.275rem; cursor: pointer; letter-spacing: 0.05em; transition: all 0.2s; white-space: nowrap; }
+  .btn-gold { background: linear-gradient(135deg, #a07820, var(--gold)); color: #1a0a00; font-weight: 500; }
+  .btn-gold:hover { filter: brightness(1.1); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-danger { background: transparent; border: 1px solid rgba(192,39,45,0.3); color: #e57373; }
+  .btn-danger:hover { background: rgba(192,39,45,0.08); }
+  .btn-red-solid { background: linear-gradient(135deg, #8b1a1e, var(--red)); color: #fff; font-family: 'Noto Serif TC', serif; font-size: 1.5rem; font-weight: 600; letter-spacing: 0.2em; }
+  .btn-red-solid:hover { filter: brightness(1.1); box-shadow: 0 4px 20px rgba(192,39,45,0.4); }
+  .btn-red-solid:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; filter: none; }
+  .btn-full { width: 100%; padding: 14px; }
+  .btn-sm { padding: 6px 12px; font-size: 1.17rem; }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed rgba(212,168,67,0.25); border-radius: 6px; padding: 28px 20px;
+    text-align: center; cursor: pointer; transition: all 0.25s; position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--gold); background: rgba(212,168,67,0.04); }
+  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 3rem; margin-bottom: 8px; }
+  .upload-label { font-size: 1.275rem; color: var(--text-muted); line-height: 1.7; }
+  .upload-label strong { color: var(--gold); }
+
+  /* Column mapping */
+  .map-panel { background: var(--surface2); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; padding: 16px; margin-top: 14px; display: none; }
+  .map-panel.show { display: block; }
+  .map-title { font-size: 1.17rem; color: var(--gold); letter-spacing: 0.15em; margin-bottom: 12px; }
+  .map-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .map-select { background: var(--surface); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 8px 12px; color: var(--text); font-family: 'Noto Sans TC', sans-serif; font-size: 1.275rem; outline: none; width: 100%; }
+  .map-select:focus { border-color: var(--gold); }
+  .map-label { font-size: 1.17rem; color: var(--text-muted); margin-bottom: 5px; }
+
+  /* Personnel stats */
+  .personnel-stats { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+  .stat-chip { padding: 5px 14px; background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.15); border-radius: 20px; font-size: 1.2rem; color: var(--gold); }
+  .stat-chip.excluded { background: rgba(192,39,45,0.08); border-color: rgba(192,39,45,0.2); color: #e57373; }
+
+  .personnel-table-wrap { margin-top: 14px; max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: 4px; display: none; }
+  .personnel-table-wrap.show { display: block; }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 8px 12px; font-size: 1.11rem; color: var(--gold); background: var(--surface2); letter-spacing: 0.1em; text-align: left; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2; }
+  td { padding: 8px 12px; font-size: 1.26rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(212,168,67,0.02); }
+  .excluded-row td { opacity: 0.4; text-decoration: line-through; }
+  .excluded-tag { font-size: 1.05rem; color: #e57373; background: rgba(192,39,45,0.15); padding: 1px 6px; border-radius: 8px; margin-left: 6px; }
+
+  /* Prize list */
+  .prize-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+  .prize-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.05); border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .prize-item.drawn { border-color: rgba(192,39,45,0.2); background: rgba(192,39,45,0.05); }
+  .prize-order { width: 26px; height: 26px; border-radius: 50%; background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.11rem; color: var(--gold); flex-shrink: 0; }
+  .prize-name { flex: 1; font-size: 1.35rem; }
+  .prize-count { font-size: 1.17rem; color: var(--text-muted); white-space: nowrap; }
+  .prize-drawn-badge { font-size: 1.08rem; color: #e57373; background: rgba(192,39,45,0.12); padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .prize-delete-btn {
+    background: transparent; border: none; color: rgba(192,39,45,0.45);
+    cursor: pointer; font-size: 1.275rem; padding: 4px 6px; border-radius: 3px; transition: all 0.2s; flex-shrink: 0;
+  }
+  .prize-delete-btn:hover { color: #e57373; background: rgba(192,39,45,0.1); }
+
+  /* Draw control */
+  .select-wrapper { position: relative; margin-bottom: 16px; }
+  .form-select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 36px; }
+  .select-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--gold); pointer-events: none; font-size: 1.125rem; }
+
+  .info-box { padding: 12px 16px; background: rgba(212,168,67,0.05); border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; margin-bottom: 16px; font-size: 1.275rem; display: none; }
+  .info-box.show { display: block; }
+
+  .result-preview { background: var(--surface2); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; padding: 16px; margin-top: 14px; display: none; }
+  .result-preview.show { display: block; }
+  .result-preview-title { font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.15em; margin-bottom: 10px; }
+  .result-winner-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .result-winner-chip { padding: 5px 12px; background: rgba(192,39,45,0.15); border: 1px solid rgba(192,39,45,0.2); border-radius: 20px; font-size: 1.23rem; }
+
+  .note { margin-top: 12px; padding: 10px 14px; background: rgba(212,168,67,0.04); border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; font-size: 1.17rem; color: var(--text-muted); line-height: 1.7; }
+
+  .history-list { display: flex; flex-direction: column; gap: 10px; }
+  .history-item { padding: 12px 16px; background: var(--surface2); border-radius: 4px; border-left: 3px solid var(--gold); }
+  .history-prize { font-size: 1.35rem; color: var(--gold); margin-bottom: 4px; }
+  .history-winners { font-size: 1.23rem; color: var(--text-muted); line-height: 1.6; }
+
+  .empty-msg { color: var(--text-muted); font-size: 1.275rem; text-align: center; padding: 20px; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 20px; color: var(--text); font-size: 1.32rem; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); max-width: 340px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── RWD ── */
+  @media (max-width: 900px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .nav { padding: 8px 16px; height: auto; flex-wrap: wrap; }
+    .nav-brand { margin-right: 16px; font-size: 0.9rem; }
+    .nav-link { padding: 6px 10px; font-size: 0.78rem; }
+  }
+  @media (max-width: 600px) {
+    .main { padding: 12px; }
+    .nav { padding: 8px 12px; }
+    .nav-links { flex-wrap: wrap; gap: 2px; }
+    .nav-link { padding: 5px 8px; font-size: 0.72rem; }
+    .panel { padding: 18px 14px; }
+    .page-title { font-size: 1.2rem; }
+    .row-inline { grid-template-columns: 1fr; }
+    .map-row { grid-template-columns: 1fr; }
+    .btn-red-solid { font-size: 0.9rem; padding: 12px; }
+    .personnel-stats { gap: 6px; }
+    .stat-chip { font-size: 0.75rem; padding: 4px 10px; }
+    .result-winner-chip { font-size: 0.75rem; padding: 4px 9px; }
+    .prize-item { flex-wrap: wrap; gap: 6px; }
+    .history-item { padding: 10px 12px; }
+    .history-prize { font-size: 0.85rem; }
+    .history-winners { font-size: 0.78rem; }
+    table { min-width: 360px; }
+    .personnel-table-wrap { overflow-x: auto; }
+  }
+
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">🏮 春酒後台</div>
+  <div class="nav-links">
+    <a href="admin-1-registrations.html" class="nav-link">報名名單</a>
+    <a href="admin-2-redpacket.html" class="nav-link">紅包雨</a>
+    <a href="admin-3-lottery.html" class="nav-link active">抽獎管理</a>
+    <a href="admin-4-youtube.html" class="nav-link">YT 監控</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-title">抽獎管理</div>
+  <div class="page-subtitle">匯入人員名單、設定獎品，並操控前台抽獎流程。中獎過的人不會再被抽中。</div>
+
+  <div class="grid-2">
+
+    <!-- ─── LEFT ─── -->
+    <div>
+
+      <!-- Excel Import -->
+      <div class="panel">
+        <div class="panel-title">
+          <span>人員名單匯入（Excel）</span>
+        </div>
+
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="onFileSelect(event)">
+          <div class="upload-icon">📂</div>
+          <div class="upload-label">
+            <strong>點擊選擇</strong>或拖曳 Excel 到此<br>
+            支援 .xlsx / .xls / .csv<br>
+            <span style="font-size:1.17rem;opacity:0.7">欄位順序沒有限制，上傳後可自行對應</span>
+          </div>
+        </div>
+
+
+
+        <!-- Column mapping -->
+        <div class="map-panel" id="mapPanel">
+          <div class="map-title">欄位對應（請選擇哪欄是姓名、哪欄是單位）</div>
+          <div class="map-row">
+            <div>
+              <div class="map-label">姓名欄位</div>
+              <select class="map-select" id="colName"></select>
+            </div>
+            <div>
+              <div class="map-label">單位欄位</div>
+              <select class="map-select" id="colUnit"></select>
+            </div>
+          </div>
+          <button class="btn btn-gold" style="width:100%;margin-top:4px" onclick="confirmImport()">確認匯入</button>
+        </div>
+
+        <!-- Stats & preview -->
+        <div id="personnelStats" style="display:none">
+          <div class="personnel-stats">
+            <div class="stat-chip" id="statAvailable"></div>
+            <div class="stat-chip excluded" id="statExcluded" style="display:none"></div>
+            <button class="btn btn-outline btn-sm" onclick="togglePreview()" style="margin-left:auto">預覽名單</button>
+            <button class="btn btn-danger btn-sm" onclick="clearPersonnel()">清除</button>
+          </div>
+          <div class="personnel-table-wrap" id="previewTableWrap">
+            <table>
+              <thead><tr><th>#</th><th>姓名</th><th>單位</th><th>狀態</th></tr></thead>
+              <tbody id="previewTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prize Setup -->
+      <div class="panel">
+        <div class="panel-title">獎品設定</div>
+        <div class="row-inline">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">獎項名稱</label>
+            <input type="text" class="form-input" id="prizeName" placeholder="例：頭獎、二獎、幸運獎..." onkeydown="if(event.key==='Enter')addPrize()">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">人數</label>
+            <input type="number" class="form-input" id="prizeCount" placeholder="1" min="1" style="padding:10px 10px">
+          </div>
+        </div>
+        <button class="btn btn-gold" style="margin-top:12px;width:100%" onclick="addPrize()">＋ 新增獎項</button>
+
+        <div style="margin-top:20px">
+          <div style="font-size:1.17rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+            <span>獎項列表</span>
+            <button class="btn btn-danger btn-sm" onclick="clearAllPrizes()">全部清除</button>
+          </div>
+          <div class="prize-list" id="prizeList">
+            <div class="empty-msg">尚未新增任何獎項</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RIGHT ─── -->
+    <div>
+
+      <!-- Draw Control -->
+      <div class="panel">
+        <div class="panel-title">抽獎操作</div>
+
+        <!-- 防呆提示 -->
+        <div id="resetWarning" style="display:none;padding:12px 16px;background:rgba(192,39,45,0.12);border:1px solid rgba(192,39,45,0.35);border-radius:6px;margin-bottom:16px;font-size:1.275rem;color:#ff8a80;line-height:1.6">
+          ⚠️ 前台正在顯示得獎名單<br>
+          <strong>請先按下方「重置前台空白畫面」</strong>，才能進行下一輪抽獎
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">選擇要抽的獎項</label>
+          <div class="select-wrapper">
+            <select class="form-select" id="prizeSelect" onchange="onPrizeSelect()">
+              <option value="">— 請選擇獎項 —</option>
+            </select>
+            <div class="select-arrow">▾</div>
+          </div>
+        </div>
+
+        <div class="info-box" id="infoBox">
+          可抽人數：<span id="poolCount" style="color:var(--gold);font-weight:500"></span> 人　
+          本次抽出：<span id="selectedCountText" style="color:var(--gold);font-weight:500"></span> 位
+        </div>
+
+        <div class="result-preview" id="resultPreview">
+          <div class="result-preview-title">預覽得獎名單（正式按「開始抽獎」才會發送至前台）</div>
+          <div class="result-winner-list" id="previewWinners"></div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;gap:10px">
+          <button class="btn btn-outline" style="flex:1" id="btnPreview" onclick="previewDraw()" disabled>重新預覽</button>
+          <button class="btn btn-red-solid" style="flex:2;padding:14px" id="btnDraw" onclick="startDraw()" disabled>▶ 開始抽獎</button>
+        </div>
+
+        <div class="note">
+          ⚠️ 按下「開始抽獎」後前台播放 6 秒影片並公布名單。<br>
+          ✓ 已中獎的人員會從後續抽獎名單中排除。<br>
+          ✓ 已抽過的獎項可以從列表中刪除。
+        </div>
+      </div>
+
+      <!-- Reset -->
+      <div class="panel">
+        <div class="panel-title">前台控制</div>
+        <button class="btn btn-outline btn-full" onclick="resetFrontend()">重置前台至空白畫面</button>
+      </div>
+
+      <!-- History -->
+      <div class="panel">
+        <div class="panel-title">
+          <span>抽獎紀錄</span>
+          <button class="btn btn-danger btn-sm" onclick="clearHistory()">清除紀錄</button>
+        </div>
+        <div class="history-list" id="historyList">
+          <div class="empty-msg">尚無抽獎紀錄</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── State ──
+  let prizes      = JSON.parse(localStorage.getItem('springFest_prizes')      || '[]');
+  let personnel   = JSON.parse(localStorage.getItem('springFest_personnel')   || '[]');
+  let winners     = JSON.parse(localStorage.getItem('springFest_winners')     || '[]'); // cumulative past winners (by realName+unitName key)
+  let drawHistory = JSON.parse(localStorage.getItem('springFest_drawHistory') || '[]');
+  let pendingResult = null;
+  let needsReset = false; // 防呆：開始抽獎後必須先重置前台才能再抽
+
+  // Raw excel data
+  let rawSheet = [], rawHeaders = [];
+  let previewVisible = false;
+
+  // ──────────────────────────────────────────────
+  // Excel / CSV import
+  // ──────────────────────────────────────────────
+  function onFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) readFile(file);
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+  }
+
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) readFile(file);
+  });
+
+  function readFile(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+        // Filter out completely empty rows first
+        const nonEmptyRows = rows.filter(r => r.some(c => String(c).trim() !== ''));
+        if (nonEmptyRows.length === 0) { showToast('檔案為空，請確認內容'); return; }
+
+        // Always treat first row as header
+        rawHeaders = nonEmptyRows[0].map((h, i) => String(h).trim() || `欄${i+1}`);
+        rawSheet   = nonEmptyRows.slice(1);
+
+        if (rawSheet.length === 0) { showToast('沒有資料列（只有標題行），請確認 Excel 內容'); return; }
+
+        populateColSelects();
+        document.getElementById('mapPanel').classList.add('show');
+        showToast(`已讀取 ${rawSheet.length} 筆資料，請確認欄位對應`);
+      } catch(err) { showToast('讀取失敗：' + err.message); }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function populateColSelects() {
+    ['colName','colUnit'].forEach(id => {
+      document.getElementById(id).innerHTML = rawHeaders
+        .map((h,i) => `<option value="${i}">${h || '欄'+(i+1)}</option>`).join('');
+    });
+    // Auto-detect
+    rawHeaders.forEach((h,i) => {
+      if (/姓名|名字|name/i.test(h)) document.getElementById('colName').value = i;
+      if (/單位|部門|unit|dept/i.test(h)) document.getElementById('colUnit').value = i;
+    });
+  }
+
+  function confirmImport() {
+    const ni = parseInt(document.getElementById('colName').value);
+    const ui = parseInt(document.getElementById('colUnit').value);
+    const imported = rawSheet
+      .map(r => ({ realName: String(r[ni]||'').trim(), unitName: String(r[ui]||'').trim() }))
+      .filter(p => p.realName);
+    if (!imported.length) { showToast('沒有有效資料，請確認欄位'); return; }
+    personnel = imported;
+    localStorage.setItem('springFest_personnel', JSON.stringify(personnel));
+    document.getElementById('mapPanel').classList.remove('show');
+    renderPersonnelStats();
+    showToast(`✓ 已匯入 ${personnel.length} 位人員`);
+  }
+
+  function getAvailablePool() {
+    // Exclude anyone who has already won
+    return personnel.filter(p => !winners.some(w => w.realName === p.realName && w.unitName === p.unitName));
+  }
+
+  function renderPersonnelStats() {
+    const statsEl = document.getElementById('personnelStats');
+    if (!personnel.length) { statsEl.style.display = 'none'; return; }
+    statsEl.style.display = 'block';
+
+    const available = getAvailablePool().length;
+    const excluded  = personnel.length - available;
+
+    document.getElementById('statAvailable').textContent = `可抽人數：${available} 人`;
+
+    const exEl = document.getElementById('statExcluded');
+    if (excluded > 0) {
+      exEl.textContent = `已中獎排除：${excluded} 人`;
+      exEl.style.display = 'inline-block';
+    } else {
+      exEl.style.display = 'none';
+    }
+
+    const tbody = document.getElementById('previewTableBody');
+    tbody.innerHTML = personnel.map((p, i) => {
+      const isExcluded = winners.some(w => w.realName === p.realName && w.unitName === p.unitName);
+      return `<tr class="${isExcluded ? 'excluded-row' : ''}">
+        <td style="color:var(--text-muted)">${i+1}</td>
+        <td>${esc(p.realName)}</td>
+        <td>${esc(p.unitName)}</td>
+        <td>${isExcluded ? '<span class="excluded-tag">已中獎</span>' : '<span style="color:var(--green);font-size:1.17rem">可抽</span>'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function togglePreview() {
+    previewVisible = !previewVisible;
+    document.getElementById('previewTableWrap').classList.toggle('show', previewVisible);
+  }
+
+  function clearPersonnel() {
+    if (!confirm('確定清除人員名單？（中獎紀錄也會一併清除）')) return;
+    personnel = [];
+    winners   = [];
+    localStorage.removeItem('springFest_personnel');
+    localStorage.removeItem('springFest_winners');
+    document.getElementById('personnelStats').style.display = 'none';
+    previewVisible = false;
+    document.getElementById('previewTableWrap').classList.remove('show');
+    showToast('已清除人員名單');
+  }
+
+  // ──────────────────────────────────────────────
+  // Prizes
+  // ──────────────────────────────────────────────
+  function addPrize() {
+    const name  = document.getElementById('prizeName').value.trim();
+    const count = parseInt(document.getElementById('prizeCount').value) || 1;
+    if (!name) { showToast('請輸入獎項名稱'); return; }
+    prizes.push({ id: Date.now(), name, count, drawn: false, order: prizes.length + 1 });
+    savePrizes();
+    document.getElementById('prizeName').value  = '';
+    document.getElementById('prizeCount').value = '';
+    showToast(`已新增：${name}`);
+  }
+
+  function deletePrize(id) {
+    if (!confirm('確定刪除此獎項？')) return;
+    prizes = prizes.filter(p => p.id !== id);
+    savePrizes();
+  }
+
+  function clearAllPrizes() {
+    if (!confirm('確定清除所有獎項？')) return;
+    prizes = [];
+    savePrizes();
+    showToast('已清除所有獎項');
+  }
+
+  function savePrizes() {
+    localStorage.setItem('springFest_prizes', JSON.stringify(prizes));
+    renderPrizeList();
+    renderPrizeSelect();
+  }
+
+  function renderPrizeList() {
+    const el = document.getElementById('prizeList');
+    if (!prizes.length) { el.innerHTML = '<div class="empty-msg">尚未新增任何獎項</div>'; return; }
+    el.innerHTML = prizes.map(p => `
+      <div class="prize-item ${p.drawn ? 'drawn' : ''}">
+        <div class="prize-order">${p.order}</div>
+        <div class="prize-name">${esc(p.name)}</div>
+        <div class="prize-count">${p.count} 人</div>
+        ${p.drawn ? '<div class="prize-drawn-badge">✓ 已抽出</div>' : ''}
+        <button class="prize-delete-btn" onclick="deletePrize(${p.id})" title="刪除此獎項">🗑</button>
+      </div>
+    `).join('');
+  }
+
+  function renderPrizeSelect() {
+    const sel = document.getElementById('prizeSelect');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— 請選擇獎項 —</option>';
+    // All prizes appear in dropdown (including drawn), but drawn ones are disabled
+    prizes.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = p.drawn ? `${p.name}（已抽出）` : `${p.name}（${p.count} 人）`;
+      o.disabled = p.drawn;
+      sel.appendChild(o);
+    });
+    // Restore selection if still valid
+    if (cur) sel.value = cur;
+  }
+
+  function onPrizeSelect() {
+    const prize = getSelectedPrize();
+    const infoEl    = document.getElementById('infoBox');
+    const previewEl = document.getElementById('resultPreview');
+
+    if (prize && !prize.drawn) {
+      const pool = getAvailablePool();
+      infoEl.classList.add('show');
+      document.getElementById('poolCount').textContent = pool.length;
+      document.getElementById('selectedCountText').textContent = Math.min(prize.count, pool.length);
+      document.getElementById('btnDraw').disabled    = false;
+      document.getElementById('btnPreview').disabled = false;
+      previewDraw();
+    } else {
+      infoEl.classList.remove('show');
+      previewEl.classList.remove('show');
+      document.getElementById('btnDraw').disabled    = true;
+      document.getElementById('btnPreview').disabled = true;
+      pendingResult = null;
+    }
+  }
+
+  // ──────────────────────────────────────────────
+  // Draw logic — excludes past winners
+  // ──────────────────────────────────────────────
+  function pickWinners(prize) {
+    const pool = getAvailablePool();
+    if (!pool.length) return [];
+    // Fisher-Yates shuffle
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, Math.min(prize.count, pool.length));
+  }
+
+  function previewDraw() {
+    const prize = getSelectedPrize();
+    if (!prize) return;
+    const pool = getAvailablePool();
+    if (!pool.length) { showToast('可抽名單為空（所有人都已中獎）'); return; }
+    const newWinners = pickWinners(prize);
+    pendingResult = { prize, winners: newWinners };
+
+    const previewEl  = document.getElementById('resultPreview');
+    document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
+      `<div class="result-winner-chip">${esc(w.realName)}・${esc(w.unitName)}</div>`
+    ).join('');
+    previewEl.classList.add('show');
+  }
+
+  function startDraw() {
+    if (needsReset) { showToast('請先重置前台空白畫面，才能進行下一輪抽獎'); return; }
+    const prize = getSelectedPrize();
+    if (!prize) return;
+    if (!personnel.length) { showToast('人員名單為空，無法抽獎'); return; }
+    if (!pendingResult) previewDraw();
+    if (!pendingResult || !pendingResult.winners.length) { showToast('可抽人數不足'); return; }
+
+    const { winners: newWinners } = pendingResult;
+
+    // Save result for frontend
+    localStorage.setItem('springFest_lotteryResult', JSON.stringify({
+      prizeName: prize.name,
+      prizeCount: prize.count,
+      winners: newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))
+    }));
+    localStorage.setItem('springFest_lottery', 'start');
+
+    // Mark prize as drawn
+    prizes = prizes.map(p => p.id == prize.id ? { ...p, drawn: true } : p);
+    savePrizes();
+
+    // Add new winners to cumulative exclusion list
+    winners = [...winners, ...newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))];
+    localStorage.setItem('springFest_winners', JSON.stringify(winners));
+
+    // History
+    drawHistory.unshift({
+      time: new Date().toLocaleString('zh-TW'),
+      prizeName: prize.name,
+      winners: newWinners.map(w => `${w.realName}（${w.unitName}）`).join('、')
+    });
+    localStorage.setItem('springFest_drawHistory', JSON.stringify(drawHistory));
+
+    renderHistory();
+    renderPersonnelStats();
+
+    // 防呆：鎖住抽獎，等待重置前台
+    needsReset = true;
+    updateResetWarning();
+
+    // Reset UI
+    document.getElementById('prizeSelect').value = '';
+    document.getElementById('infoBox').classList.remove('show');
+    document.getElementById('resultPreview').classList.remove('show');
+    document.getElementById('btnDraw').disabled    = true;
+    document.getElementById('btnPreview').disabled = true;
+    pendingResult = null;
+
+    showToast(`🎉 已啟動抽獎：${prize.name}，前台播放中！`);
+  }
+
+  function getSelectedPrize() {
+    const val = document.getElementById('prizeSelect').value;
+    return prizes.find(p => p.id == val) || null;
+  }
+
+  function resetFrontend() {
+    localStorage.setItem('springFest_lottery', 'reset');
+    needsReset = false;
+    updateResetWarning();
+    showToast('已重置前台，可進行下一輪抽獎');
+  }
+
+  function updateResetWarning() {
+    const warning = document.getElementById('resetWarning');
+    const prizeSelect = document.getElementById('prizeSelect');
+    warning.style.display = needsReset ? 'block' : 'none';
+    // 鎖住選單與按鈕
+    prizeSelect.disabled = needsReset;
+    if (needsReset) {
+      document.getElementById('btnDraw').disabled    = true;
+      document.getElementById('btnPreview').disabled = true;
+      document.getElementById('infoBox').classList.remove('show');
+      document.getElementById('resultPreview').classList.remove('show');
+    }
+  }
+
+  // ──────────────────────────────────────────────
+  // History
+  // ──────────────────────────────────────────────
+  function renderHistory() {
+    const el = document.getElementById('historyList');
+    if (!drawHistory.length) { el.innerHTML = '<div class="empty-msg">尚無抽獎紀錄</div>'; return; }
+    el.innerHTML = drawHistory.map(h => `
+      <div class="history-item">
+        <div class="history-prize">🏆 ${esc(h.prizeName)}
+          <span style="color:var(--text-muted);font-size:1.125rem;margin-left:8px">${h.time}</span>
+        </div>
+        <div class="history-winners">${esc(h.winners)}</div>
+      </div>
+    `).join('');
+  }
+
+  function clearHistory() {
+    if (!confirm('確定清除抽獎紀錄？（不會影響已中獎排除名單）')) return;
+    drawHistory = [];
+    localStorage.removeItem('springFest_drawHistory');
+    renderHistory();
+    showToast('已清除紀錄');
+  }
+
+  // ──────────────────────────────────────────────
+  // Helpers
+  // ──────────────────────────────────────────────
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Init ──
+  renderPrizeList();
+  renderPrizeSelect();
+  renderPersonnelStats();
+  renderHistory();
+  updateResetWarning();
+</script>
+</body>
+</html>
