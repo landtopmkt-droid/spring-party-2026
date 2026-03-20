@@ -92,6 +92,10 @@
 
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 20px; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
   .toast.show { transform: translateY(0); opacity: 1; }
+
+  .empty-msg { color: var(--text-muted); padding: 20px; text-align: center; }
+
+  .prize-item-actions { display: flex; gap: 8px; }
 </style>
 </head>
 <body>
@@ -138,7 +142,10 @@
       </div>
 
       <div class="panel">
-        <div class="panel-title">獎品設定</div>
+        <div class="panel-title">
+          獎品設定
+          <button class="btn btn-danger btn-sm" id="clearAllPrizesBtn" onclick="clearAllPrizes()" style="display:none">清除全部</button>
+        </div>
         <div class="row-inline">
           <div class="form-group"><label class="form-label">獎項名稱</label><input type="text" class="form-input" id="prizeName"></div>
           <div class="form-group"><label class="form-label">人數</label><input type="number" class="form-input" id="prizeCount" value="1"></div>
@@ -251,17 +258,30 @@
   };
 
   window.addPrize = () => {
-    const name = document.getElementById('prizeName').value;
+    const name = document.getElementById('prizeName').value.trim();
     const count = parseInt(document.getElementById('prizeCount').value) || 1;
-    if(!name) return;
+    if(!name) {
+      showToast('請輸入獎項名稱');
+      return;
+    }
     prizes.push({ id: Date.now(), name, count, drawn: false, order: prizes.length + 1 });
     syncToFirebase();
     document.getElementById('prizeName').value = '';
+    document.getElementById('prizeCount').value = '1';
+    showToast('✓ 獎項已新增');
   };
 
   window.deletePrize = (id) => {
     prizes = prizes.filter(p => p.id !== id);
     syncToFirebase();
+    showToast('✓ 獎項已刪除');
+  };
+
+  window.clearAllPrizes = () => {
+    if (!confirm('確定要清除所有獎項嗎？')) return;
+    prizes = [];
+    syncToFirebase();
+    showToast('✓ 所有獎項已清除');
   };
 
   function getAvailablePool() {
@@ -271,14 +291,20 @@
   window.previewDraw = () => {
     const prize = prizes.find(p => p.id == document.getElementById('prizeSelect').value);
     const pool = getAvailablePool();
-    if(!pool.length) return showToast('無人可抽');
+    if(!pool.length) {
+      showToast('無人可抽');
+      return;
+    }
     pendingResult = { prize, winners: [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(prize.count, pool.length)) };
     document.getElementById('previewWinners').innerHTML = pendingResult.winners.map(w => `<div class="result-winner-chip">${w.realName}</div>`).join('');
     document.getElementById('resultPreview').classList.add('show');
   };
 
   window.startDraw = () => {
-    if(!pendingResult) return;
+    if(!pendingResult) {
+      showToast('請先預覽');
+      return;
+    }
     const { prize, winners: newWinners } = pendingResult;
     set(ref(db, 'lottery_control'), { status: 'start', prizeName: prize.name, winners: newWinners, timestamp: Date.now() });
     prizes = prizes.map(p => p.id == prize.id ? { ...p, drawn: true } : p);
@@ -286,23 +312,35 @@
     drawHistory.unshift({ time: new Date().toLocaleTimeString(), prizeName: prize.name, winners: newWinners.map(w => w.realName).join(', ') });
     needsReset = true;
     pendingResult = null;
+    document.getElementById('resultPreview').classList.remove('show');
     syncToFirebase();
+    showToast('✓ 抽獎已開始！');
   };
 
   window.resetFrontend = () => {
     set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
     needsReset = false;
     syncToFirebase();
+    showToast('✓ 前台已重置');
   };
 
-  window.clearPersonnel = () => { if(confirm('確定清除？')) { personnel = []; winners = []; syncToFirebase(); } };
-  window.clearHistory = () => { if(confirm('清除紀錄？')) { drawHistory = []; syncToFirebase(); } };
+  window.clearPersonnel = () => { if(confirm('確定清除？')) { personnel = []; winners = []; syncToFirebase(); showToast('✓ 人員已清除'); } };
+  window.clearHistory = () => { if(confirm('清除紀錄？')) { drawHistory = []; syncToFirebase(); showToast('✓ 紀錄已清除'); } };
 
   function refreshAllUI() {
     const sel = document.getElementById('prizeSelect');
     const curValue = sel.value;
-    sel.innerHTML = '<option value="">— 請選擇獎項 —</option>' + prizes.map(p => `<option value="${p.id}" ${p.drawn?'disabled':''}>${p.name} (${p.count}人)${p.drawn?' - 已抽':''}</option>`).join('');
+    // 【修正1】獎項下拉選單正確顯示人數
+    sel.innerHTML = '<option value="">— 請選擇獎項 —</option>' + prizes.map(p => {
+      const disabled = p.drawn ? 'disabled' : '';
+      const label = `${p.name} (${p.count}人)${p.drawn ? ' ✓ 已抽' : ''}`;
+      return `<option value="${p.id}" ${disabled}>${label}</option>`;
+    }).join('');
     sel.value = curValue;
+
+    // 【修正3】清除獎項按鈕的顯示邏輯
+    const clearBtn = document.getElementById('clearAllPrizesBtn');
+    clearBtn.style.display = prizes.length > 0 ? 'block' : 'none';
 
     document.getElementById('prizeList').innerHTML = prizes.map(p => `
       <div class="prize-item ${p.drawn?'drawn':''}">
@@ -325,7 +363,9 @@
     
     document.getElementById('resetWarning').style.display = needsReset ? 'block' : 'none';
     const selectedPrize = prizes.find(p => p.id == sel.value);
-    const canDraw = selectedPrize && !selectedPrize.drawn && pool.length > 0 && !needsReset;
+    
+    // 【修正2】修正按鈕啟用邏輯 - needsReset 不應該禁用按鈕，只是顯示警告
+    const canDraw = selectedPrize && !selectedPrize.drawn && pool.length > 0;
     document.getElementById('btnDraw').disabled = !canDraw;
     document.getElementById('btnPreview').disabled = !canDraw;
 
