@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>後台3 — 抽獎管理 (已整合重置功能)</title>
+<title>後台3 — 抽獎管理 (完全修正版)</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -19,7 +19,7 @@
     --text: #e8e0d0;
     --text-muted: rgba(232,224,208,0.45);
     --green: #4caf50;
-    --orange: #ffb74d; /* 新增重置按鈕顏色 */
+    --orange: #ffb74d;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; }
@@ -48,7 +48,6 @@
     font-family: 'Noto Sans TC', sans-serif; font-size: 1.35rem; outline: none; transition: border-color 0.2s;
   }
   .form-input:focus, .form-select:focus { border-color: var(--gold); }
-  .form-input::placeholder { color: var(--text-muted); font-size: 1.275rem; }
 
   .row-inline { display: grid; grid-template-columns: 1fr 90px; gap: 10px; align-items: end; }
 
@@ -58,84 +57,41 @@
   .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
   .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
   .btn-danger { background: transparent; border: 1px solid rgba(192,39,45,0.3); color: #e57373; }
-  .btn-danger:hover { background: rgba(192,39,45,0.08); }
   .btn-red-solid { background: linear-gradient(135deg, #8b1a1e, var(--red)); color: #fff; font-family: 'Noto Serif TC', serif; font-size: 1.5rem; font-weight: 600; letter-spacing: 0.2em; }
-  .btn-red-solid:hover { filter: brightness(1.1); box-shadow: 0 4px 20px rgba(192,39,45,0.4); }
-  .btn-red-solid:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; filter: none; }
-  .btn-full { width: 100%; padding: 14px; }
+  .btn-red-solid:disabled { opacity: 0.3; cursor: not-allowed; }
   .btn-sm { padding: 6px 12px; font-size: 1.17rem; }
 
-  .upload-zone {
-    border: 2px dashed rgba(212,168,67,0.25); border-radius: 6px; padding: 28px 20px;
-    text-align: center; cursor: pointer; transition: all 0.25s; position: relative;
-  }
-  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--gold); background: rgba(212,168,67,0.04); }
-  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-zone { border: 2px dashed rgba(212,168,67,0.25); border-radius: 6px; padding: 28px 20px; text-align: center; cursor: pointer; position: relative; }
   .upload-icon { font-size: 3rem; margin-bottom: 8px; }
-  .upload-label { font-size: 1.275rem; color: var(--text-muted); line-height: 1.7; }
-  .upload-label strong { color: var(--gold); }
 
   .map-panel { background: var(--surface2); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; padding: 16px; margin-top: 14px; display: none; }
   .map-panel.show { display: block; }
-  .map-title { font-size: 1.17rem; color: var(--gold); letter-spacing: 0.15em; margin-bottom: 12px; }
-  .map-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .map-select { background: var(--surface); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 8px 12px; color: var(--text); font-family: 'Noto Sans TC', sans-serif; font-size: 1.275rem; outline: none; width: 100%; }
-  .map-select:focus { border-color: var(--gold); }
-  .map-label { font-size: 1.17rem; color: var(--text-muted); margin-bottom: 5px; }
 
   .personnel-stats { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
   .stat-chip { padding: 5px 14px; background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.15); border-radius: 20px; font-size: 1.2rem; color: var(--gold); }
   .stat-chip.excluded { background: rgba(192,39,45,0.08); border-color: rgba(192,39,45,0.2); color: #e57373; }
 
-  .personnel-table-wrap { margin-top: 14px; max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: 4px; display: none; }
-  .personnel-table-wrap.show { display: block; }
-  table { width: 100%; border-collapse: collapse; }
-  th { padding: 8px 12px; font-size: 1.11rem; color: var(--gold); background: var(--surface2); letter-spacing: 0.1em; text-align: left; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2; }
-  td { padding: 8px 12px; font-size: 1.26rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: rgba(212,168,67,0.02); }
-
   .prize-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
-  .prize-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface2); border: 1px solid rgba(255,255,255,0.05); border-radius: 4px; transition: all 0.2s; }
+  .prize-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface2); border: 1px solid rgba(255,255,255,0.05); border-radius: 4px; }
   .prize-item.drawn { border-color: rgba(192,39,45,0.2); background: rgba(192,39,45,0.05); }
-  .prize-order { width: 26px; height: 26px; border-radius: 50%; background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.11rem; color: var(--gold); flex-shrink: 0; }
   .prize-name { flex: 1; font-size: 1.35rem; }
-  .prize-count { font-size: 1.17rem; color: var(--text-muted); white-space: nowrap; }
-  .prize-drawn-badge { font-size: 1.08rem; color: #e57373; background: rgba(192,39,45,0.12); padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
-  .prize-delete-btn { background: transparent; border: none; color: rgba(192,39,45,0.45); cursor: pointer; font-size: 1.275rem; padding: 4px 6px; border-radius: 3px; transition: all 0.2s; flex-shrink: 0; }
-  .prize-delete-btn:hover { color: #e57373; background: rgba(192,39,45,0.1); }
+  .prize-count { font-size: 1.17rem; color: var(--gold); font-weight: 500; }
+  .prize-drawn-badge { font-size: 1.08rem; color: #e57373; background: rgba(192,39,45,0.12); padding: 2px 8px; border-radius: 10px; }
+  .prize-delete-btn { background: transparent; border: none; color: rgba(192,39,45,0.45); cursor: pointer; font-size: 1.275rem; }
 
-  .select-wrapper { position: relative; margin-bottom: 16px; }
-  .form-select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 36px; }
-  .select-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--gold); pointer-events: none; font-size: 1.125rem; }
-
-  .info-box { padding: 12px 16px; background: rgba(212,168,67,0.05); border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; margin-bottom: 16px; font-size: 1.275rem; display: none; }
+  .info-box { padding: 12px 16px; background: rgba(212,168,67,0.05); border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; margin-bottom: 16px; display: none; }
   .info-box.show { display: block; }
 
   .result-preview { background: var(--surface2); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; padding: 16px; margin-top: 14px; display: none; }
   .result-preview.show { display: block; }
-  .result-preview-title { font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.15em; margin-bottom: 10px; }
-  .result-winner-list { display: flex; flex-wrap: wrap; gap: 8px; }
-  .result-winner-chip { padding: 5px 12px; background: rgba(192,39,45,0.15); border: 1px solid rgba(192,39,45,0.2); border-radius: 20px; font-size: 1.23rem; }
+  .result-winner-chip { padding: 5px 12px; background: rgba(192,39,45,0.15); border: 1px solid rgba(192,39,45,0.2); border-radius: 20px; margin: 4px; display: inline-block; }
 
-  .note { margin-top: 12px; padding: 10px 14px; background: rgba(212,168,67,0.04); border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; font-size: 1.17rem; color: var(--text-muted); line-height: 1.7; }
+  .history-item { padding: 12px 16px; background: var(--surface2); border-radius: 4px; border-left: 3px solid var(--gold); margin-bottom: 8px; }
+  .history-prize { font-size: 1.35rem; color: var(--gold); }
+  .history-winners { font-size: 1.23rem; color: var(--text-muted); }
 
-  .history-list { display: flex; flex-direction: column; gap: 10px; }
-  .history-item { padding: 12px 16px; background: var(--surface2); border-radius: 4px; border-left: 3px solid var(--gold); }
-  .history-prize { font-size: 1.35rem; color: var(--gold); margin-bottom: 4px; }
-  .history-winners { font-size: 1.23rem; color: var(--text-muted); line-height: 1.6; }
-
-  .empty-msg { color: var(--text-muted); font-size: 1.275rem; text-align: center; padding: 20px; }
-
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 20px; color: var(--text); font-size: 1.32rem; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); max-width: 340px; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 20px; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
   .toast.show { transform: translateY(0); opacity: 1; }
-
-  @media (max-width: 900px) {
-    .grid-2 { grid-template-columns: 1fr; }
-    .nav { padding: 8px 16px; height: auto; flex-wrap: wrap; }
-    .nav-brand { margin-right: 16px; font-size: 0.9rem; }
-    .nav-link { padding: 6px 10px; font-size: 0.78rem; }
-  }
 </style>
 </head>
 <body>
@@ -146,57 +102,37 @@
     <a href="admin-1-registrations.html" class="nav-link">報名名單</a>
     <a href="admin-2-redpacket.html" class="nav-link">紅包雨</a>
     <a href="admin-3-lottery.html" class="nav-link active">抽獎管理</a>
-    <a href="admin-4-youtube.html" class="nav-link">YT 監控</a>
   </div>
 </nav>
 
 <div class="main">
   <div class="page-title">抽獎管理</div>
-  <div class="page-subtitle">匯入人員名單、設定獎品，中獎過的人不會再被抽中。</div>
+  <div class="page-subtitle">中獎過的人不會再被抽中。</div>
 
   <div class="grid-2">
     <div>
       <div class="panel">
-        <div class="panel-title"><span>人員名單匯入（Excel）</span></div>
-
+        <div class="panel-title">人員名單匯入</div>
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="onFileSelect(event)">
           <div class="upload-icon">📂</div>
-          <div class="upload-label">
-            <strong>點擊選擇</strong>或拖曳 Excel 到此<br>
-            <span style="font-size:1.17rem;opacity:0.7">上傳後可對應欄位</span>
-          </div>
+          <div class="upload-label">點擊或拖曳 Excel 到此</div>
         </div>
 
         <div class="map-panel" id="mapPanel">
-          <div class="map-title">欄位對應（請選擇姓名與單位）</div>
           <div class="map-row">
-            <div>
-              <div class="map-label">姓名欄位</div>
-              <select class="map-select" id="colName"></select>
-            </div>
-            <div>
-              <div class="map-label">單位欄位</div>
-              <select class="map-select" id="colUnit"></select>
-            </div>
+            <div><label class="map-label">姓名</label><select class="map-select" id="colName"></select></div>
+            <div><label class="map-label">單位</label><select class="map-select" id="colUnit"></select></div>
           </div>
-          <button class="btn btn-gold" style="width:100%;margin-top:4px" onclick="confirmImport()">確認匯入</button>
+          <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="confirmImport()">確認匯入</button>
         </div>
 
         <div id="personnelStats" style="display:none">
           <div class="personnel-stats">
             <div class="stat-chip" id="statAvailable"></div>
             <div class="stat-chip excluded" id="statExcluded" style="display:none"></div>
-            
             <button class="btn btn-outline btn-sm" onclick="resetLotteryStatus()" style="margin-left:auto; color: var(--orange); border-color: rgba(255,183,77,0.3)">重置抽獎狀態</button>
-            <button class="btn btn-outline btn-sm" onclick="togglePreview()">預覽名單</button>
             <button class="btn btn-danger btn-sm" onclick="clearPersonnel()">清除</button>
-          </div>
-          <div class="personnel-table-wrap" id="previewTableWrap">
-            <table>
-              <thead><tr><th>#</th><th>姓名</th><th>單位</th></tr></thead>
-              <tbody id="previewTableBody"></tbody>
-            </table>
           </div>
         </div>
       </div>
@@ -204,70 +140,36 @@
       <div class="panel">
         <div class="panel-title">獎品設定</div>
         <div class="row-inline">
-          <div class="form-group" style="margin-bottom:0">
-            <label class="form-label">獎項名稱</label>
-            <input type="text" class="form-input" id="prizeName" placeholder="例：頭獎">
-          </div>
-          <div class="form-group" style="margin-bottom:0">
-            <label class="form-label">人數</label>
-            <input type="number" class="form-input" id="prizeCount" placeholder="1" min="1">
-          </div>
+          <div class="form-group"><label class="form-label">獎項名稱</label><input type="text" class="form-input" id="prizeName"></div>
+          <div class="form-group"><label class="form-label">人數</label><input type="number" class="form-input" id="prizeCount" value="1"></div>
         </div>
-        <button class="btn btn-gold" style="margin-top:12px;width:100%" onclick="addPrize()">＋ 新增獎項</button>
-
-        <div style="margin-top:20px">
-          <div class="prize-list" id="prizeList">
-            <div class="empty-msg">尚未新增任何獎項</div>
-          </div>
-        </div>
+        <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addPrize()">＋ 新增獎項</button>
+        <div style="margin-top:20px" class="prize-list" id="prizeList"></div>
       </div>
     </div>
 
     <div>
       <div class="panel">
         <div class="panel-title">抽獎操作</div>
-        <div id="resetWarning" style="display:none;padding:12px 16px;background:rgba(192,39,45,0.12);border:1px solid rgba(192,39,45,0.35);border-radius:6px;margin-bottom:16px;font-size:1.275rem;color:#ff8a80;">
-          ⚠️ 前台正在顯示名單，請先按下方重置。
-        </div>
-
+        <div id="resetWarning" style="display:none;padding:10px;background:rgba(192,39,45,0.1);color:#ff8a80;margin-bottom:10px;border-radius:4px">⚠️ 請先重置前台畫面</div>
         <div class="form-group">
-          <label class="form-label">選擇獎項</label>
-          <div class="select-wrapper">
-            <select class="form-select" id="prizeSelect" onchange="onPrizeSelect()">
-              <option value="">— 請選擇獎項 —</option>
-            </select>
-            <div class="select-arrow">▾</div>
-          </div>
+          <select class="form-select" id="prizeSelect" onchange="refreshAllUI()"></select>
         </div>
-
-        <div class="info-box" id="infoBox">
-          可抽：<span id="poolCount" style="color:var(--gold)"></span> 人　
-          抽出：<span id="selectedCountText" style="color:var(--gold)"></span> 位
-        </div>
-
-        <div class="result-preview" id="resultPreview">
-          <div class="result-winner-list" id="previewWinners"></div>
-        </div>
-
+        <div class="info-box" id="infoBox">可抽：<span id="poolCount"></span> 人 / 抽出：<span id="selectedCountText"></span> 位</div>
+        <div class="result-preview" id="resultPreview"><div id="previewWinners"></div></div>
         <div style="margin-top:16px;display:flex;gap:10px">
-          <button class="btn btn-outline" style="flex:1" id="btnPreview" onclick="previewDraw()" disabled>重新預覽</button>
+          <button class="btn btn-outline" style="flex:1" id="btnPreview" onclick="previewDraw()" disabled>預覽</button>
           <button class="btn btn-red-solid" style="flex:2" id="btnDraw" onclick="startDraw()" disabled>▶ 開始抽獎</button>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">前台控制</div>
-        <button class="btn btn-outline btn-full" onclick="resetFrontend()">重置前台至空白畫面</button>
+        <button class="btn btn-outline" style="width:100%" onclick="resetFrontend()">重置前台至空白</button>
       </div>
 
       <div class="panel">
-        <div class="panel-title">
-          <span>抽獎紀錄</span>
-          <button class="btn btn-danger btn-sm" onclick="clearHistory()">清除紀錄</button>
-        </div>
-        <div class="history-list" id="historyList">
-          <div class="empty-msg">尚無紀錄</div>
-        </div>
+        <div class="panel-title">抽獎紀錄 <button class="btn btn-danger btn-sm" onclick="clearHistory()">清除</button></div>
+        <div id="historyList"></div>
       </div>
     </div>
   </div>
@@ -286,15 +188,14 @@
     databaseURL: "https://springfestival-4aaea-default-rtdb.firebaseio.com",
     storageBucket: "springfestival-4aaea.firebasestorage.app",
     messagingSenderId: "64196762294",
-    appId: "1:64196762294:web:2fb6e766f38f8d47332417",
-    measurementId: "G-4MZF0HPLJV"
+    appId: "1:64196762294:web:2fb6e766f38f8d47332417"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  let prizes = [], personnel = [], winners = [], drawHistory = [], needsReset = false;
-  let rawSheet = [], rawHeaders = [], pendingResult = null, previewVisible = false;
+  let prizes = [], personnel = [], winners = [], drawHistory = [], needsReset = false, pendingResult = null;
+  let rawSheet = [], rawHeaders = [];
 
   onValue(ref(db, 'lottery_data'), (snapshot) => {
     if (snapshot.exists()) {
@@ -312,40 +213,17 @@
     set(ref(db, 'lottery_data'), { prizes, personnel, winners, drawHistory, needsReset });
   }
 
-  // ── 重置抽獎狀態 (核心新增) ──
-    window.resetLotteryStatus = function() {
-    if (!confirm('確定要「強制重置」抽獎狀態嗎？\n這會清空資料庫中所有已中獎的紀錄。')) return;
-
-    // 1. 本地變數清空
+  window.resetLotteryStatus = function() {
+    if (!confirm('確定要強制重置抽獎狀態嗎？(所有人恢復可抽獎)')) return;
     winners = [];
     drawHistory = [];
     prizes = prizes.map(p => ({ ...p, drawn: false }));
     needsReset = false;
-    pendingResult = null;
+    syncToFirebase();
+    set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
+    showToast('✓ 已成功重置排除名單！');
+  };
 
-    // 2. 強制寫入 Firebase (使用 set 直接覆蓋)
-    // 這樣可以確保 winners 陣列在資料庫裡變成空的
-    set(ref(db, 'lottery_data'), {
-        prizes: prizes,
-        personnel: personnel, // 保留目前匯入的人員
-        winners: [],          // 強制清空得獎名單
-        drawHistory: [],      // 強制清空紀錄
-        needsReset: false
-    });
-
-    // 3. 同步重置前台控制狀態
-    set(ref(db, 'lottery_control'), { 
-        status: 'reset', 
-        timestamp: Date.now() 
-    });
-
-    // 4. UI 立即更新
-    refreshAllUI();
-    document.getElementById('resultPreview').classList.remove('show'); // 隱藏預覽區
-    showToast('✓ 已強制重置！現在所有人都可以抽了。');
-};
-
-  // Excel Import Logic
   window.onFileSelect = e => {
     const file = e.target.files[0];
     if (file) {
@@ -356,18 +234,13 @@
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
         rawHeaders = rows[0].map((h, i) => String(h).trim() || `欄${i+1}`);
         rawSheet = rows.slice(1);
-        populateColSelects();
+        document.getElementById('colName').innerHTML = rawHeaders.map((h,i) => `<option value="${i}">${h}</option>`).join('');
+        document.getElementById('colUnit').innerHTML = rawHeaders.map((h,i) => `<option value="${i}">${h}</option>`).join('');
         document.getElementById('mapPanel').classList.add('show');
       };
       reader.readAsArrayBuffer(file);
     }
   };
-
-  function populateColSelects() {
-    ['colName','colUnit'].forEach(id => {
-      document.getElementById(id).innerHTML = rawHeaders.map((h,i) => `<option value="${i}">${h}</option>`).join('');
-    });
-  }
 
   window.confirmImport = () => {
     const ni = parseInt(document.getElementById('colName').value);
@@ -375,31 +248,25 @@
     personnel = rawSheet.map(r => ({ realName: String(r[ni]||'').trim(), unitName: String(r[ui]||'').trim() })).filter(p => p.realName);
     document.getElementById('mapPanel').classList.remove('show');
     syncToFirebase();
-    showToast('匯入完成');
   };
 
-  window.clearPersonnel = () => { if(confirm('確定清除？')) { personnel = []; winners = []; syncToFirebase(); } };
-
-  window.togglePreview = () => {
-    previewVisible = !previewVisible;
-    document.getElementById('previewTableWrap').classList.toggle('show', previewVisible);
-    document.getElementById('previewTableBody').innerHTML = personnel.map((p, i) => `<tr><td>${i+1}</td><td>${p.realName}</td><td>${p.unitName}</td></tr>`).join('');
-  };
-
-  // 抽獎邏輯
-  function getAvailablePool() {
-    // 只有當 personnel 的姓名與單位，同時出現在 winners 名單中時，才會被排除
-    return personnel.filter(p => {
-        return !winners.some(w => w.realName === p.realName && w.unitName === p.unitName);
-    });
-}
   window.addPrize = () => {
     const name = document.getElementById('prizeName').value;
     const count = parseInt(document.getElementById('prizeCount').value) || 1;
     if(!name) return;
     prizes.push({ id: Date.now(), name, count, drawn: false, order: prizes.length + 1 });
     syncToFirebase();
+    document.getElementById('prizeName').value = '';
   };
+
+  window.deletePrize = (id) => {
+    prizes = prizes.filter(p => p.id !== id);
+    syncToFirebase();
+  };
+
+  function getAvailablePool() {
+    return personnel.filter(p => !winners.some(w => w.realName === p.realName && w.unitName === p.unitName));
+  }
 
   window.previewDraw = () => {
     const prize = prizes.find(p => p.id == document.getElementById('prizeSelect').value);
@@ -411,7 +278,7 @@
   };
 
   window.startDraw = () => {
-    if(!pendingResult) previewDraw();
+    if(!pendingResult) return;
     const { prize, winners: newWinners } = pendingResult;
     set(ref(db, 'lottery_control'), { status: 'start', prizeName: prize.name, winners: newWinners, timestamp: Date.now() });
     prizes = prizes.map(p => p.id == prize.id ? { ...p, drawn: true } : p);
@@ -428,25 +295,47 @@
     syncToFirebase();
   };
 
+  window.clearPersonnel = () => { if(confirm('確定清除？')) { personnel = []; winners = []; syncToFirebase(); } };
   window.clearHistory = () => { if(confirm('清除紀錄？')) { drawHistory = []; syncToFirebase(); } };
 
   function refreshAllUI() {
     const sel = document.getElementById('prizeSelect');
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">— 請選擇獎項 —</option>' + prizes.map(p => `<option value="${p.id}" ${p.drawn ? 'disabled' : ''}>${p.name}${p.drawn ? '(已抽)' : ''}</option>`).join('');
-    sel.value = cur;
-    
-    document.getElementById('prizeList').innerHTML = prizes.map(p => `<div class="prize-item ${p.drawn?'drawn':''}"><div class="prize-name">${p.name} (${p.count}人)</div></div>`).join('') || '尚未新增獎項';
-    document.getElementById('historyList').innerHTML = drawHistory.map(h => `<div class="history-item">${h.prizeName}: ${h.winners}</div>`).join('') || '尚無紀錄';
-    
+    const curValue = sel.value;
+    sel.innerHTML = '<option value="">— 請選擇獎項 —</option>' + prizes.map(p => `<option value="${p.id}" ${p.drawn?'disabled':''}>${p.name} (${p.count}人)${p.drawn?' - 已抽':''}</option>`).join('');
+    sel.value = curValue;
+
+    document.getElementById('prizeList').innerHTML = prizes.map(p => `
+      <div class="prize-item ${p.drawn?'drawn':''}">
+        <div class="prize-name">${p.name}</div>
+        <div class="prize-count">${p.count} 人</div>
+        ${p.drawn?'<div class="prize-drawn-badge">已抽出</div>':''}
+        <button class="prize-delete-btn" onclick="deletePrize(${p.id})">🗑</button>
+      </div>
+    `).join('') || '<div class="empty-msg">尚未新增獎項</div>';
+
     const pool = getAvailablePool();
     document.getElementById('personnelStats').style.display = personnel.length ? 'block' : 'none';
     document.getElementById('statAvailable').textContent = `可抽：${pool.length} 人`;
-    document.getElementById('resetWarning').style.display = needsReset ? 'block' : 'none';
+    const excludedCount = personnel.length - pool.length;
+    const statExcluded = document.getElementById('statExcluded');
+    statExcluded.style.display = excludedCount > 0 ? 'inline-block' : 'none';
+    statExcluded.textContent = `排除：${excludedCount} 人`;
+
+    document.getElementById('historyList').innerHTML = drawHistory.map(h => `<div class="history-item"><div class="history-prize">${h.prizeName}</div><div class="history-winners">${h.winners}</div></div>`).join('') || '<div class="empty-msg">尚無紀錄</div>';
     
-    const prize = prizes.find(p => p.id == sel.value);
-    document.getElementById('btnDraw').disabled = !prize || prize.drawn;
-    document.getElementById('btnPreview').disabled = !prize || prize.drawn;
+    document.getElementById('resetWarning').style.display = needsReset ? 'block' : 'none';
+    const selectedPrize = prizes.find(p => p.id == sel.value);
+    const canDraw = selectedPrize && !selectedPrize.drawn && pool.length > 0 && !needsReset;
+    document.getElementById('btnDraw').disabled = !canDraw;
+    document.getElementById('btnPreview').disabled = !canDraw;
+
+    if (selectedPrize && !selectedPrize.drawn) {
+      document.getElementById('infoBox').classList.add('show');
+      document.getElementById('poolCount').textContent = pool.length;
+      document.getElementById('selectedCountText').textContent = Math.min(selectedPrize.count, pool.length);
+    } else {
+      document.getElementById('infoBox').classList.remove('show');
+    }
   }
 
   function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
