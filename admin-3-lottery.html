@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>後台3 — 抽獎管理</title>
+<title>後台3 — 抽獎管理 (已整合重置功能)</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -19,6 +19,7 @@
     --text: #e8e0d0;
     --text-muted: rgba(232,224,208,0.45);
     --green: #4caf50;
+    --orange: #ffb74d; /* 新增重置按鈕顏色 */
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; }
@@ -135,26 +136,6 @@
     .nav-brand { margin-right: 16px; font-size: 0.9rem; }
     .nav-link { padding: 6px 10px; font-size: 0.78rem; }
   }
-  @media (max-width: 600px) {
-    .main { padding: 12px; }
-    .nav { padding: 8px 12px; }
-    .nav-links { flex-wrap: wrap; gap: 2px; }
-    .nav-link { padding: 5px 8px; font-size: 0.72rem; }
-    .panel { padding: 18px 14px; }
-    .page-title { font-size: 1.2rem; }
-    .row-inline { grid-template-columns: 1fr; }
-    .map-row { grid-template-columns: 1fr; }
-    .btn-red-solid { font-size: 0.9rem; padding: 12px; }
-    .personnel-stats { gap: 6px; }
-    .stat-chip { font-size: 0.75rem; padding: 4px 10px; }
-    .result-winner-chip { font-size: 0.75rem; padding: 4px 9px; }
-    .prize-item { flex-wrap: wrap; gap: 6px; }
-    .history-item { padding: 10px 12px; }
-    .history-prize { font-size: 0.85rem; }
-    .history-winners { font-size: 0.78rem; }
-    table { min-width: 360px; }
-    .personnel-table-wrap { overflow-x: auto; }
-  }
 </style>
 </head>
 <body>
@@ -171,11 +152,9 @@
 
 <div class="main">
   <div class="page-title">抽獎管理</div>
-  <div class="page-subtitle">匯入人員名單、設定獎品，並操控前台抽獎流程。中獎過的人不會再被抽中。</div>
+  <div class="page-subtitle">匯入人員名單、設定獎品，中獎過的人不會再被抽中。</div>
 
   <div class="grid-2">
-
-    <!-- ─── LEFT ─── -->
     <div>
       <div class="panel">
         <div class="panel-title"><span>人員名單匯入（Excel）</span></div>
@@ -185,13 +164,12 @@
           <div class="upload-icon">📂</div>
           <div class="upload-label">
             <strong>點擊選擇</strong>或拖曳 Excel 到此<br>
-            支援 .xlsx / .xls / .csv<br>
-            <span style="font-size:1.17rem;opacity:0.7">欄位順序沒有限制，上傳後可自行對應</span>
+            <span style="font-size:1.17rem;opacity:0.7">上傳後可對應欄位</span>
           </div>
         </div>
 
         <div class="map-panel" id="mapPanel">
-          <div class="map-title">欄位對應（請選擇哪欄是姓名、哪欄是單位）</div>
+          <div class="map-title">欄位對應（請選擇姓名與單位）</div>
           <div class="map-row">
             <div>
               <div class="map-label">姓名欄位</div>
@@ -209,7 +187,9 @@
           <div class="personnel-stats">
             <div class="stat-chip" id="statAvailable"></div>
             <div class="stat-chip excluded" id="statExcluded" style="display:none"></div>
-            <button class="btn btn-outline btn-sm" onclick="togglePreview()" style="margin-left:auto">預覽名單</button>
+            
+            <button class="btn btn-outline btn-sm" onclick="resetLotteryStatus()" style="margin-left:auto; color: var(--orange); border-color: rgba(255,183,77,0.3)">重置抽獎狀態</button>
+            <button class="btn btn-outline btn-sm" onclick="togglePreview()">預覽名單</button>
             <button class="btn btn-danger btn-sm" onclick="clearPersonnel()">清除</button>
           </div>
           <div class="personnel-table-wrap" id="previewTableWrap">
@@ -226,20 +206,16 @@
         <div class="row-inline">
           <div class="form-group" style="margin-bottom:0">
             <label class="form-label">獎項名稱</label>
-            <input type="text" class="form-input" id="prizeName" placeholder="例：頭獎、二獎、幸運獎..." onkeydown="if(event.key==='Enter')addPrize()">
+            <input type="text" class="form-input" id="prizeName" placeholder="例：頭獎">
           </div>
           <div class="form-group" style="margin-bottom:0">
             <label class="form-label">人數</label>
-            <input type="number" class="form-input" id="prizeCount" placeholder="1" min="1" style="padding:10px 10px">
+            <input type="number" class="form-input" id="prizeCount" placeholder="1" min="1">
           </div>
         </div>
         <button class="btn btn-gold" style="margin-top:12px;width:100%" onclick="addPrize()">＋ 新增獎項</button>
 
         <div style="margin-top:20px">
-          <div style="font-size:1.17rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
-            <span>獎項列表</span>
-            <button class="btn btn-danger btn-sm" onclick="clearAllPrizes()">全部清除</button>
-          </div>
           <div class="prize-list" id="prizeList">
             <div class="empty-msg">尚未新增任何獎項</div>
           </div>
@@ -247,18 +223,15 @@
       </div>
     </div>
 
-    <!-- ─── RIGHT ─── -->
     <div>
       <div class="panel">
         <div class="panel-title">抽獎操作</div>
-
-        <div id="resetWarning" style="display:none;padding:12px 16px;background:rgba(192,39,45,0.12);border:1px solid rgba(192,39,45,0.35);border-radius:6px;margin-bottom:16px;font-size:1.275rem;color:#ff8a80;line-height:1.6">
-          ⚠️ 前台正在顯示得獎名單<br>
-          <strong>請先按下方「重置前台空白畫面」</strong>，才能進行下一輪抽獎
+        <div id="resetWarning" style="display:none;padding:12px 16px;background:rgba(192,39,45,0.12);border:1px solid rgba(192,39,45,0.35);border-radius:6px;margin-bottom:16px;font-size:1.275rem;color:#ff8a80;">
+          ⚠️ 前台正在顯示名單，請先按下方重置。
         </div>
 
         <div class="form-group">
-          <label class="form-label">選擇要抽的獎項</label>
+          <label class="form-label">選擇獎項</label>
           <div class="select-wrapper">
             <select class="form-select" id="prizeSelect" onchange="onPrizeSelect()">
               <option value="">— 請選擇獎項 —</option>
@@ -268,24 +241,17 @@
         </div>
 
         <div class="info-box" id="infoBox">
-          可抽人數：<span id="poolCount" style="color:var(--gold);font-weight:500"></span> 人　
-          本次抽出：<span id="selectedCountText" style="color:var(--gold);font-weight:500"></span> 位
+          可抽：<span id="poolCount" style="color:var(--gold)"></span> 人　
+          抽出：<span id="selectedCountText" style="color:var(--gold)"></span> 位
         </div>
 
         <div class="result-preview" id="resultPreview">
-          <div class="result-preview-title">預覽得獎名單（正式按「開始抽獎」才會發送至前台）</div>
           <div class="result-winner-list" id="previewWinners"></div>
         </div>
 
         <div style="margin-top:16px;display:flex;gap:10px">
           <button class="btn btn-outline" style="flex:1" id="btnPreview" onclick="previewDraw()" disabled>重新預覽</button>
-          <button class="btn btn-red-solid" style="flex:2;padding:14px" id="btnDraw" onclick="startDraw()" disabled>▶ 開始抽獎</button>
-        </div>
-
-        <div class="note">
-          ⚠️ 按下「開始抽獎」後前台播放 6 秒影片並公布名單。<br>
-          ✓ 已中獎的人員會從後續抽獎名單中排除。<br>
-          ✓ 已抽過的獎項可以從列表中刪除。
+          <button class="btn btn-red-solid" style="flex:2" id="btnDraw" onclick="startDraw()" disabled>▶ 開始抽獎</button>
         </div>
       </div>
 
@@ -300,7 +266,7 @@
           <button class="btn btn-danger btn-sm" onclick="clearHistory()">清除紀錄</button>
         </div>
         <div class="history-list" id="historyList">
-          <div class="empty-msg">尚無抽獎紀錄</div>
+          <div class="empty-msg">尚無紀錄</div>
         </div>
       </div>
     </div>
@@ -311,7 +277,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
@@ -327,288 +293,140 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // ── State（全部由 Firebase 維護，不用 localStorage）──
-  let prizes = [];
-  let personnel = [];
-  let winners = [];
-  let drawHistory = [];
-  let pendingResult = null;
-  let needsReset = false;
-  let rawSheet = [], rawHeaders = [];
-  let previewVisible = false;
+  let prizes = [], personnel = [], winners = [], drawHistory = [], needsReset = false;
+  let rawSheet = [], rawHeaders = [], pendingResult = null, previewVisible = false;
 
-  // ── 從 Firebase 即時同步資料 ──
   onValue(ref(db, 'lottery_data'), (snapshot) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
-      prizes      = data.prizes      || [];
-      personnel   = data.personnel   || [];
-      winners     = data.winners     || [];
+      prizes = data.prizes || [];
+      personnel = data.personnel || [];
+      winners = data.winners || [];
       drawHistory = data.drawHistory || [];
-      needsReset  = data.needsReset  || false;
-    } else {
-      prizes = []; personnel = []; winners = []; drawHistory = []; needsReset = false;
+      needsReset = data.needsReset || false;
     }
     refreshAllUI();
   });
 
-  // ── 儲存至 Firebase ──
   function syncToFirebase() {
     set(ref(db, 'lottery_data'), { prizes, personnel, winners, drawHistory, needsReset });
   }
 
-  // ──────────────────────────────────────────────
-  // Excel Import
-  // ──────────────────────────────────────────────
-  window.onFileSelect = function(e) {
-    const file = e.target.files[0];
-    if (file) readFile(file);
-    e.target.value = '';
+  // ── 重置抽獎狀態 (核心新增) ──
+  window.resetLotteryStatus = function() {
+    if (!confirm('確定要全面重置抽獎狀態嗎？(名單會保留，但中獎紀錄會歸零)')) return;
+    winners = [];
+    drawHistory = [];
+    prizes = prizes.map(p => ({ ...p, drawn: false }));
+    needsReset = false;
+    set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
+    syncToFirebase();
+    showToast('✓ 抽獎狀態已重置');
   };
 
-  function readFile(file) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+  // Excel Import Logic
+  window.onFileSelect = e => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-        const nonEmptyRows = rows.filter(r => r.some(c => String(c).trim() !== ''));
-        if (nonEmptyRows.length === 0) { showToast('檔案為空'); return; }
-        rawHeaders = nonEmptyRows[0].map((h, i) => String(h).trim() || `欄${i+1}`);
-        rawSheet = nonEmptyRows.slice(1);
+        rawHeaders = rows[0].map((h, i) => String(h).trim() || `欄${i+1}`);
+        rawSheet = rows.slice(1);
         populateColSelects();
         document.getElementById('mapPanel').classList.add('show');
-        showToast(`已讀取 ${rawSheet.length} 筆資料`);
-      } catch(err) { showToast('讀取失敗：' + err.message); }
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  function populateColSelects() {
-    ['colName','colUnit'].forEach(id => {
-      document.getElementById(id).innerHTML = rawHeaders
-        .map((h,i) => `<option value="${i}">${h}</option>`).join('');
-    });
-    rawHeaders.forEach((h,i) => {
-      if (/姓名|名字|name/i.test(h)) document.getElementById('colName').value = i;
-      if (/單位|部門|unit|dept/i.test(h)) document.getElementById('colUnit').value = i;
-    });
-  }
-
-  window.confirmImport = function() {
-    const ni = parseInt(document.getElementById('colName').value);
-    const ui = parseInt(document.getElementById('colUnit').value);
-    personnel = rawSheet
-      .map(r => ({ realName: String(r[ni]||'').trim(), unitName: String(r[ui]||'').trim() }))
-      .filter(p => p.realName);
-    document.getElementById('mapPanel').classList.remove('show');
-    syncToFirebase();
-    renderPersonnelStats();
-    showToast(`✓ 已匯入 ${personnel.length} 位人員`);
-  };
-
-  window.clearPersonnel = function() {
-    if (!confirm('確定清除人員名單？')) return;
-    personnel = [];
-    syncToFirebase();
-    renderPersonnelStats();
-  };
-
-  window.togglePreview = function() {
-    previewVisible = !previewVisible;
-    const wrap = document.getElementById('previewTableWrap');
-    wrap.classList.toggle('show', previewVisible);
-    if (previewVisible) {
-      document.getElementById('previewTableBody').innerHTML = personnel.map((p, i) => `
-        <tr><td>${i+1}</td><td>${p.realName}</td><td>${p.unitName}</td></tr>
-      `).join('');
+      };
+      reader.readAsArrayBuffer(file);
     }
   };
 
+  function populateColSelects() {
+    ['colName','colUnit'].forEach(id => {
+      document.getElementById(id).innerHTML = rawHeaders.map((h,i) => `<option value="${i}">${h}</option>`).join('');
+    });
+  }
+
+  window.confirmImport = () => {
+    const ni = parseInt(document.getElementById('colName').value);
+    const ui = parseInt(document.getElementById('colUnit').value);
+    personnel = rawSheet.map(r => ({ realName: String(r[ni]||'').trim(), unitName: String(r[ui]||'').trim() })).filter(p => p.realName);
+    document.getElementById('mapPanel').classList.remove('show');
+    syncToFirebase();
+    showToast('匯入完成');
+  };
+
+  window.clearPersonnel = () => { if(confirm('確定清除？')) { personnel = []; winners = []; syncToFirebase(); } };
+
+  window.togglePreview = () => {
+    previewVisible = !previewVisible;
+    document.getElementById('previewTableWrap').classList.toggle('show', previewVisible);
+    document.getElementById('previewTableBody').innerHTML = personnel.map((p, i) => `<tr><td>${i+1}</td><td>${p.realName}</td><td>${p.unitName}</td></tr>`).join('');
+  };
+
+  // 抽獎邏輯
   function getAvailablePool() {
     return personnel.filter(p => !winners.some(w => w.realName === p.realName && w.unitName === p.unitName));
   }
 
-  // ──────────────────────────────────────────────
-  // Prize Management
-  // ──────────────────────────────────────────────
-  window.addPrize = function() {
-    const name = document.getElementById('prizeName').value.trim();
+  window.addPrize = () => {
+    const name = document.getElementById('prizeName').value;
     const count = parseInt(document.getElementById('prizeCount').value) || 1;
-    if (!name) { showToast('請輸入獎項名稱'); return; }
+    if(!name) return;
     prizes.push({ id: Date.now(), name, count, drawn: false, order: prizes.length + 1 });
-    document.getElementById('prizeName').value = '';
-    document.getElementById('prizeCount').value = '';
     syncToFirebase();
-    refreshPrizeUI();
   };
 
-  window.deletePrize = function(id) {
-    if (!confirm('確定刪除此獎項？')) return;
-    prizes = prizes.filter(p => p.id !== id);
-    syncToFirebase();
-    refreshPrizeUI();
-  };
-
-  window.clearAllPrizes = function() {
-    if (!confirm('確定清除所有獎項？')) return;
-    prizes = [];
-    syncToFirebase();
-    refreshPrizeUI();
-  };
-
-  // ──────────────────────────────────────────────
-  // Draw Logic
-  // ──────────────────────────────────────────────
-  window.previewDraw = function() {
-    const prize = getSelectedPrize();
-    if (!prize) return;
+  window.previewDraw = () => {
+    const prize = prizes.find(p => p.id == document.getElementById('prizeSelect').value);
     const pool = getAvailablePool();
-    if (!pool.length) { showToast('所有人都已中獎'); return; }
-    let shuffled = [...pool].sort(() => Math.random() - 0.5);
-    const newWinners = shuffled.slice(0, Math.min(prize.count, pool.length));
-    pendingResult = { prize, winners: newWinners };
-    document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
-      `<div class="result-winner-chip">${w.realName}・${w.unitName}</div>`
-    ).join('');
+    if(!pool.length) return showToast('無人可抽');
+    pendingResult = { prize, winners: [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(prize.count, pool.length)) };
+    document.getElementById('previewWinners').innerHTML = pendingResult.winners.map(w => `<div class="result-winner-chip">${w.realName}</div>`).join('');
     document.getElementById('resultPreview').classList.add('show');
   };
 
-  window.startDraw = function() {
-    if (needsReset) { showToast('請先重置前台'); return; }
-    if (!pendingResult) previewDraw();
-    if (!pendingResult) return;
-
+  window.startDraw = () => {
+    if(!pendingResult) previewDraw();
     const { prize, winners: newWinners } = pendingResult;
-
-    set(ref(db, 'lottery_control'), {
-      status: 'start',
-      prizeName: prize.name,
-      winners: newWinners,
-      timestamp: Date.now()
-    });
-
+    set(ref(db, 'lottery_control'), { status: 'start', prizeName: prize.name, winners: newWinners, timestamp: Date.now() });
     prizes = prizes.map(p => p.id == prize.id ? { ...p, drawn: true } : p);
     winners = [...winners, ...newWinners];
-    drawHistory.unshift({
-      time: new Date().toLocaleString('zh-TW'),
-      prizeName: prize.name,
-      winners: newWinners.map(w => `${w.realName}(${w.unitName})`).join('、')
-    });
+    drawHistory.unshift({ time: new Date().toLocaleTimeString(), prizeName: prize.name, winners: newWinners.map(w => w.realName).join(', ') });
     needsReset = true;
     pendingResult = null;
-
     syncToFirebase();
-    showToast(`🎉 已啟動：${prize.name}`);
   };
 
-  window.resetFrontend = function() {
+  window.resetFrontend = () => {
     set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
     needsReset = false;
     syncToFirebase();
-    updateResetWarning();
-    showToast('已重置前台');
   };
 
-  window.clearHistory = function() {
-    if (!confirm('確定清除抽獎紀錄？')) return;
-    drawHistory = [];
-    syncToFirebase();
-    renderHistory();
-  };
+  window.clearHistory = () => { if(confirm('清除紀錄？')) { drawHistory = []; syncToFirebase(); } };
 
-  // ── UI Renderers ──
   function refreshAllUI() {
-    refreshPrizeUI();
-    renderPersonnelStats();
-    renderHistory();
-    updateResetWarning();
-    onPrizeSelect();
-  }
-
-  function refreshPrizeUI() {
-    renderPrizeList();
-    renderPrizeSelect();
-  }
-
-  function renderPrizeList() {
-    const el = document.getElementById('prizeList');
-    if (!prizes.length) { el.innerHTML = '<div class="empty-msg">尚未新增任何獎項</div>'; return; }
-    el.innerHTML = prizes.map(p => `
-      <div class="prize-item ${p.drawn ? 'drawn' : ''}">
-        <div class="prize-order">${p.order}</div>
-        <div class="prize-name">${p.name}</div>
-        <div class="prize-count">${p.count} 人</div>
-        ${p.drawn ? '<div class="prize-drawn-badge">✓ 已抽出</div>' : ''}
-        <button class="prize-delete-btn" onclick="deletePrize(${p.id})">🗑</button>
-      </div>
-    `).join('');
-  }
-
-  function renderPrizeSelect() {
     const sel = document.getElementById('prizeSelect');
     const cur = sel.value;
-    sel.innerHTML = '<option value="">— 請選擇獎項 —</option>';
-    prizes.forEach(p => {
-      const o = document.createElement('option');
-      o.value = p.id;
-      o.textContent = p.name + (p.drawn ? ' (已抽)' : ` (${p.count}人)`);
-      o.disabled = p.drawn;
-      sel.appendChild(o);
-    });
-    if (cur) sel.value = cur;
-  }
-
-  window.onPrizeSelect = function() {
-    const prize = getSelectedPrize();
-    const infoEl = document.getElementById('infoBox');
-    if (prize && !prize.drawn) {
-      const pool = getAvailablePool();
-      infoEl.classList.add('show');
-      document.getElementById('poolCount').textContent = pool.length;
-      document.getElementById('selectedCountText').textContent = Math.min(prize.count, pool.length);
-      document.getElementById('btnDraw').disabled = false;
-      document.getElementById('btnPreview').disabled = false;
-    } else {
-      infoEl.classList.remove('show');
-      document.getElementById('btnDraw').disabled = true;
-      document.getElementById('btnPreview').disabled = true;
-    }
-  };
-
-  function updateResetWarning() {
+    sel.innerHTML = '<option value="">— 請選擇獎項 —</option>' + prizes.map(p => `<option value="${p.id}" ${p.drawn ? 'disabled' : ''}>${p.name}${p.drawn ? '(已抽)' : ''}</option>`).join('');
+    sel.value = cur;
+    
+    document.getElementById('prizeList').innerHTML = prizes.map(p => `<div class="prize-item ${p.drawn?'drawn':''}"><div class="prize-name">${p.name} (${p.count}人)</div></div>`).join('') || '尚未新增獎項';
+    document.getElementById('historyList').innerHTML = drawHistory.map(h => `<div class="history-item">${h.prizeName}: ${h.winners}</div>`).join('') || '尚無紀錄';
+    
+    const pool = getAvailablePool();
+    document.getElementById('personnelStats').style.display = personnel.length ? 'block' : 'none';
+    document.getElementById('statAvailable').textContent = `可抽：${pool.length} 人`;
     document.getElementById('resetWarning').style.display = needsReset ? 'block' : 'none';
-    document.getElementById('prizeSelect').disabled = needsReset;
+    
+    const prize = prizes.find(p => p.id == sel.value);
+    document.getElementById('btnDraw').disabled = !prize || prize.drawn;
+    document.getElementById('btnPreview').disabled = !prize || prize.drawn;
   }
 
-  function renderHistory() {
-    const el = document.getElementById('historyList');
-    el.innerHTML = drawHistory.map(h => `
-      <div class="history-item">
-        <div class="history-prize">🏆 ${h.prizeName} <small>${h.time}</small></div>
-        <div class="history-winners">${h.winners}</div>
-      </div>
-    `).join('') || '<div class="empty-msg">尚無抽獎紀錄</div>';
-  }
-
-  function renderPersonnelStats() {
-    const statsEl = document.getElementById('personnelStats');
-    if (!personnel.length) { statsEl.style.display = 'none'; return; }
-    statsEl.style.display = 'block';
-    const available = getAvailablePool().length;
-    document.getElementById('statAvailable').textContent = `可抽：${available} 人`;
-    document.getElementById('statExcluded').style.display = (personnel.length - available > 0) ? 'inline-block' : 'none';
-    document.getElementById('statExcluded').textContent = `排除：${personnel.length - available} 人`;
-  }
-
-  function getSelectedPrize() { return prizes.find(p => p.id == document.getElementById('prizeSelect').value); }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
+  function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
 </script>
 </body>
 </html>
