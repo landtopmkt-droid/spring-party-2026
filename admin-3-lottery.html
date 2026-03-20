@@ -313,16 +313,37 @@
   }
 
   // ── 重置抽獎狀態 (核心新增) ──
-  window.resetLotteryStatus = function() {
-    if (!confirm('確定要全面重置抽獎狀態嗎？(名單會保留，但中獎紀錄會歸零)')) return;
+    window.resetLotteryStatus = function() {
+    if (!confirm('確定要「強制重置」抽獎狀態嗎？\n這會清空資料庫中所有已中獎的紀錄。')) return;
+
+    // 1. 本地變數清空
     winners = [];
     drawHistory = [];
     prizes = prizes.map(p => ({ ...p, drawn: false }));
     needsReset = false;
-    set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
-    syncToFirebase();
-    showToast('✓ 抽獎狀態已重置');
-  };
+    pendingResult = null;
+
+    // 2. 強制寫入 Firebase (使用 set 直接覆蓋)
+    // 這樣可以確保 winners 陣列在資料庫裡變成空的
+    set(ref(db, 'lottery_data'), {
+        prizes: prizes,
+        personnel: personnel, // 保留目前匯入的人員
+        winners: [],          // 強制清空得獎名單
+        drawHistory: [],      // 強制清空紀錄
+        needsReset: false
+    });
+
+    // 3. 同步重置前台控制狀態
+    set(ref(db, 'lottery_control'), { 
+        status: 'reset', 
+        timestamp: Date.now() 
+    });
+
+    // 4. UI 立即更新
+    refreshAllUI();
+    document.getElementById('resultPreview').classList.remove('show'); // 隱藏預覽區
+    showToast('✓ 已強制重置！現在所有人都可以抽了。');
+};
 
   // Excel Import Logic
   window.onFileSelect = e => {
@@ -367,9 +388,11 @@
 
   // 抽獎邏輯
   function getAvailablePool() {
-    return personnel.filter(p => !winners.some(w => w.realName === p.realName && w.unitName === p.unitName));
-  }
-
+    // 只有當 personnel 的姓名與單位，同時出現在 winners 名單中時，才會被排除
+    return personnel.filter(p => {
+        return !winners.some(w => w.realName === p.realName && w.unitName === p.unitName);
+    });
+}
   window.addPrize = () => {
     const name = document.getElementById('prizeName').value;
     const count = parseInt(document.getElementById('prizeCount').value) || 1;
