@@ -373,16 +373,19 @@
 
   // ── Firebase 即時監聽（所有電腦同步）──
   onValue(ref(db, 'springFest/personnel'), snap => {
-    personnel = snap.val() || [];
+    const v = snap.val();
+    personnel = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
     renderPersonnelStats();
-    onPrizeSelect(); // 更新可抽人數
+    onPrizeSelect();
   });
   onValue(ref(db, 'springFest/winners'), snap => {
-    winners = snap.val() || [];
+    const v = snap.val();
+    winners = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
     renderPersonnelStats();
   });
   onValue(ref(db, 'springFest/prizes'), snap => {
-    prizes = snap.val() || [];
+    const v = snap.val();
+    prizes = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
     renderPrizeList();
     renderPrizeSelect();
   });
@@ -462,7 +465,8 @@
       .filter(p => p.realName);
     if (!imported.length) { showToast('沒有有效資料，請確認欄位'); return; }
     document.getElementById('mapPanel').classList.remove('show');
-    set(ref(db, 'springFest/personnel'), imported);
+    const personnelObj = Object.fromEntries(imported.map((p, i) => [i, p]));
+    set(ref(db, 'springFest/personnel'), personnelObj);
     showToast(`✓ 已匯入 ${imported.length} 位人員`);
   }
 
@@ -543,7 +547,9 @@
   }
 
   function savePrizes() {
-    set(ref(db, 'springFest/prizes'), prizes.length ? prizes : null);
+    if (!prizes.length) { set(ref(db, 'springFest/prizes'), null); return; }
+    const prizesObj = Object.fromEntries(prizes.map((p, i) => [i, p]));
+    set(ref(db, 'springFest/prizes'), prizesObj);
   }
 
   function renderPrizeList() {
@@ -652,7 +658,9 @@
 
     // Add new winners to cumulative exclusion list
     const updatedWinners = [...winners, ...newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))];
-    set(ref(db, 'springFest/winners'), updatedWinners);
+    // 用物件格式存，key = index，避免 Firebase 陣列轉換問題
+    const winnersObj = Object.fromEntries(updatedWinners.map((w, i) => [i, w]));
+    set(ref(db, 'springFest/winners'), winnersObj);
 
     // History
     const newEntry = {
