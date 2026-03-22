@@ -318,7 +318,7 @@ const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 const API_KEY = 'AIzaSyA_aSoMOEbfOtEY0gkTKajwFToB2MHQLXM';
 
-let liveChatId=null, nextPageToken=null, monitorInterval=null;
+let liveChatId=null, nextPageToken=null, monitorInterval=null, roundInterval=null;
 let countdown=60, countdownInterval=null, isRunning=false, sortMode='count';
 let allMessages=[], userCounts={}, groups=[], rounds=[], cloudRegistrations=[];
 
@@ -396,6 +396,7 @@ window.stopMonitor=function(){
   isRunning=false;
   clearInterval(monitorInterval);clearInterval(countdownInterval);
   monitorInterval=liveChatId=nextPageToken=null;
+  if(roundInterval){clearInterval(roundInterval);roundInterval=null;}
   setStatus('idle');
   document.getElementById('btnStart').disabled=false;
   document.getElementById('btnStop').disabled=true;
@@ -442,6 +443,8 @@ async function fetchMessages(){
     const g=groups.find(x=>x.id==card.dataset.gid);
     if(g)renderGroupResults(card,g);
   });
+  // 如有開啟中的場次，更新留言記錄顯示
+  if(rounds.some(r=>r.isOpen))renderRounds();
   if(newCount>0)showToast(`新增 ${newCount} 則留言`);
 }
 
@@ -620,16 +623,27 @@ window.openRound=function(rid){
   const r=rounds.find(r=>r.id==rid);if(!r)return;
   r.isOpen=true;r.openAt=new Date().toISOString();r.closeAt=null;
   syncRounds();renderRounds();
-  // 立即抓一次留言，不等 60 秒
+  // 立即抓一次
   if(liveChatId)fetchMessages().catch(e=>showError(e.message));
-  showToast('✅ 已開啟「'+r.name+'」，開始收集留言');
+  // 啟動場次專屬輪詢（10秒），與主統計60秒分開
+  if(!roundInterval&&liveChatId){
+    roundInterval=setInterval(()=>{
+      if(rounds.some(r=>r.isOpen))fetchMessages().catch(e=>console.warn(e));
+      else{clearInterval(roundInterval);roundInterval=null;}
+    },10000);
+  }
+  showToast('✅ 已開啟「'+r.name+'」，開始收集留言（每10秒更新）');
 };
 window.closeRound=function(rid){
   const r=rounds.find(r=>r.id==rid);if(!r)return;
   r.isOpen=false;r.closeAt=new Date().toISOString();
   syncRounds();
-  // 立即再抓一次，確保關閉前最後的留言不漏掉
+  // 立即補抓最後留言
   if(liveChatId)fetchMessages().catch(e=>showError(e.message));
+  // 若所有場次都已關閉，停止場次輪詢
+  if(!rounds.some(r=>r.isOpen)&&roundInterval){
+    clearInterval(roundInterval);roundInterval=null;
+  }
   renderRounds();showToast('⏹ 已關閉「'+r.name+'」，已補抓最新留言');
 };
 window.addOptionToRound=function(rid){
@@ -719,8 +733,8 @@ function renderRounds(){
   const container=document.getElementById('roundsList');
   document.getElementById('predFilterSection').style.display=rounds.length?'block':'none';
   if(!rounds.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">🏆</div><div>尚未建立任何場次</div></div>';return;}
-  // 記錄目前展開狀態，重繪後恢復
-  const openCards=new Set([...document.querySelectorAll('.round-card.open')].map(el=>el.dataset.rid));
+  // 記錄目前展開狀態，重繪後恢復（rid 全部轉字串確保比對一致）
+  const openCards=new Set([...document.querySelectorAll('.round-card.open')].map(el=>String(el.dataset.rid)));
   const openMsgs=new Set([...document.querySelectorAll('.round-msgs-body.open')].map(el=>el.id.replace('msgs-body-','')));
   container.innerHTML=rounds.map((r,idx)=>{
     const statusLabel=r.isOpen?'收集中':(r.closeAt?'已關閉':'未開始');
@@ -748,7 +762,7 @@ function renderRounds(){
       :r.isOpen
       ?`<button class="btn btn-red btn-sm" onclick="closeRound(${r.id})">⏹ 停止收集</button>`
       :`<button class="btn btn-outline btn-sm" onclick="openRound(${r.id})">↺ 重新開啟</button>`;
-    return`<div class="round-card" data-rid="${r.id}">
+    return`<div class="round-card" data-rid="${String(r.id)}">
       <div class="round-header" onclick="toggleRoundCard(${r.id})">
         <div class="round-num">${idx+1}</div>
         <div class="round-name-text">${esc(r.name)}</div>
@@ -780,9 +794,9 @@ function renderRounds(){
       </div>
     </div>`;
   }).join('');
-  // 恢復展開狀態
+  // 恢復展開狀態（rid 統一用字串比對）
   openCards.forEach(rid=>{
-    const card=document.querySelector(`.round-card[data-rid="${rid}"]`);
+    const card=document.querySelector('.round-card[data-rid="'+rid+'"]');
     if(card)card.classList.add('open');
   });
   openMsgs.forEach(rid=>{
