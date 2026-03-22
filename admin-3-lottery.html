@@ -342,7 +342,23 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
+    authDomain: "springfestival-4aaea.firebaseapp.com",
+    projectId: "springfestival-4aaea",
+    databaseURL: "https://springfestival-4aaea-default-rtdb.firebaseio.com",
+    storageBucket: "springfestival-4aaea.firebasestorage.app",
+    messagingSenderId: "64196762294",
+    appId: "1:64196762294:web:2fb6e766f38f8d47332417",
+    measurementId: "G-4MZF0HPLJV"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
   // ── State ──
   let prizes      = JSON.parse(localStorage.getItem('springFest_prizes')      || '[]');
   let personnel   = JSON.parse(localStorage.getItem('springFest_personnel')   || '[]');
@@ -603,13 +619,14 @@
 
     const { winners: newWinners } = pendingResult;
 
-    // Save result for frontend
-    localStorage.setItem('springFest_lotteryResult', JSON.stringify({
+    // Save result for frontend via Firebase（前台監聽 lottery_control）
+    set(ref(db, 'lottery_control'), {
+      status: 'start',
+      timestamp: Date.now(),
       prizeName: prize.name,
       prizeCount: prize.count,
       winners: newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))
-    }));
-    localStorage.setItem('springFest_lottery', 'start');
+    });
 
     // Mark prize as drawn
     prizes = prizes.map(p => p.id == prize.id ? { ...p, drawn: true } : p);
@@ -651,7 +668,10 @@
   }
 
   function resetFrontend() {
-    localStorage.setItem('springFest_lottery', 'reset');
+    set(ref(db, 'lottery_control'), {
+      status: 'reset',
+      timestamp: Date.now()
+    });
     needsReset = false;
     updateResetWarning();
     showToast('已重置前台，可進行下一輪抽獎');
@@ -712,6 +732,20 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
   }
+
+  // ── 暴露給 HTML onclick 使用（module 作用域必須掛到 window）──
+  window.onFileSelect      = onFileSelect;
+  window.confirmImport     = confirmImport;
+  window.togglePreview     = togglePreview;
+  window.clearPersonnel    = clearPersonnel;
+  window.addPrize          = addPrize;
+  window.deletePrize       = deletePrize;
+  window.clearAllPrizes    = clearAllPrizes;
+  window.onPrizeSelect     = onPrizeSelect;
+  window.previewDraw       = previewDraw;
+  window.startDraw         = startDraw;
+  window.resetFrontend     = resetFrontend;
+  window.clearHistory      = clearHistory;
 
   // ── Init ──
   renderPrizeList();

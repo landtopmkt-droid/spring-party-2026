@@ -208,27 +208,34 @@
     if (state !== 'idle') return;
     state = 'drawing';
 
+    // 存好本次名單
+    window._currentDrawData = data;
+
     drawScreen.classList.add('show');
     drawVideo.currentTime = 0;
 
-    const playPromise = drawVideo.play();
-    let timer = setTimeout(endDraw, DRAW_DURATION_MS);
-
-    if (playPromise !== undefined) {
-      playPromise.catch(e => {
-        console.warn('影片播放被阻擋，直接跳到結果:', e);
-        clearTimeout(timer);
-        endDraw();
-      });
+    // 防止 ended 與 setTimeout 雙重觸發
+    let ended = false;
+    function onEnd() {
+      if (ended) return;
+      ended = true;
+      clearTimeout(fallbackTimer);
+      endDraw();
     }
 
-    drawVideo.addEventListener('ended', () => {
-      clearTimeout(timer);
-      endDraw();
-    }, { once: true });
+    // 保底計時器：影片若超過 DRAW_DURATION_MS 仍未結束就強制跳
+    let fallbackTimer = setTimeout(onEnd, DRAW_DURATION_MS);
+    drawVideo.addEventListener('ended', onEnd, { once: true });
 
-    // 存好本次名單
-    window._currentDrawData = data;
+    drawVideo.play().catch(e => {
+      // 影片無法播放（檔案不存在或格式不支援），直接顯示結果
+      console.warn('影片播放失敗:', e);
+      ended = true;
+      clearTimeout(fallbackTimer);
+      drawVideo.removeEventListener('ended', onEnd);
+      drawScreen.classList.remove('show');
+      showResult(window._currentDrawData);
+    });
   }
 
   function endDraw() {
