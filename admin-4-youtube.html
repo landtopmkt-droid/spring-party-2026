@@ -7,19 +7,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --surface3: #2e2e2e;
-    --border: rgba(212,168,67,0.15);
-    --gold: #d4a843;
-    --gold-light: #f0c96a;
-    --red: #c0272d;
-    --red-light: #e8474e;
-    --text: #e8e0d0;
-    --text-muted: rgba(232,224,208,0.45);
-    --green: #4caf50;
-    --blue: #4a9eff;
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424; --surface3: #2e2e2e;
+    --border: rgba(212,168,67,0.15); --gold: #d4a843; --gold-light: #f0c96a;
+    --red: #c0272d; --red-light: #e8474e; --text: #e8e0d0;
+    --text-muted: rgba(232,224,208,0.45); --green: #4caf50; --blue: #4a9eff;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; }
@@ -53,6 +44,7 @@
   .btn-green { background: linear-gradient(135deg, #2e7d32, var(--green)); color: #fff; }
   .btn-green:hover { filter: brightness(1.1); }
   .btn-sm { padding: 7px 14px; font-size: 1.2rem; }
+  .btn-xs { padding: 4px 10px; font-size: 1.1rem; }
 
   .status-bar { display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: var(--surface2); border-radius: 4px; margin-top: 12px; font-size: 1.23rem; flex-wrap: wrap; }
   .status-indicator { display: flex; align-items: center; gap: 6px; }
@@ -61,14 +53,14 @@
   .dot.error { background: var(--red-light); }
   @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
 
-  .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
-  .tab-btn { padding: 10px 20px; background: transparent; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--text-muted); font-family: 'Noto Sans TC', sans-serif; font-size: 1.32rem; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 0; flex-wrap: wrap; }
+  .tab-btn { padding: 10px 20px; background: transparent; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--text-muted); font-family: 'Noto Sans TC', sans-serif; font-size: 1.32rem; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; white-space: nowrap; }
   .tab-btn:hover { color: var(--text); }
   .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
+  /* 留言次數統計 */
   .count-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
   .count-info { font-size: 1.23rem; color: var(--text-muted); margin-left: auto; }
   .count-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; max-height: 500px; overflow-y: auto; }
@@ -93,23 +85,98 @@
   .count-num { font-size: 1.65rem; font-weight: 500; color: var(--text); }
   .last-time { font-size: 1.17rem; color: var(--text-muted); }
 
-  .keyword-setup { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin-bottom: 20px; }
-  .keyword-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 12px; }
-  .keyword-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  .keyword-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(192,39,45,0.15); border: 1px solid rgba(192,39,45,0.25); border-radius: 20px; font-size: 1.23rem; color: #ff8a80; }
-  .keyword-chip button { background: none; border: none; color: currentColor; cursor: pointer; font-size: 1.275rem; padding: 0; line-height: 1; opacity: 0.6; }
-  .keyword-chip button:hover { opacity: 1; }
+  /* ── 關鍵字群組 ── */
+  .groups-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+  }
+  .groups-header-title { font-size: 1.275rem; color: var(--text-muted); letter-spacing: 0.1em; }
 
-  .kw-results-table { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; max-height: 500px; overflow-y: auto; }
-  .keyword-highlight { background: rgba(192,39,45,0.2); color: #ff8a80; padding: 1px 4px; border-radius: 2px; font-weight: 500; }
+  /* 新增群組表單 */
+  .add-group-form {
+    display: flex; gap: 10px; align-items: flex-end;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .add-group-form .form-group { flex: 1; min-width: 160px; }
+  .color-swatch-row { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .color-swatch {
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s;
+  }
+  .color-swatch:hover { transform: scale(1.2); }
+  .color-swatch.selected { border-color: #fff; transform: scale(1.15); }
+
+  /* 群組卡片列表 */
+  .groups-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .group-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .group-card-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .group-card-header:hover { background: rgba(255,255,255,0.02); }
+  .group-color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .group-name { font-size: 1.35rem; font-weight: 500; flex: 1; }
+  .group-meta { font-size: 1.17rem; color: var(--text-muted); }
+  .group-count-badge {
+    padding: 3px 10px; border-radius: 12px; font-size: 1.17rem; font-weight: 500;
+    background: rgba(255,255,255,0.06);
+  }
+  .group-chevron { color: var(--text-muted); font-size: 1.1rem; transition: transform 0.2s; }
+  .group-card.open .group-chevron { transform: rotate(180deg); }
+
+  .group-card-body {
+    display: none;
+    padding: 0 18px 16px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .group-card.open .group-card-body { display: block; }
+
+  /* 關鍵字 chips in group */
+  .kw-chips-area { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; min-height: 32px; }
+  .kw-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 20px; font-size: 1.23rem;
+    border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
+  }
+  .kw-chip-del { background: none; border: none; color: currentColor; cursor: pointer; font-size: 1.2rem; padding: 0; line-height: 1; opacity: 0.5; }
+  .kw-chip-del:hover { opacity: 1; }
+
+  /* 新增關鍵字到群組 */
+  .add-kw-row { display: flex; gap: 8px; margin-top: 4px; }
+  .add-kw-input { flex: 1; background: var(--surface2); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 8px 12px; color: var(--text); font-family: 'Noto Sans TC', sans-serif; font-size: 1.275rem; outline: none; }
+  .add-kw-input:focus { border-color: var(--gold); }
+
+  /* 搜尋結果 */
+  .group-results { margin-top: 14px; }
+  .group-results-title {
+    font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .results-count-badge {
+    padding: 2px 8px; border-radius: 10px; font-size: 1.1rem;
+    background: rgba(212,168,67,0.1); color: var(--gold);
+  }
+  .kw-results-table { background: var(--surface2); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; max-height: 360px; overflow-y: auto; }
+  .kw-results-table table { min-width: 560px; }
+  .keyword-highlight { padding: 1px 4px; border-radius: 2px; font-weight: 600; }
   .msg-text { font-size: 1.275rem; color: var(--text); line-height: 1.5; }
+
+  .group-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
   .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
   .empty-icon { font-size: 3.75rem; margin-bottom: 10px; }
-
   .error-box { padding: 14px 18px; background: rgba(192,39,45,0.08); border: 1px solid rgba(192,39,45,0.25); border-radius: 6px; font-size: 1.275rem; color: #ff8a80; margin-top: 12px; display: none; }
   .error-box.show { display: block; }
-
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 20px; color: var(--text); font-size: 1.32rem; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
   .toast.show { transform: translateY(0); opacity: 1; }
 
@@ -127,20 +194,12 @@
     .nav-link { padding: 5px 8px; font-size: 0.72rem; }
     .page-title { font-size: 1.2rem; }
     .setup-panel { padding: 16px; }
-    .status-bar { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 0.78rem; }
-    .tabs { overflow-x: auto; white-space: nowrap; padding-bottom: 4px; }
-    .tab-btn { padding: 8px 14px; font-size: 0.8rem; }
     .count-toolbar { flex-direction: column; align-items: flex-start; gap: 8px; }
     .count-info { margin-left: 0; }
-    .count-table-wrap, .kw-results-table { overflow-x: auto; }
+    .count-table-wrap { overflow-x: auto; }
     table { min-width: 560px; }
-    .keyword-setup { padding: 14px; }
-    .keyword-row { flex-direction: column; gap: 8px; }
-    .keyword-chips { gap: 6px; }
     th, td { padding: 8px 10px; font-size: 0.78rem; }
-  }
-  @media (max-width: 400px) {
-    .tab-btn { padding: 7px 10px; font-size: 0.75rem; }
+    .add-group-form { flex-direction: column; }
   }
 </style>
 </head>
@@ -158,7 +217,7 @@
 
 <div class="main">
   <div class="page-title">YouTube 直播監控</div>
-  <div class="page-subtitle">即時追蹤留言數量與關鍵字，並自動比對報名資料</div>
+  <div class="page-subtitle">即時追蹤留言數量與關鍵字分類，並自動比對報名資料</div>
 
   <div class="setup-panel">
     <div class="setup-row">
@@ -183,9 +242,10 @@
 
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('count')">📊 留言次數統計</button>
-    <button class="tab-btn" onclick="switchTab('keyword')">🔍 關鍵字搜尋</button>
+    <button class="tab-btn" onclick="switchTab('keyword')">🗂 關鍵字分類</button>
   </div>
 
+  <!-- Tab 1：留言次數統計 -->
   <div class="tab-content active" id="tab-count">
     <div class="count-toolbar">
       <button class="btn btn-outline btn-sm" onclick="sortBy('count')">依留言數排序</button>
@@ -210,34 +270,27 @@
     </div>
   </div>
 
+  <!-- Tab 2：關鍵字分類 -->
   <div class="tab-content" id="tab-keyword">
-    <div class="keyword-setup">
-      <div class="keyword-row">
-        <div style="flex:1;min-width:180px">
-          <label class="form-label">新增關鍵字</label>
-          <input type="text" class="form-input" id="kwInput" placeholder="例：紅包、春酒、恭喜..." onkeydown="if(event.key==='Enter')addKeyword()">
-        </div>
-        <button class="btn btn-gold" onclick="addKeyword()">新增</button>
-        <button class="btn btn-red" onclick="searchKeywords()">🔍 搜尋</button>
+
+    <!-- 新增群組 -->
+    <div class="add-group-form">
+      <div class="form-group">
+        <label class="form-label">群組名稱</label>
+        <input type="text" class="form-input" id="newGroupName" placeholder="例：紅包組、發財組...">
       </div>
-      <div class="keyword-chips" id="kwChips"></div>
+      <div class="form-group">
+        <label class="form-label">顏色</label>
+        <div class="color-swatch-row" id="colorSwatches"></div>
+      </div>
+      <button class="btn btn-gold" style="align-self:flex-end" onclick="addGroup()">＋ 新增群組</button>
     </div>
 
-    <div class="kw-results-table">
-      <table>
-        <thead><tr>
-          <th>時間戳記</th>
-          <th>YouTube 帳號</th>
-          <th>本名</th>
-          <th>單位</th>
-          <th>留言內容</th>
-          <th>命中關鍵字</th>
-        </tr></thead>
-        <tbody id="kwTableBody">
-          <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🔍</div><div>請設定關鍵字並按搜尋</div></div></td></tr>
-        </tbody>
-      </table>
+    <!-- 群組列表 -->
+    <div id="groupsList">
+      <div class="empty-state"><div class="empty-icon">🗂</div><div>尚未建立任何關鍵字群組</div></div>
     </div>
+
   </div>
 </div>
 
@@ -260,56 +313,77 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-
   const API_KEY = 'AIzaSyA_aSoMOEbfOtEY0gkTKajwFToB2MHQLXM';
 
-  let liveChatId = null;
-  let nextPageToken = null;
-  let monitorInterval = null;
-  let countdown = 60;
-  let countdownInterval = null;
-  let isRunning = false;
-  let sortMode = 'count';
+  let liveChatId = null, nextPageToken = null, monitorInterval = null;
+  let countdown = 60, countdownInterval = null, isRunning = false, sortMode = 'count';
 
-  // ── 全部改用記憶體變數，從 Firebase 載入/寫入，不碰 localStorage ──
-  let allMessages = [];
-  let userCounts = {};
-  let keywords = [];
+  let allMessages = [];   // { id, ytName, text, time }
+  let userCounts  = {};   // { ytName: { count, lastTime } }
+  let groups      = [];   // [{ id, name, color, keywords:[] }]
   let cloudRegistrations = [];
 
-  // ── 初始化：從 Firebase 載入 YT 監控資料 ──
-  async function loadYtData() {
+  // ── 預設顏色盤 ──
+  const PALETTE = ['#e8474e','#d4a843','#4a9eff','#4caf50','#c084fc','#fb923c','#f472b6','#34d399'];
+  let selectedColor = PALETTE[0];
+
+  function initColorSwatches() {
+    const row = document.getElementById('colorSwatches');
+    row.innerHTML = PALETTE.map(c => `
+      <div class="color-swatch ${c===selectedColor?'selected':''}"
+           style="background:${c}"
+           onclick="selectColor('${c}')"></div>
+    `).join('');
+  }
+  window.selectColor = function(c) {
+    selectedColor = c;
+    initColorSwatches();
+  };
+  initColorSwatches();
+
+  // ── 從 Firebase 載入 ──
+  async function loadData() {
     const snap = await get(ref(db, 'yt_monitor'));
     if (snap.exists()) {
       const d = snap.val();
       allMessages = d.allMessages || [];
       userCounts  = d.userCounts  || {};
-      keywords    = d.keywords    || [];
+      // 舊格式 keywords 陣列自動忽略（已換成 groups）
+    }
+    const gSnap = await get(ref(db, 'yt_groups'));
+    if (gSnap.exists()) {
+      const v = gSnap.val();
+      groups = Array.isArray(v) ? v : Object.values(v);
     }
     renderCountTable();
-    renderKeywordChips();
+    renderGroups();
     document.getElementById('totalFetched').textContent =
       allMessages.length ? `已載入 ${allMessages.length} 則留言` : '';
   }
 
-  // ── 寫回 Firebase ──
-  function syncYtData() {
-    // 避免留言太多：只保留最新 5000 筆
-    if (allMessages.length > 5000) allMessages = allMessages.slice(-5000);
-    set(ref(db, 'yt_monitor'), { allMessages, userCounts, keywords });
+  function syncMessages() {
+    if (allMessages.length > 10000) allMessages = allMessages.slice(-10000);
+    set(ref(db, 'yt_monitor'), { allMessages, userCounts });
   }
 
-  // ── 監聽雲端報名名單 ──
-  onValue(ref(db, 'registrations'), (snapshot) => {
-    const val = snapshot.val();
-    cloudRegistrations = val ? Object.values(val) : [];
+  function syncGroups() {
+    set(ref(db, 'yt_groups'), groups.length
+      ? Object.fromEntries(groups.map((g,i) => [i, g]))
+      : null
+    );
+  }
+
+  // 監聽報名資料
+  onValue(ref(db, 'registrations'), snap => {
+    const v = snap.val();
+    cloudRegistrations = v ? Object.values(v) : [];
     renderCountTable();
   });
 
   // ── 身分比對 ──
-  function matchUser(ytDisplayName) {
-    if (!ytDisplayName) return null;
-    const name = ytDisplayName.toLowerCase().replace('@','');
+  function matchUser(ytName) {
+    if (!ytName) return null;
+    const name = ytName.toLowerCase().replace('@','');
     return cloudRegistrations.find(d =>
       d.ytAccount && (
         d.ytAccount.toLowerCase() === name ||
@@ -318,43 +392,30 @@
     ) || null;
   }
 
-  // ── YouTube 監控邏輯 ──
+  // ── YouTube 監控 ──
   window.startMonitor = async function() {
     const input = document.getElementById('videoIdInput').value;
     const videoId = extractVideoId(input);
     if (!videoId) { showError('無效的影片 ID 或網址'); return; }
-
-    hideError();
-    setStatus('connecting');
-
+    hideError(); setStatus('connecting');
     try {
       liveChatId = await getLiveChatId(videoId);
-      isRunning = true;
-      setStatus('active');
+      isRunning = true; setStatus('active');
       document.getElementById('btnStart').disabled = true;
       document.getElementById('btnStop').disabled = false;
-
-      await fetchMessages();
-      startCountdown();
+      await fetchMessages(); startCountdown();
       monitorInterval = setInterval(async () => {
         await fetchMessages().catch(e => showError(e.message));
         resetCountdown();
       }, 60000);
-
       showToast('監控已啟動，每分鐘自動更新 ✓');
-    } catch (e) {
-      setStatus('error');
-      showError(e.message);
-    }
+    } catch(e) { setStatus('error'); showError(e.message); }
   };
 
   window.stopMonitor = function() {
     isRunning = false;
-    clearInterval(monitorInterval);
-    clearInterval(countdownInterval);
-    monitorInterval = null;
-    liveChatId = null;
-    nextPageToken = null;
+    clearInterval(monitorInterval); clearInterval(countdownInterval);
+    monitorInterval = liveChatId = nextPageToken = null;
     setStatus('idle');
     document.getElementById('btnStart').disabled = false;
     document.getElementById('btnStop').disabled = true;
@@ -364,10 +425,8 @@
 
   window.clearAllData = function() {
     if (!confirm('確定清除所有留言資料？')) return;
-    allMessages = [];
-    userCounts = {};
-    syncYtData();
-    renderCountTable();
+    allMessages = []; userCounts = {};
+    syncMessages(); renderCountTable();
     document.getElementById('totalFetched').textContent = '';
     showToast('已清除留言資料');
   };
@@ -376,172 +435,263 @@
     if (!liveChatId) return;
     let url = `https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${liveChatId}&part=snippet,authorDetails&maxResults=200&key=${API_KEY}`;
     if (nextPageToken) url += `&pageToken=${nextPageToken}`;
-
     const res = await fetch(url);
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
-
     nextPageToken = data.nextPageToken || nextPageToken;
-    const items = data.items || [];
     let newCount = 0;
-
-    items.forEach(item => {
-      const snippet = item.snippet;
-      const author = item.authorDetails;
-      if (snippet.type !== 'textMessageEvent') return;
+    (data.items || []).forEach(item => {
+      if (item.snippet.type !== 'textMessageEvent') return;
       if (allMessages.find(m => m.id === item.id)) return;
-
-      const ytName = author.displayName;
-      const publishedAt = snippet.publishedAt;
-      const msgText = snippet.textMessageDetails?.messageText || '';
-
+      const ytName = item.authorDetails.displayName;
+      const time   = item.snippet.publishedAt;
+      const text   = item.snippet.textMessageDetails?.messageText || '';
       newCount++;
-      allMessages.push({ id: item.id, ytName, text: msgText, time: publishedAt });
-
-      if (!userCounts[ytName]) userCounts[ytName] = { count: 0, lastTime: publishedAt };
+      allMessages.push({ id: item.id, ytName, text, time });
+      if (!userCounts[ytName]) userCounts[ytName] = { count: 0, lastTime: time };
       userCounts[ytName].count++;
-      userCounts[ytName].lastTime = publishedAt;
+      userCounts[ytName].lastTime = time;
     });
-
-    // 每次抓完同步到 Firebase（取代 localStorage）
-    syncYtData();
-
+    syncMessages();
     document.getElementById('totalFetched').textContent = `已抓取 ${allMessages.length} 則留言`;
     renderCountTable();
+    // 即時更新展開中的群組結果
+    document.querySelectorAll('.group-card.open').forEach(card => {
+      const gid = card.dataset.gid;
+      const g = groups.find(x => x.id == gid);
+      if (g) renderGroupResults(card, g);
+    });
     if (newCount > 0) showToast(`新增 ${newCount} 則留言`);
   }
 
-  // ── 介面渲染 ──
+  // ── 留言次數統計 ──
   window.renderCountTable = function() {
     const tbody = document.getElementById('countTableBody');
-    let entries = Object.entries(userCounts).map(([yt, v]) => ({ ytName: yt, ...v }));
-
-    if (sortMode === 'count') entries.sort((a, b) => b.count - a.count);
-    else entries.sort((a, b) => a.ytName.localeCompare(b.ytName));
-
-    if (entries.length === 0) {
+    let entries = Object.entries(userCounts).map(([yt,v]) => ({ ytName:yt, ...v }));
+    if (sortMode === 'count') entries.sort((a,b) => b.count - a.count);
+    else entries.sort((a,b) => a.ytName.localeCompare(b.ytName));
+    if (!entries.length) {
       tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">📡 尚無留言資料</div></td></tr>';
       document.getElementById('countInfo').textContent = '';
       return;
     }
-
-    tbody.innerHTML = entries.map((e, i) => {
-      const matched = matchUser(e.ytName);
-      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
+    tbody.innerHTML = entries.map((e,i) => {
+      const m = matchUser(e.ytName);
+      const rc = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
       return `<tr>
-        <td><div class="rank-badge ${rankClass}">${i+1}</div></td>
+        <td><div class="rank-badge ${rc}">${i+1}</div></td>
         <td><div class="yt-name">${esc(e.ytName)}</div></td>
-        <td>${matched ? `<div class="real-name">${esc(matched.realName)}</div>` : '<div class="unmatched">未登記</div>'}</td>
-        <td>${matched ? `<span class="unit-badge">${esc(matched.unitName)}</span>` : '-'}</td>
+        <td>${m?`<div class="real-name">${esc(m.realName)}</div>`:'<div class="unmatched">未登記</div>'}</td>
+        <td>${m?`<span class="unit-badge">${esc(m.unitName)}</span>`:'-'}</td>
         <td><div class="count-num">${e.count}</div></td>
         <td><div class="last-time">${new Date(e.lastTime).toLocaleTimeString('zh-TW')}</div></td>
       </tr>`;
     }).join('');
-
     document.getElementById('countInfo').textContent = `共 ${entries.length} 位使用者`;
   };
 
   window.exportCountCSV = function() {
-    const entries = Object.entries(userCounts).map(([yt, v]) => ({ ytName: yt, ...v }));
+    const entries = Object.entries(userCounts).map(([yt,v])=>({ytName:yt,...v}));
     if (!entries.length) { showToast('沒有資料可匯出'); return; }
-    entries.sort((a, b) => b.count - a.count);
-    const headers = ['排名','YouTube帳號','本名','單位','留言次數','最後留言時間'];
-    const rows = entries.map((e, i) => {
+    entries.sort((a,b) => b.count - a.count);
+    const hdr = ['排名','YouTube帳號','本名','單位','留言次數','最後留言時間'];
+    const rows = entries.map((e,i) => {
       const m = matchUser(e.ytName);
-      return [i+1, e.ytName, m ? m.realName : '未登記', m ? m.unitName : '-', e.count, new Date(e.lastTime).toLocaleString('zh-TW')];
+      return [i+1, e.ytName, m?m.realName:'未登記', m?m.unitName:'-', e.count, new Date(e.lastTime).toLocaleString('zh-TW')];
     });
-    const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const csv = [hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `YT留言統計_${Date.now()}.csv`;
-    a.click();
+    a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+    a.download = `YT留言統計_${Date.now()}.csv`; a.click();
     showToast('CSV 匯出完成 ✓');
   };
 
-  // ── 關鍵字搜尋 ──
-  window.addKeyword = function() {
-    const val = document.getElementById('kwInput').value.trim();
-    if (!val || keywords.includes(val)) return;
-    keywords.push(val);
-    syncYtData();
-    document.getElementById('kwInput').value = '';
-    renderKeywordChips();
+  // ──────────────────────────────────────────
+  // 關鍵字群組
+  // ──────────────────────────────────────────
+  window.addGroup = function() {
+    const name = document.getElementById('newGroupName').value.trim();
+    if (!name) { showToast('請輸入群組名稱'); return; }
+    if (groups.find(g => g.name === name)) { showToast('群組名稱已存在'); return; }
+    groups.push({ id: Date.now(), name, color: selectedColor, keywords: [] });
+    syncGroups();
+    document.getElementById('newGroupName').value = '';
+    renderGroups();
+    showToast(`已新增群組：${name}`);
   };
 
-  window.removeKeyword = function(kw) {
-    keywords = keywords.filter(k => k !== kw);
-    syncYtData();
-    renderKeywordChips();
+  window.deleteGroup = function(gid) {
+    if (!confirm('確定刪除此群組？')) return;
+    groups = groups.filter(g => g.id != gid);
+    syncGroups(); renderGroups();
   };
 
-  window.renderKeywordChips = function() {
-    document.getElementById('kwChips').innerHTML = keywords.map(kw =>
-      `<div class="keyword-chip">${esc(kw)}<button onclick="removeKeyword('${esc(kw)}')">✕</button></div>`
-    ).join('');
+  window.addKeywordToGroup = function(gid) {
+    const input = document.getElementById(`kwinput-${gid}`);
+    const kw = input.value.trim();
+    if (!kw) return;
+    const g = groups.find(g => g.id == gid);
+    if (!g) return;
+    if (g.keywords.includes(kw)) { showToast('關鍵字已存在'); return; }
+    g.keywords.push(kw);
+    syncGroups();
+    input.value = '';
+    renderGroups();
+    // 重新計算結果
+    const card = document.querySelector(`.group-card[data-gid="${gid}"]`);
+    if (card && card.classList.contains('open')) renderGroupResults(card, g);
   };
 
-  window.searchKeywords = function() {
-    if (keywords.length === 0) { showToast('請先新增關鍵字'); return; }
-    const results = allMessages.filter(m => keywords.some(kw => m.text.toLowerCase().includes(kw.toLowerCase())));
-    const tbody = document.getElementById('kwTableBody');
+  window.removeKeywordFromGroup = function(gid, kw) {
+    const g = groups.find(g => g.id == gid);
+    if (!g) return;
+    g.keywords = g.keywords.filter(k => k !== kw);
+    syncGroups(); renderGroups();
+    const card = document.querySelector(`.group-card[data-gid="${gid}"]`);
+    if (card && card.classList.contains('open')) renderGroupResults(card, g);
+  };
 
-    if (results.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">🔍 沒有符合的留言</div></td></tr>';
-      return;
+  window.toggleGroup = function(gid) {
+    const card = document.querySelector(`.group-card[data-gid="${gid}"]`);
+    if (!card) return;
+    const wasOpen = card.classList.contains('open');
+    card.classList.toggle('open');
+    if (!wasOpen) {
+      const g = groups.find(g => g.id == gid);
+      if (g) renderGroupResults(card, g);
     }
-
-    tbody.innerHTML = [...results].reverse().map(m => {
-      const matched = matchUser(m.ytName);
-      let text = esc(m.text);
-      keywords.forEach(kw => {
-        const re = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-        text = text.replace(re, `<span class="keyword-highlight">$&</span>`);
-      });
-
-      return `<tr>
-        <td style="font-size:1.1rem">${new Date(m.time).toLocaleString('zh-TW')}</td>
-        <td><div class="yt-name">${esc(m.ytName)}</div></td>
-        <td>${matched ? esc(matched.realName) : '<span class="unmatched">未登記</span>'}</td>
-        <td>${matched ? `<span class="unit-badge">${esc(matched.unitName)}</span>` : '-'}</td>
-        <td><div class="msg-text">${text}</div></td>
-        <td>${keywords.filter(kw => m.text.toLowerCase().includes(kw.toLowerCase())).map(kw => `<span class="keyword-chip">${esc(kw)}</span>`).join('')}</td>
-      </tr>`;
-    }).join('');
   };
 
-  // ── 輔助工具 ──
-  function extractVideoId(input) {
-    const patterns = [/(?:v=|youtu\.be\/|\/live\/)([A-Za-z0-9_-]{11})/, /^([A-Za-z0-9_-]{11})$/];
-    for (const p of patterns) { const m = input.match(p); if (m) return m[1]; }
-    return null;
+  window.exportGroupCSV = function(gid) {
+    const g = groups.find(g => g.id == gid);
+    if (!g || !g.keywords.length) { showToast('此群組沒有關鍵字'); return; }
+    const results = allMessages.filter(m =>
+      g.keywords.some(kw => m.text.toLowerCase().includes(kw.toLowerCase()))
+    );
+    if (!results.length) { showToast('沒有符合的留言'); return; }
+    const hdr = ['時間','YouTube帳號','本名','單位','留言內容','命中關鍵字'];
+    const rows = results.map(m => {
+      const mt = matchUser(m.ytName);
+      const hit = g.keywords.filter(kw => m.text.toLowerCase().includes(kw.toLowerCase())).join('、');
+      return [new Date(m.time).toLocaleString('zh-TW'), m.ytName, mt?mt.realName:'未登記', mt?mt.unitName:'-', m.text, hit];
+    });
+    const csv = [hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+    a.download = `${g.name}_留言_${Date.now()}.csv`; a.click();
+    showToast('CSV 匯出完成 ✓');
+  };
+
+  function getGroupResults(g) {
+    if (!g.keywords.length) return [];
+    return allMessages.filter(m =>
+      g.keywords.some(kw => m.text.toLowerCase().includes(kw.toLowerCase()))
+    );
   }
 
+  function renderGroupResults(card, g) {
+    const container = card.querySelector('.group-results');
+    if (!container) return;
+    const results = getGroupResults(g);
+    const badge = card.querySelector('.results-count-badge');
+    if (badge) badge.textContent = results.length + ' 則';
+    if (!results.length) {
+      container.innerHTML = `<div style="color:var(--text-muted);font-size:1.23rem;padding:12px 0">
+        ${g.keywords.length ? '尚無符合的留言' : '請先新增關鍵字'}</div>`;
+      return;
+    }
+    const rows = [...results].reverse().map(m => {
+      const mt = matchUser(m.ytName);
+      let text = esc(m.text);
+      g.keywords.forEach(kw => {
+        const re = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi');
+        text = text.replace(re, `<span class="keyword-highlight" style="background:${g.color}22;color:${g.color}">$&</span>`);
+      });
+      return `<tr>
+        <td style="font-size:1.1rem;white-space:nowrap">${new Date(m.time).toLocaleTimeString('zh-TW')}</td>
+        <td><div class="yt-name">${esc(m.ytName)}</div></td>
+        <td>${mt?esc(mt.realName):'<span class="unmatched">未登記</span>'}</td>
+        <td>${mt?`<span class="unit-badge">${esc(mt.unitName)}</span>`:'-'}</td>
+        <td><div class="msg-text">${text}</div></td>
+      </tr>`;
+    }).join('');
+    container.innerHTML = `
+      <div class="kw-results-table">
+        <table>
+          <thead><tr>
+            <th>時間</th><th>YouTube帳號</th><th>本名</th><th>單位</th><th>留言內容</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function renderGroups() {
+    const container = document.getElementById('groupsList');
+    if (!groups.length) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂</div><div>尚未建立任何關鍵字群組</div></div>';
+      return;
+    }
+    container.innerHTML = groups.map(g => {
+      const chips = g.keywords.map(kw => `
+        <div class="kw-chip" style="border-color:${g.color}44;color:${g.color}">
+          ${esc(kw)}
+          <button class="kw-chip-del" onclick="removeKeywordFromGroup(${g.id},'${esc(kw)}')">✕</button>
+        </div>`).join('');
+      return `
+        <div class="group-card" data-gid="${g.id}">
+          <div class="group-card-header" onclick="toggleGroup(${g.id})">
+            <div class="group-color-dot" style="background:${g.color}"></div>
+            <div class="group-name">${esc(g.name)}</div>
+            <div class="group-meta">${g.keywords.length} 個關鍵字</div>
+            <div class="group-count-badge results-count-badge">— 則</div>
+            <div class="group-chevron">▾</div>
+          </div>
+          <div class="group-card-body">
+            <div class="kw-chips-area">${chips || '<span style="color:var(--text-muted);font-size:1.2rem">尚未新增關鍵字</span>'}</div>
+            <div class="add-kw-row">
+              <input type="text" class="add-kw-input" id="kwinput-${g.id}"
+                     placeholder="新增關鍵字..."
+                     onkeydown="if(event.key==='Enter')addKeywordToGroup(${g.id})">
+              <button class="btn btn-gold btn-sm" onclick="addKeywordToGroup(${g.id})">新增</button>
+            </div>
+            <div class="group-actions">
+              <button class="btn btn-outline btn-sm" onclick="exportGroupCSV(${g.id})">匯出 CSV</button>
+              <button class="btn btn-sm" style="background:transparent;border:1px solid rgba(192,39,45,0.3);color:#e57373" onclick="deleteGroup(${g.id})">刪除群組</button>
+            </div>
+            <div class="group-results" style="margin-top:12px"></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── 工具 ──
+  function extractVideoId(input) {
+    const ps = [/(?:v=|youtu\.be\/|\/live\/)([A-Za-z0-9_-]{11})/, /^([A-Za-z0-9_-]{11})$/];
+    for (const p of ps) { const m = input.match(p); if (m) return m[1]; }
+    return null;
+  }
   async function getLiveChatId(videoId) {
     const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${videoId}&key=${API_KEY}`);
     const data = await res.json();
-    const details = data.items?.[0]?.liveStreamingDetails;
-    if (!details?.activeLiveChatId) throw new Error('找不到直播聊天室，請確認是否正在直播');
-    return details.activeLiveChatId;
+    const d = data.items?.[0]?.liveStreamingDetails;
+    if (!d?.activeLiveChatId) throw new Error('找不到直播聊天室，請確認是否正在直播');
+    return d.activeLiveChatId;
   }
 
   window.sortBy = function(mode) { sortMode = mode; renderCountTable(); };
   window.switchTab = function(name) {
-    document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn,.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelector(`.tab-btn[onclick*="${name}"]`).classList.add('active');
     document.getElementById(`tab-${name}`).classList.add('active');
   };
 
   function setStatus(s) {
-    const dot = document.getElementById('statusDot');
-    const text = document.getElementById('statusText');
-    dot.className = 'dot' + (s==='active'?' active':s==='error'?' error':'');
-    text.textContent = s==='active'?'監控中':s==='connecting'?'連線中...':s==='error'?'發生錯誤':'未啟動';
+    document.getElementById('statusDot').className = 'dot'+(s==='active'?' active':s==='error'?' error':'');
+    document.getElementById('statusText').textContent = s==='active'?'監控中':s==='connecting'?'連線中...':s==='error'?'發生錯誤':'未啟動';
   }
-
   function startCountdown() {
-    clearInterval(countdownInterval);
-    countdown = 60;
+    clearInterval(countdownInterval); countdown = 60;
     countdownInterval = setInterval(() => {
       countdown--;
       document.getElementById('nextUpdateText').textContent = `下次更新：${countdown}s 後`;
@@ -549,19 +699,16 @@
     }, 1000);
   }
   function resetCountdown() { countdown = 60; }
-  function showError(msg) { const b = document.getElementById('errorBox'); b.textContent = '⚠️ ' + msg; b.classList.add('show'); }
+  function showError(msg) { const b=document.getElementById('errorBox'); b.textContent='⚠️ '+msg; b.classList.add('show'); }
   function hideError() { document.getElementById('errorBox').classList.remove('show'); }
   function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
   let tTimer;
   function showToast(m) {
-    const t = document.getElementById('toast');
-    t.textContent = m; t.classList.add('show');
-    clearTimeout(tTimer); tTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
+    clearTimeout(tTimer); tTimer=setTimeout(()=>t.classList.remove('show'),3000);
   }
 
-  // 初始化
-  loadYtData();
+  loadData();
 </script>
 </body>
 </html>

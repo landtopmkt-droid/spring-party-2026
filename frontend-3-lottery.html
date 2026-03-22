@@ -89,14 +89,14 @@
   /* 固定在頂部的標題區 */
   .result-header {
     text-align: center;
-    padding: 28px 20px 16px;
-    flex-shrink: 0; /* 不壓縮，永遠可見 */
+    padding: 16px 20px 8px;
+    flex-shrink: 0;
   }
-  .result-prize-label { font-size: 1.5rem; color: rgba(212,168,67,0.55); letter-spacing: 0.45em; margin-bottom: 10px; }
-  .result-prize-name  { font-size: 4.5rem; font-weight: 900; color: var(--gold-light); letter-spacing: 0.15em; text-shadow: 0 0 40px rgba(212,168,67,0.45); line-height: 1.1; }
-  .result-count       { font-size: 1.65rem; color: rgba(212,168,67,0.45); letter-spacing: 0.3em; margin-top: 10px; }
+  .result-prize-label { font-size: 1.1rem; color: rgba(212,168,67,0.55); letter-spacing: 0.4em; margin-bottom: 4px; }
+  .result-prize-name  { font-size: 3rem; font-weight: 900; color: var(--gold-light); letter-spacing: 0.12em; text-shadow: 0 0 30px rgba(212,168,67,0.45); line-height: 1.1; }
+  .result-count       { font-size: 1.2rem; color: rgba(212,168,67,0.45); letter-spacing: 0.25em; margin-top: 6px; }
 
-  .result-divider { width: 220px; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); margin: 0 auto 12px; flex-shrink: 0; }
+  .result-divider { width: 180px; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); margin: 8px auto 6px; flex-shrink: 0; }
 
   /* 名單區：可捲動，佔滿剩餘空間 */
   .winners-scroll {
@@ -141,16 +141,17 @@
   }
 
   @media (max-width: 768px) {
-    .result-prize-name { font-size: 2.1rem; }
-    .result-count { font-size: 0.95rem; }
-    .winners-grid { gap: 10px; }
-    .result-prize-label { font-size: 0.85rem; }
-    .result-header { padding: 20px 16px 12px; }
+    .result-prize-name { font-size: 1.8rem; }
+    .result-count { font-size: 0.9rem; }
+    .winners-grid { gap: 8px; }
+    .result-prize-label { font-size: 0.8rem; }
+    .result-header { padding: 12px 16px 6px; }
+    .result-divider { margin: 6px auto 4px; }
   }
   @media (max-width: 480px) {
-    .result-prize-name { font-size: 1.7rem; }
-    .winners-grid { gap: 8px; }
-    .winners-scroll { padding: 8px 10px 24px; }
+    .result-prize-name { font-size: 1.4rem; }
+    .winners-grid { gap: 6px; }
+    .winners-scroll { padding: 6px 8px 20px; }
   }
 </style>
 </head>
@@ -280,12 +281,14 @@
       grid.appendChild(card);
     });
 
-    // 根據人數自動縮小 card：10 人以下 100%，最多縮到 55%
-    const scale = Math.max(0.55, Math.min(1, 10 / Math.max(winners.length, 10)));
-    document.getElementById('winnersGrid').style.setProperty('--card-scale', scale);
+    // 根據人數計算縮放：
+    // ≤8人: 100%, ≤15人: 80%, ≤25人: 65%, ≤40人: 50%, >40人: 40%
+    const n = winners.length;
+    const scale = n <= 8 ? 1 : n <= 15 ? 0.8 : n <= 25 ? 0.65 : n <= 40 ? 0.5 : 0.4;
+    grid.style.setProperty('--card-scale', scale);
 
     resultScreen.classList.add('show');
-    // 捲回頂部，確保第一位得獎者可見
+    // 捲回頂部
     requestAnimationFrame(() => {
       const scrollEl = resultScreen.querySelector('.winners-scroll');
       if (scrollEl) scrollEl.scrollTop = 0;
