@@ -319,7 +319,7 @@ const db  = getDatabase(app);
 const API_KEY = 'AIzaSyA_aSoMOEbfOtEY0gkTKajwFToB2MHQLXM';
 
 let liveChatId=null, nextPageToken=null, monitorInterval=null, roundInterval=null;
-let countdown=60, countdownInterval=null, isRunning=false, sortMode='count';
+let countdown=10, countdownInterval=null, isRunning=false, sortMode='count';
 let allMessages=[], userCounts={}, groups=[], rounds=[], cloudRegistrations=[];
 
 // ── 顏色盤 ──
@@ -387,8 +387,8 @@ window.startMonitor=async function(){
     monitorInterval=setInterval(async()=>{
       await fetchMessages().catch(e=>showError(e.message));
       resetCountdown();
-    },60000);
-    showToast('監控已啟動，每分鐘自動更新 ✓');
+    },10000);
+    showToast('監控已啟動，每10秒自動更新 ✓');
   }catch(e){setStatus('error');showError(e.message);}
 };
 
@@ -828,14 +828,14 @@ function setStatus(s){
   document.getElementById('statusText').textContent=s==='active'?'監控中':s==='connecting'?'連線中...':s==='error'?'發生錯誤':'未啟動';
 }
 function startCountdown(){
-  clearInterval(countdownInterval);countdown=60;
+  clearInterval(countdownInterval);countdown=10;
   countdownInterval=setInterval(()=>{
     countdown--;
     document.getElementById('nextUpdateText').textContent=`下次更新：${countdown}s 後`;
-    if(countdown<=0)countdown=60;
+    if(countdown<=0)countdown=10;
   },1000);
 }
-function resetCountdown(){countdown=60;}
+function resetCountdown(){countdown=10;}
 function showError(msg){const b=document.getElementById('errorBox');b.textContent='⚠️ '+msg;b.classList.add('show');}
 function hideError(){document.getElementById('errorBox').classList.remove('show');}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
