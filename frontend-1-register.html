@@ -115,8 +115,8 @@
     <!-- 1. YT帳號（文字輸入） -->
     <div class="form-group">
       <label class="form-label">YouTube 帳號 <span>YT Channel Name</span></label>
-      <input type="text" id="ytAccount" class="form-input" placeholder="YouTube 帳號名稱 為@開頭名稱">
-      <div class="error-msg" id="err-yt">請填寫 YouTube 帳號 為@開頭名稱</div>
+      <input type="text" id="ytAccount" class="form-input" placeholder="@您的帳號名稱" oninput="formatYtInput(this)" onblur="validateYtInput(this)">
+      <div class="error-msg" id="err-yt">請填寫 YouTube 帳號（格式：@帳號名稱）</div>
     </div>
 
     <!-- 2. 單位名稱（下拉） -->
@@ -270,6 +270,33 @@ onValue(ref(db,'registrations'), snap => {
   document.getElementById('regCount').textContent = count > 0 ? `已有 ${count} 位貴賓完成報到` : '';
 });
 
+// ── YT 帳號格式處理 ──
+window.formatYtInput = function(input) {
+  let val = input.value;
+  // 自動補 @ 在最前面
+  if (val && !val.startsWith('@')) val = '@' + val;
+  // 只允許 @ 開頭，後面只能是英數字、底線、句點、連字號
+  // @之後過濾非法字元
+  const atPart = val.slice(1).replace(/[^a-zA-Z0-9_.\-一-鿿㐀-䶿]/g, '');
+  input.value = val.length > 0 ? '@' + atPart : '';
+  // 清除錯誤狀態
+  document.getElementById('err-yt').classList.remove('show');
+};
+
+window.validateYtInput = function(input) {
+  const val = input.value.trim();
+  const errEl = document.getElementById('err-yt');
+  if (!val) {
+    errEl.textContent = '請填寫 YouTube 帳號（格式：@帳號名稱）';
+    errEl.classList.add('show');
+  } else if (!val.startsWith('@') || val.length < 2) {
+    errEl.textContent = '格式錯誤，帳號需以 @ 開頭';
+    errEl.classList.add('show');
+  } else {
+    errEl.classList.remove('show');
+  }
+};
+
 // ── 提交報到 ──
 window.handleSubmit = async function() {
   const yt   = document.getElementById('ytAccount').value.trim();
@@ -279,7 +306,9 @@ window.handleSubmit = async function() {
   ['err-yt','err-unit','err-name'].forEach(id => document.getElementById(id).classList.remove('show'));
 
   let valid = true;
-  if (!yt)   { document.getElementById('err-yt').classList.add('show');   valid = false; }
+  if (!yt || !yt.startsWith('@') || yt.length < 2) {
+    document.getElementById('err-yt').classList.add('show'); valid = false;
+  }
   if (!unit) { document.getElementById('err-unit').classList.add('show'); valid = false; }
   if (!name) { document.getElementById('err-name').classList.add('show'); valid = false; }
   if (!valid) return;
