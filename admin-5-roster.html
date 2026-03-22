@@ -86,6 +86,18 @@
   .toast.show{transform:translateY(0);opacity:1;}
   .note{padding:10px 14px;background:rgba(212,168,67,0.05);border:1px solid rgba(212,168,67,0.1);border-radius:4px;font-size:1.17rem;color:var(--text-muted);line-height:1.7;margin-top:16px;}
 
+  /* 單位名稱編輯模式 */
+  .unit-name-wrap { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
+  .unit-name-text { flex:1; }
+  .unit-edit-btn { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem; padding:2px 6px; border-radius:3px; transition:all .2s; flex-shrink:0; }
+  .unit-edit-btn:hover { color:var(--gold); background:rgba(212,168,67,0.1); }
+  .unit-name-input { flex:1; background:var(--surface2); border:1px solid var(--gold); border-radius:4px; padding:4px 10px; color:var(--text); font-family:'Noto Sans TC',sans-serif; font-size:1.35rem; outline:none; }
+  .unit-edit-actions { display:flex; gap:6px; flex-shrink:0; }
+  .btn-confirm { padding:4px 12px; border-radius:4px; border:none; background:rgba(212,168,67,0.15); color:var(--gold); font-size:1.17rem; cursor:pointer; transition:all .2s; }
+  .btn-confirm:hover { background:rgba(212,168,67,0.25); }
+  .btn-cancel { padding:4px 12px; border-radius:4px; border:none; background:rgba(255,255,255,0.05); color:var(--text-muted); font-size:1.17rem; cursor:pointer; transition:all .2s; }
+  .btn-cancel:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+
   @media(max-width:900px){.nav{padding:8px 16px;height:auto;flex-wrap:wrap;}.nav-brand{margin-right:16px;font-size:0.9rem;}.nav-link{padding:6px 10px;font-size:0.78rem;}}
   @media(max-width:600px){.main{padding:12px;}.map-row{grid-template-columns:1fr;}.row{flex-direction:column;}.stats-row{grid-template-columns:1fr 1fr;}.page-title{font-size:1.2rem;}}
 </style>
@@ -149,10 +161,10 @@
     </div>
   </div>
 
-  <!-- 參加名單列表 -->
+  <!-- 花名冊列表 -->
   <div class="panel">
     <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
-      <span>📋 參加名單</span>
+      <span>📋 花名冊</span>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-outline btn-sm" onclick="exportCSV()">匯出 CSV</button>
         <button class="btn btn-danger btn-sm" onclick="clearAll()">清空全部</button>
@@ -223,10 +235,13 @@ function renderList() {
       </div>`).join('');
     return `
       <div class="unit-card ${openUnits.has(unit)?'open':''}" data-unit="${esc(unit)}">
-        <div class="unit-header" onclick="toggleUnit('${esc(unit)}')">
-          <div class="unit-name-text">${esc(unit)}</div>
-          <div class="unit-count-badge">${members.length} 人</div>
-          <div class="unit-chevron">▾</div>
+        <div class="unit-header">
+          <div class="unit-name-wrap" id="namewrap-${esc(unit)}">
+            <div class="unit-name-text" onclick="toggleUnit('${esc(unit)}')" style="cursor:pointer">${esc(unit)}</div>
+            <button class="unit-edit-btn" onclick="startEditUnit('${esc(unit)}')" title="修改單位名稱">✏️</button>
+          </div>
+          <div class="unit-count-badge" onclick="toggleUnit('${esc(unit)}')" style="cursor:pointer">${members.length} 人</div>
+          <div class="unit-chevron" onclick="toggleUnit('${esc(unit)}')" style="cursor:pointer">▾</div>
         </div>
         <div class="unit-body">
           <div class="member-list">${chips || '<span style="color:var(--text-muted);font-size:1.2rem">尚無成員</span>'}</div>
@@ -243,6 +258,40 @@ function renderList() {
       </div>`;
   }).join('');
 }
+
+// ── 修改單位名稱 ──
+window.startEditUnit = function(unit) {
+  const wrap = document.getElementById('namewrap-' + unit);
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <input type="text" class="unit-name-input" id="editinput-${unit}"
+      value="${esc(unit)}"
+      onkeydown="if(event.key==='Enter')confirmEditUnit('${esc(unit)}');if(event.key==='Escape')cancelEditUnit('${esc(unit)}')">
+    <div class="unit-edit-actions">
+      <button class="btn-confirm" onclick="confirmEditUnit('${esc(unit)}')">✓ 確認</button>
+      <button class="btn-cancel"  onclick="cancelEditUnit('${esc(unit)}')">✕</button>
+    </div>`;
+  const input = document.getElementById('editinput-' + unit);
+  if (input) { input.focus(); input.select(); }
+};
+
+window.confirmEditUnit = function(oldUnit) {
+  const input = document.getElementById('editinput-' + oldUnit);
+  if (!input) return;
+  const newUnit = input.value.trim();
+  if (!newUnit) { showToast('單位名稱不能為空'); return; }
+  if (newUnit === oldUnit) { cancelEditUnit(oldUnit); return; }
+  if (roster[newUnit] !== undefined) { showToast('此單位名稱已存在'); return; }
+  // 複製資料到新 key，刪除舊 key
+  roster[newUnit] = roster[oldUnit];
+  delete roster[oldUnit];
+  syncRoster();
+  showToast(`已將「${oldUnit}」改為「${newUnit}」`);
+};
+
+window.cancelEditUnit = function(unit) {
+  renderList();
+};
 
 window.toggleUnit = function(unit) {
   const card = document.querySelector(`.unit-card[data-unit="${unit}"]`);
@@ -291,10 +340,10 @@ window.deleteUnit = function(unit) {
 };
 
 window.clearAll = function() {
-  if (!confirm('確定清空全部參加名單？')) return;
+  if (!confirm('確定清空全部花名冊？')) return;
   roster = {};
   syncRoster();
-  showToast('已清空參加名單');
+  showToast('已清空花名冊');
 };
 
 // ── Excel 匯入 ──
@@ -385,7 +434,7 @@ window.exportCSV = function() {
   const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
-  a.download = `參加名單_${Date.now()}.csv`; a.click();
+  a.download = `花名冊_${Date.now()}.csv`; a.click();
   showToast('匯出完成 ✓');
 };
 
