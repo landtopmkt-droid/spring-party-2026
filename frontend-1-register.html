@@ -115,7 +115,7 @@
     <!-- 1. YT帳號（文字輸入） -->
     <div class="form-group">
       <label class="form-label">YouTube 帳號 <span>YT Channel Name</span></label>
-      <input type="text" id="ytAccount" class="form-input" placeholder="@您的帳號名稱" oninput="formatYtInput(this)" onblur="validateYtInput(this)">
+      <input type="text" id="ytAccount" class="form-input" placeholder="@您的帳號名稱" onblur="validateYtInput(this)">
       <div class="error-msg" id="err-yt">請填寫 YouTube 帳號（格式：@帳號名稱）</div>
     </div>
 
@@ -271,17 +271,28 @@ onValue(ref(db,'registrations'), snap => {
 });
 
 // ── YT 帳號格式處理 ──
+let _ytComposing = false;
+
 window.formatYtInput = function(input) {
+  // 組字期間（電腦輸入法）不過濾，等 compositionend 再處理
+  if (_ytComposing) return;
   let val = input.value;
-  // 自動補 @ 在最前面
   if (val && !val.startsWith('@')) val = '@' + val;
-  // 只允許 @ 開頭，後面只能是英數字、底線、句點、連字號
-  // @之後過濾非法字元
-  const atPart = val.slice(1).replace(/[^a-zA-Z0-9_.\-一-鿿㐀-䶿]/g, '');
+  const atPart = val.slice(1).replace(/[^一-鿿㐀-䶿a-zA-Z0-9_.\-]/g, '');
   input.value = val.length > 0 ? '@' + atPart : '';
-  // 清除錯誤狀態
   document.getElementById('err-yt').classList.remove('show');
 };
+
+// 綁定組字事件（解決電腦輸入法中文問題）
+(function() {
+  const el = document.getElementById('ytAccount');
+  el.addEventListener('compositionstart', () => { _ytComposing = true; });
+  el.addEventListener('compositionend', () => {
+    _ytComposing = false;
+    formatYtInput(el);  // 組字結束後補跑一次格式化
+  });
+  el.addEventListener('input', () => formatYtInput(el));
+})();
 
 window.validateYtInput = function(input) {
   const val = input.value.trim();
