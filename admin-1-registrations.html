@@ -408,7 +408,7 @@
     tbody.innerHTML = filtered.map((d, i) => `
       <tr>
         <td class="row-num">${i + 1}</td>
-        <td><span class="yt-account">@${esc(d.ytAccount)}</span></td>
+        <td><span class="yt-account">${esc(d.ytAccount)}</span></td>
         <td>${esc(d.realName)}</td>
         <td><span class="badge badge-gold">${esc(d.unitName)}</span></td>
         <td style="color:var(--text-muted);font-size:1.23rem">${d.registeredAt || '-'}</td>
