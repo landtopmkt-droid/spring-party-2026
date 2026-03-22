@@ -344,7 +344,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+  import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
@@ -360,16 +360,41 @@
   const db  = getDatabase(app);
 
   // ── State ──
-  let prizes      = JSON.parse(localStorage.getItem('springFest_prizes')      || '[]');
-  let personnel   = JSON.parse(localStorage.getItem('springFest_personnel')   || '[]');
-  let winners     = JSON.parse(localStorage.getItem('springFest_winners')     || '[]'); // cumulative past winners (by realName+unitName key)
-  let drawHistory = JSON.parse(localStorage.getItem('springFest_drawHistory') || '[]');
+  let prizes      = [];
+  let personnel   = [];
+  let winners     = [];
+  let drawHistory = [];
   let pendingResult = null;
-  let needsReset = false; // 防呆：開始抽獎後必須先重置前台才能再抽
+  let needsReset = false;
 
   // Raw excel data
   let rawSheet = [], rawHeaders = [];
   let previewVisible = false;
+
+  // ── Firebase 即時監聽（所有電腦同步）──
+  onValue(ref(db, 'springFest/personnel'), snap => {
+    personnel = snap.val() || [];
+    renderPersonnelStats();
+    onPrizeSelect(); // 更新可抽人數
+  });
+  onValue(ref(db, 'springFest/winners'), snap => {
+    winners = snap.val() || [];
+    renderPersonnelStats();
+  });
+  onValue(ref(db, 'springFest/prizes'), snap => {
+    prizes = snap.val() || [];
+    renderPrizeList();
+    renderPrizeSelect();
+  });
+  onValue(ref(db, 'springFest/drawHistory'), snap => {
+    const val = snap.val();
+    drawHistory = val ? Object.values(val).sort((a,b) => b.ts - a.ts) : [];
+    renderHistory();
+  });
+  onValue(ref(db, 'springFest/needsReset'), snap => {
+    needsReset = snap.val() === true;
+    updateResetWarning();
+  });
 
   // ──────────────────────────────────────────────
   // Excel / CSV import
@@ -436,11 +461,9 @@
       .map(r => ({ realName: String(r[ni]||'').trim(), unitName: String(r[ui]||'').trim() }))
       .filter(p => p.realName);
     if (!imported.length) { showToast('沒有有效資料，請確認欄位'); return; }
-    personnel = imported;
-    localStorage.setItem('springFest_personnel', JSON.stringify(personnel));
     document.getElementById('mapPanel').classList.remove('show');
-    renderPersonnelStats();
-    showToast(`✓ 已匯入 ${personnel.length} 位人員`);
+    set(ref(db, 'springFest/personnel'), imported);
+    showToast(`✓ 已匯入 ${imported.length} 位人員`);
   }
 
   function getAvailablePool() {
@@ -485,11 +508,8 @@
 
   function clearPersonnel() {
     if (!confirm('確定清除人員名單？（中獎紀錄也會一併清除）')) return;
-    personnel = [];
-    winners   = [];
-    localStorage.removeItem('springFest_personnel');
-    localStorage.removeItem('springFest_winners');
-    document.getElementById('personnelStats').style.display = 'none';
+    set(ref(db, 'springFest/personnel'), null);
+    set(ref(db, 'springFest/winners'), null);
     previewVisible = false;
     document.getElementById('previewTableWrap').classList.remove('show');
     showToast('已清除人員名單');
@@ -523,9 +543,7 @@
   }
 
   function savePrizes() {
-    localStorage.setItem('springFest_prizes', JSON.stringify(prizes));
-    renderPrizeList();
-    renderPrizeSelect();
+    set(ref(db, 'springFest/prizes'), prizes.length ? prizes : null);
   }
 
   function renderPrizeList() {
@@ -633,23 +651,20 @@
     savePrizes();
 
     // Add new winners to cumulative exclusion list
-    winners = [...winners, ...newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))];
-    localStorage.setItem('springFest_winners', JSON.stringify(winners));
+    const updatedWinners = [...winners, ...newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))];
+    set(ref(db, 'springFest/winners'), updatedWinners);
 
     // History
-    drawHistory.unshift({
+    const newEntry = {
+      ts: Date.now(),
       time: new Date().toLocaleString('zh-TW'),
       prizeName: prize.name,
       winners: newWinners.map(w => `${w.realName}（${w.unitName}）`).join('、')
-    });
-    localStorage.setItem('springFest_drawHistory', JSON.stringify(drawHistory));
-
-    renderHistory();
-    renderPersonnelStats();
+    };
+    set(ref(db, `springFest/drawHistory/${newEntry.ts}`), newEntry);
 
     // 防呆：鎖住抽獎，等待重置前台
-    needsReset = true;
-    updateResetWarning();
+    set(ref(db, 'springFest/needsReset'), true);
 
     // Reset UI
     document.getElementById('prizeSelect').value = '';
@@ -668,12 +683,8 @@
   }
 
   function resetFrontend() {
-    set(ref(db, 'lottery_control'), {
-      status: 'reset',
-      timestamp: Date.now()
-    });
-    needsReset = false;
-    updateResetWarning();
+    set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
+    set(ref(db, 'springFest/needsReset'), false);
     showToast('已重置前台，可進行下一輪抽獎');
   }
 
@@ -709,9 +720,7 @@
 
   function clearHistory() {
     if (!confirm('確定清除抽獎紀錄？（不會影響已中獎排除名單）')) return;
-    drawHistory = [];
-    localStorage.removeItem('springFest_drawHistory');
-    renderHistory();
+    set(ref(db, 'springFest/drawHistory'), null);
     showToast('已清除紀錄');
   }
 
@@ -747,12 +756,7 @@
   window.resetFrontend     = resetFrontend;
   window.clearHistory      = clearHistory;
 
-  // ── Init ──
-  renderPrizeList();
-  renderPrizeSelect();
-  renderPersonnelStats();
-  renderHistory();
-  updateResetWarning();
+  // ── Init ──（資料由 Firebase onValue 驅動，不需要手動初始化）
 </script>
 </body>
 </html>
