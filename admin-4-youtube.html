@@ -421,6 +421,7 @@
   let userCounts = {};
   let keywords = [];
   let cloudRegistrations = [];
+  let rounds = [];         // [{ id, name, options, answer, isOpen, openAt, closeAt, messages }]
 
   // ── 初始化：從 Firebase 載入 YT 監控資料 ──
   async function loadYtData() {
