@@ -619,12 +619,18 @@ window.deleteRound=function(rid){
 window.openRound=function(rid){
   const r=rounds.find(r=>r.id==rid);if(!r)return;
   r.isOpen=true;r.openAt=new Date().toISOString();r.closeAt=null;
-  syncRounds();renderRounds();showToast('✅ 已開啟「'+r.name+'」，開始收集留言');
+  syncRounds();renderRounds();
+  // 立即抓一次留言，不等 60 秒
+  if(liveChatId)fetchMessages().catch(e=>showError(e.message));
+  showToast('✅ 已開啟「'+r.name+'」，開始收集留言');
 };
 window.closeRound=function(rid){
   const r=rounds.find(r=>r.id==rid);if(!r)return;
   r.isOpen=false;r.closeAt=new Date().toISOString();
-  syncRounds();renderRounds();showToast('⏹ 已關閉「'+r.name+'」');
+  syncRounds();
+  // 立即再抓一次，確保關閉前最後的留言不漏掉
+  if(liveChatId)fetchMessages().catch(e=>showError(e.message));
+  renderRounds();showToast('⏹ 已關閉「'+r.name+'」，已補抓最新留言');
 };
 window.addOptionToRound=function(rid){
   const input=document.getElementById('optinput-'+rid);
@@ -713,6 +719,9 @@ function renderRounds(){
   const container=document.getElementById('roundsList');
   document.getElementById('predFilterSection').style.display=rounds.length?'block':'none';
   if(!rounds.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">🏆</div><div>尚未建立任何場次</div></div>';return;}
+  // 記錄目前展開狀態，重繪後恢復
+  const openCards=new Set([...document.querySelectorAll('.round-card.open')].map(el=>el.dataset.rid));
+  const openMsgs=new Set([...document.querySelectorAll('.round-msgs-body.open')].map(el=>el.id.replace('msgs-body-','')));
   container.innerHTML=rounds.map((r,idx)=>{
     const statusLabel=r.isOpen?'收集中':(r.closeAt?'已關閉':'未開始');
     const statusCls=r.isOpen?'open':'closed';
@@ -771,6 +780,15 @@ function renderRounds(){
       </div>
     </div>`;
   }).join('');
+  // 恢復展開狀態
+  openCards.forEach(rid=>{
+    const card=document.querySelector(`.round-card[data-rid="${rid}"]`);
+    if(card)card.classList.add('open');
+  });
+  openMsgs.forEach(rid=>{
+    const el=document.getElementById('msgs-body-'+rid);
+    if(el)el.classList.add('open');
+  });
 }
 
 // ── 工具 ──
