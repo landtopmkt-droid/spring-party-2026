@@ -149,10 +149,10 @@
     </div>
   </div>
 
-  <!-- 花名冊列表 -->
+  <!-- 參加名單列表 -->
   <div class="panel">
     <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
-      <span>📋 花名冊</span>
+      <span>📋 參加名單</span>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-outline btn-sm" onclick="exportCSV()">匯出 CSV</button>
         <button class="btn btn-danger btn-sm" onclick="clearAll()">清空全部</button>
@@ -291,10 +291,10 @@ window.deleteUnit = function(unit) {
 };
 
 window.clearAll = function() {
-  if (!confirm('確定清空全部花名冊？')) return;
+  if (!confirm('確定清空全部參加名單？')) return;
   roster = {};
   syncRoster();
-  showToast('已清空花名冊');
+  showToast('已清空參加名單');
 };
 
 // ── Excel 匯入 ──
@@ -385,7 +385,7 @@ window.exportCSV = function() {
   const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
-  a.download = `花名冊_${Date.now()}.csv`; a.click();
+  a.download = `參加名單_${Date.now()}.csv`; a.click();
   showToast('匯出完成 ✓');
 };
 
