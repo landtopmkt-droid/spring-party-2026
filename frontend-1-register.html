@@ -7,227 +7,94 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --red: #c0272d;
-    --red-dark: #8b1a1e;
-    --red-light: #e8474e;
-    --gold: #d4a843;
-    --gold-light: #f0c96a;
-    --gold-dark: #a07820;
-    --cream: #fdf6e3;
-    --ink: #1a0a00;
-    --ink-light: #4a2c0a;
+    --red:#c0272d;--red-dark:#8b1a1e;--red-light:#e8474e;
+    --gold:#d4a843;--gold-light:#f0c96a;--gold-dark:#a07820;
+    --cream:#fdf6e3;--ink:#1a0a00;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
+  *{margin:0;padding:0;box-sizing:border-box;}
   body {
-    min-height: 100vh;
-    background-color: #1a0500;
+    min-height:100vh;background-color:#1a0500;
     background-image:
-      radial-gradient(ellipse at 20% 50%, rgba(192,39,45,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(212,168,67,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 20% 50%,rgba(192,39,45,0.15) 0%,transparent 60%),
+      radial-gradient(ellipse at 80% 20%,rgba(212,168,67,0.1) 0%,transparent 50%),
       url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4a843' fill-opacity='0.04'%3E%3Cpath d='M30 0 L60 30 L30 60 L0 30Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    font-family: 'Noto Sans TC', sans-serif;
-    overflow-x: hidden;
-    overflow-y: auto;
-    position: relative;
-    padding: 40px 0;
+    display:flex;align-items:flex-start;justify-content:center;
+    font-family:'Noto Sans TC',sans-serif;overflow-x:hidden;overflow-y:auto;padding:40px 0;
   }
+  .lantern{position:fixed;font-size:3rem;animation:floatLantern linear infinite;pointer-events:none;z-index:0;opacity:0.6;}
+  @keyframes floatLantern{0%{transform:translateY(100vh) rotate(-10deg);opacity:0;}10%{opacity:0.6;}90%{opacity:0.6;}100%{transform:translateY(-10vh) rotate(10deg);opacity:0;}}
+  .petal{position:fixed;width:8px;height:8px;background:var(--red-light);border-radius:50% 0 50% 0;animation:fall linear infinite;pointer-events:none;z-index:0;opacity:0.4;}
+  @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);}100%{transform:translateY(100vh) rotate(720deg);}}
+  .container{position:relative;z-index:10;width:100%;max-width:520px;padding:20px;}
+  .ornament{text-align:center;margin-bottom:10px;}
+  .ornament-line{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:6px;}
+  .ornament-line span{color:var(--gold);font-size:2.1rem;}
+  .ornament-line::before,.ornament-line::after{content:'';flex:1;max-width:80px;height:1px;background:linear-gradient(to right,transparent,var(--gold-dark),transparent);}
+  .card{background:linear-gradient(145deg,#2a0a02,#1a0500);border:1px solid rgba(212,168,67,0.3);border-radius:4px;padding:48px 44px;position:relative;box-shadow:0 0 60px rgba(192,39,45,0.2),0 0 120px rgba(0,0,0,0.5),inset 0 1px 0 rgba(212,168,67,0.1);}
+  .card::before,.card::after{content:'❈';position:absolute;color:var(--gold-dark);font-size:1.8rem;opacity:0.6;}
+  .card::before{top:12px;left:16px;}.card::after{bottom:12px;right:16px;}
+  .corner-tr,.corner-bl{position:absolute;color:var(--gold-dark);font-size:1.8rem;opacity:0.6;}
+  .corner-tr{top:12px;right:16px;}.corner-bl{bottom:12px;left:16px;}
+  .title-cn{font-family:'Noto Serif TC',serif;font-size:3.9rem;font-weight:900;color:var(--gold-light);text-align:center;letter-spacing:0.15em;line-height:1;text-shadow:0 0 30px rgba(212,168,67,0.4);margin-bottom:4px;}
+  .title-sub{font-family:'Noto Serif TC',serif;font-size:1.5rem;font-weight:400;color:rgba(212,168,67,0.6);text-align:center;letter-spacing:0.4em;margin-bottom:36px;}
+  .divider{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(212,168,67,0.4),transparent);}
+  .divider span{color:var(--gold);font-size:1.5rem;}
+  .form-group{margin-bottom:22px;}
+  .form-label{display:block;font-family:'Noto Serif TC',serif;font-size:1.275rem;color:var(--gold);letter-spacing:0.2em;margin-bottom:10px;font-weight:600;}
+  .form-label span{color:rgba(212,168,67,0.4);font-size:1.125rem;font-family:'Noto Sans TC',sans-serif;font-weight:300;letter-spacing:0;margin-left:8px;}
 
-  .lantern {
-    position: fixed;
-    font-size: 3rem;
-    animation: floatLantern linear infinite;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.6;
+  /* input + select 共用樣式 */
+  .form-input, .form-select {
+    width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(212,168,67,0.2);
+    border-radius:2px;padding:14px 18px;color:var(--cream);
+    font-family:'Noto Sans TC',sans-serif;font-size:1.425rem;font-weight:300;
+    letter-spacing:0.05em;transition:all 0.3s ease;outline:none;
   }
-  @keyframes floatLantern {
-    0% { transform: translateY(100vh) rotate(-10deg); opacity: 0; }
-    10% { opacity: 0.6; }
-    90% { opacity: 0.6; }
-    100% { transform: translateY(-10vh) rotate(10deg); opacity: 0; }
+  .form-input::placeholder{color:rgba(253,246,227,0.2);font-size:1.275rem;}
+  .form-input:focus, .form-select:focus {
+    background:rgba(192,39,45,0.08);border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(212,168,67,0.1),0 0 20px rgba(212,168,67,0.05);
   }
+  /* select 專屬 */
+  .form-select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:44px;}
+  .form-select option{background:#2a0a02;color:var(--cream);}
+  .form-select:disabled{opacity:0.35;cursor:not-allowed;}
+  .select-wrap{position:relative;}
+  .select-wrap::after{content:'▾';position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--gold);pointer-events:none;font-size:1.3rem;transition:opacity .3s;}
+  .select-wrap.disabled::after{opacity:0.3;}
 
-  .petal {
-    position: fixed;
-    width: 8px;
-    height: 8px;
-    background: var(--red-light);
-    border-radius: 50% 0 50% 0;
-    animation: fall linear infinite;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-  @keyframes fall {
-    0% { transform: translateY(-20px) rotate(0deg); }
-    100% { transform: translateY(100vh) rotate(720deg); }
-  }
+  /* 未選單位時姓名欄的鎖定提示 */
+  .locked-hint{font-size:1.17rem;color:rgba(212,168,67,0.35);margin-top:6px;letter-spacing:0.05em;display:none;}
+  .locked-hint.show{display:block;}
 
-  .container {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    max-width: 520px;
-    padding: 20px;
-  }
+  .btn-submit{width:100%;margin-top:10px;padding:16px;background:linear-gradient(135deg,var(--red-dark),var(--red),var(--red-dark));background-size:200% 100%;border:1px solid rgba(212,168,67,0.4);border-radius:2px;color:var(--gold-light);font-family:'Noto Serif TC',serif;font-size:1.65rem;font-weight:600;letter-spacing:0.3em;cursor:pointer;transition:all 0.3s ease;position:relative;overflow:hidden;}
+  .btn-submit::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,0.08) 50%,transparent 70%);transform:translateX(-100%);transition:transform 0.5s ease;}
+  .btn-submit:hover{background-position:100% 0;box-shadow:0 0 30px rgba(192,39,45,0.4),0 0 60px rgba(192,39,45,0.1);letter-spacing:0.4em;}
+  .btn-submit:hover::before{transform:translateX(100%);}
+  .btn-submit:active{transform:scale(0.99);}
+  .btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
+  .success-overlay{display:none;position:absolute;inset:0;background:linear-gradient(145deg,#2a0a02,#1a0500);border-radius:4px;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:20;}
+  .success-overlay.show{display:flex;animation:fadeIn 0.5s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
+  .success-icon{font-size:6rem;animation:bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1);}
+  @keyframes bounceIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .success-title{font-family:'Noto Serif TC',serif;font-size:2.7rem;font-weight:900;color:var(--gold-light);letter-spacing:0.2em;text-shadow:0 0 20px rgba(212,168,67,0.4);}
+  .success-name{font-family:'Noto Sans TC',sans-serif;font-size:1.5rem;color:rgba(253,246,227,0.7);letter-spacing:0.1em;}
+  .btn-again{margin-top:10px;padding:10px 28px;background:transparent;border:1px solid rgba(212,168,67,0.3);border-radius:2px;color:var(--gold);font-family:'Noto Sans TC',sans-serif;font-size:1.275rem;letter-spacing:0.2em;cursor:pointer;transition:all 0.3s ease;}
+  .btn-again:hover{background:rgba(212,168,67,0.1);}
+  .error-msg{color:#ff6b6b;font-size:1.2rem;margin-top:6px;display:none;letter-spacing:0.05em;}
+  .error-msg.show{display:block;animation:shake 0.3s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+  .reg-count{text-align:center;margin-top:20px;color:rgba(212,168,67,0.4);font-size:1.2rem;letter-spacing:0.15em;}
+  .conn-status{position:fixed;top:12px;right:16px;z-index:100;font-size:1.1rem;padding:5px 14px;border-radius:20px;font-family:'Noto Sans TC',sans-serif;letter-spacing:0.05em;transition:all 0.3s ease;}
+  .conn-status.ok{background:rgba(76,175,80,0.15);color:#81c784;border:1px solid rgba(76,175,80,0.3);}
+  .conn-status.err{background:rgba(192,39,45,0.15);color:#e57373;border:1px solid rgba(192,39,45,0.3);}
+  .loading-hint{text-align:center;color:rgba(212,168,67,0.4);font-size:1.17rem;padding:8px 0;display:none;}
+  .loading-hint.show{display:block;}
 
-  .ornament { text-align: center; margin-bottom: 10px; }
-  .ornament-line {
-    display: flex; align-items: center; gap: 12px; justify-content: center; margin-bottom: 6px;
-  }
-  .ornament-line span { color: var(--gold); font-size: 2.1rem; }
-  .ornament-line::before, .ornament-line::after {
-    content: ''; flex: 1; max-width: 80px; height: 1px;
-    background: linear-gradient(to right, transparent, var(--gold-dark), transparent);
-  }
-
-  .card {
-    background: linear-gradient(145deg, #2a0a02, #1a0500);
-    border: 1px solid rgba(212,168,67,0.3);
-    border-radius: 4px;
-    padding: 48px 44px;
-    position: relative;
-    box-shadow: 0 0 60px rgba(192,39,45,0.2), 0 0 120px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,168,67,0.1);
-  }
-  .card::before, .card::after {
-    content: '❈'; position: absolute; color: var(--gold-dark); font-size: 1.8rem; opacity: 0.6;
-  }
-  .card::before { top: 12px; left: 16px; }
-  .card::after { bottom: 12px; right: 16px; }
-
-  .corner-tr, .corner-bl { position: absolute; color: var(--gold-dark); font-size: 1.8rem; opacity: 0.6; }
-  .corner-tr { top: 12px; right: 16px; }
-  .corner-bl { bottom: 12px; left: 16px; }
-
-  .title-cn {
-    font-family: 'Noto Serif TC', serif; font-size: 3.9rem; font-weight: 900;
-    color: var(--gold-light); text-align: center; letter-spacing: 0.15em; line-height: 1;
-    text-shadow: 0 0 30px rgba(212,168,67,0.4); margin-bottom: 4px;
-  }
-  .title-sub {
-    font-family: 'Noto Serif TC', serif; font-size: 1.5rem; font-weight: 400;
-    color: rgba(212,168,67,0.6); text-align: center; letter-spacing: 0.4em; margin-bottom: 36px;
-  }
-
-  .divider {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 32px;
-  }
-  .divider::before, .divider::after {
-    content: ''; flex: 1; height: 1px;
-    background: linear-gradient(to right, transparent, rgba(212,168,67,0.4), transparent);
-  }
-  .divider span { color: var(--gold); font-size: 1.5rem; }
-
-  .form-group { margin-bottom: 22px; }
-  .form-label {
-    display: block; font-family: 'Noto Serif TC', serif; font-size: 1.275rem;
-    color: var(--gold); letter-spacing: 0.2em; margin-bottom: 10px; font-weight: 600;
-  }
-  .form-label span {
-    color: rgba(212,168,67,0.4); font-size: 1.125rem; font-family: 'Noto Sans TC', sans-serif;
-    font-weight: 300; letter-spacing: 0; margin-left: 8px;
-  }
-
-  .form-input {
-    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(212,168,67,0.2);
-    border-radius: 2px; padding: 14px 18px; color: var(--cream);
-    font-family: 'Noto Sans TC', sans-serif; font-size: 1.425rem; font-weight: 300;
-    letter-spacing: 0.05em; transition: all 0.3s ease; outline: none;
-  }
-  .form-input::placeholder { color: rgba(253,246,227,0.2); font-size: 1.275rem; }
-  .form-input:focus {
-    background: rgba(192,39,45,0.08); border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(212,168,67,0.1), 0 0 20px rgba(212,168,67,0.05);
-  }
-  .form-input:focus::placeholder { opacity: 0; }
-
-  .btn-submit {
-    width: 100%; margin-top: 10px; padding: 16px;
-    background: linear-gradient(135deg, var(--red-dark), var(--red), var(--red-dark));
-    background-size: 200% 100%;
-    border: 1px solid rgba(212,168,67,0.4); border-radius: 2px; color: var(--gold-light);
-    font-family: 'Noto Serif TC', serif; font-size: 1.65rem; font-weight: 600;
-    letter-spacing: 0.3em; cursor: pointer; transition: all 0.3s ease;
-    position: relative; overflow: hidden;
-  }
-  .btn-submit::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
-    transform: translateX(-100%); transition: transform 0.5s ease;
-  }
-  .btn-submit:hover {
-    background-position: 100% 0;
-    box-shadow: 0 0 30px rgba(192,39,45,0.4), 0 0 60px rgba(192,39,45,0.1);
-    letter-spacing: 0.4em;
-  }
-  .btn-submit:hover::before { transform: translateX(100%); }
-  .btn-submit:active { transform: scale(0.99); }
-  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .success-overlay {
-    display: none; position: absolute; inset: 0;
-    background: linear-gradient(145deg, #2a0a02, #1a0500);
-    border-radius: 4px; align-items: center; justify-content: center;
-    flex-direction: column; gap: 16px; z-index: 20;
-  }
-  .success-overlay.show { display: flex; animation: fadeIn 0.5s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-
-  .success-icon { font-size: 6rem; animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  @keyframes bounceIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .success-title {
-    font-family: 'Noto Serif TC', serif; font-size: 2.7rem; font-weight: 900;
-    color: var(--gold-light); letter-spacing: 0.2em; text-shadow: 0 0 20px rgba(212,168,67,0.4);
-  }
-  .success-name { font-family: 'Noto Sans TC', sans-serif; font-size: 1.5rem; color: rgba(253,246,227,0.7); letter-spacing: 0.1em; }
-  .btn-again {
-    margin-top: 10px; padding: 10px 28px; background: transparent;
-    border: 1px solid rgba(212,168,67,0.3); border-radius: 2px; color: var(--gold);
-    font-family: 'Noto Sans TC', sans-serif; font-size: 1.275rem; letter-spacing: 0.2em;
-    cursor: pointer; transition: all 0.3s ease;
-  }
-  .btn-again:hover { background: rgba(212,168,67,0.1); }
-
-  .error-msg { color: #ff6b6b; font-size: 1.2rem; margin-top: 6px; display: none; letter-spacing: 0.05em; }
-  .error-msg.show { display: block; animation: shake 0.3s ease; }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); }
-  }
-
-  .reg-count { text-align: center; margin-top: 20px; color: rgba(212,168,67,0.4); font-size: 1.2rem; letter-spacing: 0.15em; }
-
-  /* 連線狀態提示 */
-  .conn-status {
-    position: fixed; top: 12px; right: 16px; z-index: 100;
-    font-size: 1.1rem; padding: 5px 14px; border-radius: 20px;
-    font-family: 'Noto Sans TC', sans-serif; letter-spacing: 0.05em;
-    transition: all 0.3s ease;
-  }
-  .conn-status.ok { background: rgba(76,175,80,0.15); color: #81c784; border: 1px solid rgba(76,175,80,0.3); }
-  .conn-status.err { background: rgba(192,39,45,0.15); color: #e57373; border: 1px solid rgba(192,39,45,0.3); }
-
-  @media (max-width: 600px) {
-    body { padding: 16px 0 40px; }
-    .container { padding: 12px; }
-    .card { padding: 32px 20px; }
-    .title-cn { font-size: 2.6rem; }
-    .title-sub { font-size: 1.1rem; margin-bottom: 24px; }
-    .form-label { font-size: 1rem; }
-    .form-input { font-size: 1.1rem; padding: 12px 14px; }
-    .btn-submit { font-size: 1.2rem; padding: 14px; }
-    .success-title { font-size: 1.9rem; }
-    .success-name { font-size: 1.1rem; }
-    .success-icon { font-size: 4rem; }
-  }
-  @media (max-width: 380px) {
-    .title-cn { font-size: 2.1rem; }
-    .card { padding: 24px 14px; }
-  }
+  @media(max-width:600px){body{padding:16px 0 40px;}.container{padding:12px;}.card{padding:32px 20px;}.title-cn{font-size:2.6rem;}.title-sub{font-size:1.1rem;margin-bottom:24px;}.form-label{font-size:1rem;}.form-input,.form-select{font-size:1.1rem;padding:12px 14px;}.btn-submit{font-size:1.2rem;padding:14px;}.success-title{font-size:1.9rem;}.success-name{font-size:1.1rem;}.success-icon{font-size:4rem;}}
+  @media(max-width:380px){.title-cn{font-size:2.1rem;}.card{padding:24px 14px;}}
 </style>
 </head>
 <body>
@@ -238,35 +105,45 @@
   <div class="ornament">
     <div class="ornament-line"><span>🏮</span></div>
   </div>
-
   <div class="card">
     <div class="corner-tr">❈</div>
     <div class="corner-bl">❈</div>
-
     <div class="title-cn">春酒活動</div>
     <div class="title-sub">報到登記</div>
-
     <div class="divider"><span>✦</span></div>
 
+    <!-- 1. YT帳號（文字輸入） -->
     <div class="form-group">
       <label class="form-label">YouTube 帳號 <span>YT Channel Name</span></label>
       <input type="text" id="ytAccount" class="form-input" placeholder="請輸入您的 YouTube 帳號名稱">
       <div class="error-msg" id="err-yt">請填寫 YouTube 帳號</div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">真實姓名 <span>Real Name</span></label>
-      <input type="text" id="realName" class="form-input" placeholder="請輸入您的真實姓名">
-      <div class="error-msg" id="err-name">請填寫真實姓名</div>
-    </div>
-
+    <!-- 2. 單位名稱（下拉） -->
     <div class="form-group">
       <label class="form-label">單位名稱 <span>Department / Unit</span></label>
-      <input type="text" id="unitName" class="form-input" placeholder="請輸入您的單位名稱">
-      <div class="error-msg" id="err-unit">請填寫單位名稱</div>
+      <div class="select-wrap" id="unitWrap">
+        <select id="unitSelect" class="form-select" onchange="onUnitChange()">
+          <option value="">— 請選擇單位 —</option>
+        </select>
+      </div>
+      <div class="loading-hint" id="rosterLoading">載入名單中...</div>
+      <div class="error-msg" id="err-unit">請選擇單位名稱</div>
     </div>
 
-    <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">完成報到</button>
+    <!-- 3. 姓名（下拉，依單位過濾） -->
+    <div class="form-group">
+      <label class="form-label">姓名 <span>Real Name</span></label>
+      <div class="select-wrap disabled" id="nameWrap">
+        <select id="nameSelect" class="form-select" disabled>
+          <option value="">— 請先選擇單位 —</option>
+        </select>
+      </div>
+      <div class="locked-hint show" id="lockedHint">請先選擇單位，才能選擇姓名</div>
+      <div class="error-msg" id="err-name">請選擇姓名</div>
+    </div>
+
+    <button class="btn-submit" id="submitBtn" onclick="handleSubmit()" disabled>完成報到</button>
 
     <div class="success-overlay" id="successOverlay">
       <div class="success-icon">🎊</div>
@@ -275,138 +152,166 @@
       <button class="btn-again" onclick="resetForm()">繼續登記</button>
     </div>
   </div>
-
   <div class="reg-count" id="regCount"></div>
 </div>
 
 <script type="module">
-  import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getDatabase, ref, push, onValue, serverTimestamp }
-    from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getDatabase, ref, push, onValue, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-  // ★ 關鍵：一定要有 databaseURL
-  const firebaseConfig = {
-    apiKey:            "AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
-    authDomain:        "springfestival-4aaea.firebaseapp.com",
-    projectId:         "springfestival-4aaea",
-    databaseURL:       "https://springfestival-4aaea-default-rtdb.firebaseio.com",
-    storageBucket:     "springfestival-4aaea.firebasestorage.app",
-    messagingSenderId: "64196762294",
-    appId:             "1:64196762294:web:2fb6e766f38f8d47332417",
-    measurementId:     "G-4MZF0HPLJV"
-  };
+const firebaseConfig = {
+  apiKey:"AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
+  authDomain:"springfestival-4aaea.firebaseapp.com",
+  projectId:"springfestival-4aaea",
+  databaseURL:"https://springfestival-4aaea-default-rtdb.firebaseio.com",
+  storageBucket:"springfestival-4aaea.firebasestorage.app",
+  messagingSenderId:"64196762294",
+  appId:"1:64196762294:web:2fb6e766f38f8d47332417",
+  measurementId:"G-4MZF0HPLJV"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
-  const registrationsRef = ref(db, 'registrations');
+let roster = {};  // { "單位A": ["姓名1","姓名2"], ... }
 
-  // ── 連線狀態偵測 ──
-  const connEl = document.getElementById('connStatus');
-  import { ref as fbRef, onValue as fbOnValue }
-    from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
-  const connectedRef = fbRef(db, '.info/connected');
-  fbOnValue(connectedRef, (snap) => {
-    if (snap.val() === true) {
-      connEl.textContent = '✓ 已連線';
-      connEl.className = 'conn-status ok';
-      document.getElementById('submitBtn').disabled = false;
-    } else {
-      connEl.textContent = '✗ 未連線';
-      connEl.className = 'conn-status err';
-    }
-  });
-
-  // ── 浮動特效 ──
-  const lanternEmojis = ['🏮','🧧','🌸','✨'];
-  for (let i = 0; i < 6; i++) {
-    const l = document.createElement('div');
-    l.className = 'lantern';
-    l.textContent = lanternEmojis[i % lanternEmojis.length];
-    l.style.left = (Math.random() * 100) + 'vw';
-    l.style.animationDuration = (8 + Math.random() * 12) + 's';
-    l.style.animationDelay   = (Math.random() * 10) + 's';
-    l.style.fontSize = (1.2 + Math.random() * 1.5) + 'rem';
-    document.body.appendChild(l);
+// ── 連線狀態 ──
+const connEl = document.getElementById('connStatus');
+onValue(ref(db,'.info/connected'), snap => {
+  if (snap.val() === true) {
+    connEl.textContent = '✓ 已連線';
+    connEl.className = 'conn-status ok';
+    document.getElementById('submitBtn').disabled = false;
+  } else {
+    connEl.textContent = '✗ 未連線';
+    connEl.className = 'conn-status err';
+    document.getElementById('submitBtn').disabled = true;
   }
-  for (let i = 0; i < 12; i++) {
-    const p = document.createElement('div');
-    p.className = 'petal';
-    p.style.left = (Math.random() * 100) + 'vw';
-    p.style.animationDuration = (5 + Math.random() * 8) + 's';
-    p.style.animationDelay   = (Math.random() * 8) + 's';
-    const sz = (6 + Math.random() * 6) + 'px';
-    p.style.width = sz; p.style.height = sz;
-    p.style.opacity = 0.2 + Math.random() * 0.3;
-    document.body.appendChild(p);
+});
+
+// ── 載入花名冊 ──
+document.getElementById('rosterLoading').classList.add('show');
+onValue(ref(db,'roster'), snap => {
+  roster = snap.val() || {};
+  document.getElementById('rosterLoading').classList.remove('show');
+  buildUnitSelect();
+});
+
+function buildUnitSelect() {
+  const sel = document.getElementById('unitSelect');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— 請選擇單位 —</option>';
+  Object.keys(roster).sort().forEach(unit => {
+    const o = document.createElement('option');
+    o.value = unit; o.textContent = unit;
+    sel.appendChild(o);
+  });
+  // 如果之前有選過單位，嘗試保留
+  if (cur && roster[cur]) { sel.value = cur; onUnitChange(); }
+}
+
+// ── 選單位時更新姓名下拉 ──
+window.onUnitChange = function() {
+  const unit = document.getElementById('unitSelect').value;
+  const nameSel = document.getElementById('nameSelect');
+  const nameWrap = document.getElementById('nameWrap');
+  const lockedHint = document.getElementById('lockedHint');
+
+  if (!unit) {
+    // 沒選單位 → 姓名鎖住
+    nameSel.innerHTML = '<option value="">— 請先選擇單位 —</option>';
+    nameSel.disabled = true;
+    nameWrap.classList.add('disabled');
+    lockedHint.classList.add('show');
+    return;
   }
 
-  // ── 即時人數 ──
-  onValue(registrationsRef, (snapshot) => {
-    const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-    const el = document.getElementById('regCount');
-    el.textContent = count > 0 ? `已有 ${count} 位貴賓完成報到` : '';
+  // 有選單位 → 填入該單位的人
+  const members = (roster[unit] || []).slice().sort();
+  nameSel.innerHTML = '<option value="">— 請選擇姓名 —</option>';
+  members.forEach(name => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = name;
+    nameSel.appendChild(o);
   });
+  nameSel.disabled = false;
+  nameWrap.classList.remove('disabled');
+  lockedHint.classList.remove('show');
+  nameSel.value = '';
+};
 
-  // ── 提交報到 ──
-  window.handleSubmit = async function() {
-    const yt   = document.getElementById('ytAccount').value.trim();
-    const name = document.getElementById('realName').value.trim();
-    const unit = document.getElementById('unitName').value.trim();
+// ── 浮動特效 ──
+const lanternEmojis = ['🏮','🧧','🌸','✨'];
+for (let i = 0; i < 6; i++) {
+  const l = document.createElement('div');
+  l.className = 'lantern';
+  l.textContent = lanternEmojis[i % lanternEmojis.length];
+  l.style.left = (Math.random() * 100) + 'vw';
+  l.style.animationDuration = (8 + Math.random() * 12) + 's';
+  l.style.animationDelay = (Math.random() * 10) + 's';
+  l.style.fontSize = (1.2 + Math.random() * 1.5) + 'rem';
+  document.body.appendChild(l);
+}
+for (let i = 0; i < 12; i++) {
+  const p = document.createElement('div');
+  p.className = 'petal';
+  p.style.left = (Math.random() * 100) + 'vw';
+  p.style.animationDuration = (5 + Math.random() * 8) + 's';
+  p.style.animationDelay = (Math.random() * 8) + 's';
+  const sz = (6 + Math.random() * 6) + 'px';
+  p.style.width = sz; p.style.height = sz;
+  p.style.opacity = 0.2 + Math.random() * 0.3;
+  document.body.appendChild(p);
+}
 
-    // 清除舊錯誤
-    ['err-yt','err-name','err-unit'].forEach(id => {
-      document.getElementById(id).classList.remove('show');
+// ── 即時人數 ──
+onValue(ref(db,'registrations'), snap => {
+  const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+  document.getElementById('regCount').textContent = count > 0 ? `已有 ${count} 位貴賓完成報到` : '';
+});
+
+// ── 提交報到 ──
+window.handleSubmit = async function() {
+  const yt   = document.getElementById('ytAccount').value.trim();
+  const unit = document.getElementById('unitSelect').value;
+  const name = document.getElementById('nameSelect').value;
+
+  ['err-yt','err-unit','err-name'].forEach(id => document.getElementById(id).classList.remove('show'));
+
+  let valid = true;
+  if (!yt)   { document.getElementById('err-yt').classList.add('show');   valid = false; }
+  if (!unit) { document.getElementById('err-unit').classList.add('show'); valid = false; }
+  if (!name) { document.getElementById('err-name').classList.add('show'); valid = false; }
+  if (!valid) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '提交中...';
+
+  try {
+    await push(ref(db,'registrations'), {
+      ytAccount:    yt,
+      realName:     name,
+      unitName:     unit,
+      registeredAt: new Date().toLocaleString('zh-TW'),
+      timestamp:    serverTimestamp()
     });
+    document.getElementById('successMsg').textContent = `${name}（${unit}）報到完成 🎉`;
+    document.getElementById('successOverlay').classList.add('show');
+  } catch(err) {
+    alert('提交失敗，請確認網路連線：' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '完成報到';
+  }
+};
 
-    let valid = true;
-    if (!yt)   { document.getElementById('err-yt').classList.add('show');   valid = false; }
-    if (!name) { document.getElementById('err-name').classList.add('show'); valid = false; }
-    if (!unit) { document.getElementById('err-unit').classList.add('show'); valid = false; }
-    if (!valid) return;
-
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = '提交中...';
-
-    try {
-      await push(registrationsRef, {
-        ytAccount:    yt,
-        realName:     name,
-        unitName:     unit,
-        registeredAt: new Date().toLocaleString('zh-TW'),
-        timestamp:    serverTimestamp()
-      });
-
-      document.getElementById('successMsg').textContent = `${name}（${unit}）報到完成 🎉`;
-      document.getElementById('successOverlay').classList.add('show');
-
-    } catch (err) {
-      alert('提交失敗，請確認網路連線：' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '完成報到';
-    }
-  };
-
-  // ── 重置表單 ──
-  window.resetForm = function() {
-    document.getElementById('ytAccount').value = '';
-    document.getElementById('realName').value  = '';
-    document.getElementById('unitName').value  = '';
-    document.getElementById('successOverlay').classList.remove('show');
-    document.getElementById('ytAccount').focus();
-  };
-
-  // ── 鍵盤 Enter 切換欄位 ──
-  document.querySelectorAll('.form-input').forEach((input, i, arr) => {
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        if (i < arr.length - 1) arr[i+1].focus();
-        else window.handleSubmit();
-      }
-    });
-  });
+// ── 重置表單 ──
+window.resetForm = function() {
+  document.getElementById('ytAccount').value = '';
+  document.getElementById('unitSelect').value = '';
+  onUnitChange();
+  document.getElementById('successOverlay').classList.remove('show');
+  document.getElementById('ytAccount').focus();
+};
 </script>
 </body>
 </html>
