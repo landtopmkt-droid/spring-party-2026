@@ -371,33 +371,7 @@
   let rawSheet = [], rawHeaders = [];
   let previewVisible = false;
 
-  // ── Firebase 即時監聽（所有電腦同步）──
-  onValue(ref(db, 'springFest/personnel'), snap => {
-    const v = snap.val();
-    personnel = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
-    renderPersonnelStats();
-    onPrizeSelect();
-  });
-  onValue(ref(db, 'springFest/winners'), snap => {
-    const v = snap.val();
-    winners = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
-    renderPersonnelStats();
-  });
-  onValue(ref(db, 'springFest/prizes'), snap => {
-    const v = snap.val();
-    prizes = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
-    renderPrizeList();
-    renderPrizeSelect();
-  });
-  onValue(ref(db, 'springFest/drawHistory'), snap => {
-    const val = snap.val();
-    drawHistory = val ? Object.values(val).sort((a,b) => b.ts - a.ts) : [];
-    renderHistory();
-  });
-  onValue(ref(db, 'springFest/needsReset'), snap => {
-    needsReset = snap.val() === true;
-    updateResetWarning();
-  });
+
 
   // ──────────────────────────────────────────────
   // Excel / CSV import
@@ -764,7 +738,33 @@
   window.resetFrontend     = resetFrontend;
   window.clearHistory      = clearHistory;
 
-  // ── Init ──（資料由 Firebase onValue 驅動，不需要手動初始化）
+  // ── Init：在所有函式定義完後才註冊監聽，避免 ReferenceError ──
+  onValue(ref(db, 'springFest/personnel'), snap => {
+    const v = snap.val();
+    personnel = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+    renderPersonnelStats();
+    onPrizeSelect();
+  });
+  onValue(ref(db, 'springFest/winners'), snap => {
+    const v = snap.val();
+    winners = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+    renderPersonnelStats();
+  });
+  onValue(ref(db, 'springFest/prizes'), snap => {
+    const v = snap.val();
+    prizes = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+    renderPrizeList();
+    renderPrizeSelect();
+  });
+  onValue(ref(db, 'springFest/drawHistory'), snap => {
+    const val = snap.val();
+    drawHistory = val ? Object.values(val).sort((a,b) => b.ts - a.ts) : [];
+    renderHistory();
+  });
+  onValue(ref(db, 'springFest/needsReset'), snap => {
+    needsReset = snap.val() === true;
+    updateResetWarning();
+  });
 </script>
 </body>
 </html>
