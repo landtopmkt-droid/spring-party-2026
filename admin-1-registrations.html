@@ -20,251 +20,69 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; }
-
-  /* Nav */
-  .nav {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    display: flex;
-    align-items: center;
-    gap: 0;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .nav-brand {
-    font-family: 'Noto Serif TC', serif;
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--gold);
-    letter-spacing: 0.2em;
-    margin-right: 32px;
-    white-space: nowrap;
-  }
+  .nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; gap: 0; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; font-weight: 900; color: var(--gold); letter-spacing: 0.2em; margin-right: 32px; white-space: nowrap; }
   .nav-links { display: flex; gap: 4px; }
-  .nav-link {
-    padding: 8px 16px;
-    border-radius: 4px;
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 1.275rem;
-    letter-spacing: 0.05em;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
+  .nav-link { padding: 8px 16px; border-radius: 4px; color: var(--text-muted); text-decoration: none; font-size: 1.275rem; letter-spacing: 0.05em; transition: all 0.2s; white-space: nowrap; }
   .nav-link:hover { color: var(--text); background: var(--surface2); }
   .nav-link.active { color: var(--gold); background: rgba(212,168,67,0.08); }
-
-  /* Main */
   .main { padding: 32px; max-width: 1200px; margin: 0 auto; }
-
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  .page-title {
-    font-family: 'Noto Serif TC', serif;
-    font-size: 2.25rem;
-    font-weight: 900;
-    color: var(--gold);
-    letter-spacing: 0.1em;
-  }
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
+  .page-title { font-family: 'Noto Serif TC', serif; font-size: 2.25rem; font-weight: 900; color: var(--gold); letter-spacing: 0.1em; }
   .page-subtitle { color: var(--text-muted); font-size: 1.275rem; margin-top: 4px; }
-
   .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-
-  /* Stats cards */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 20px 24px;
-  }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px 24px; }
   .stat-label { font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.15em; margin-bottom: 6px; }
   .stat-value { font-size: 3rem; font-weight: 500; color: var(--gold); font-family: 'Noto Sans TC'; }
-
-  /* Search & filter */
-  .toolbar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .search-input {
-    flex: 1;
-    min-width: 200px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px 16px;
-    color: var(--text);
-    font-family: 'Noto Sans TC', sans-serif;
-    font-size: 1.35rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
+  .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .search-input { flex: 1; min-width: 200px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 16px; color: var(--text); font-family: 'Noto Sans TC', sans-serif; font-size: 1.35rem; outline: none; transition: border-color 0.2s; }
   .search-input:focus { border-color: var(--gold); }
   .search-input::placeholder { color: var(--text-muted); }
-
-  /* Buttons */
-  .btn {
-    padding: 10px 20px;
-    border-radius: 4px;
-    border: none;
-    font-family: 'Noto Sans TC', sans-serif;
-    font-size: 1.275rem;
-    cursor: pointer;
-    letter-spacing: 0.05em;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .btn-gold {
-    background: linear-gradient(135deg, #a07820, var(--gold));
-    color: #1a0a00;
-    font-weight: 500;
-  }
+  .btn { padding: 10px 20px; border-radius: 4px; border: none; font-family: 'Noto Sans TC', sans-serif; font-size: 1.275rem; cursor: pointer; letter-spacing: 0.05em; transition: all 0.2s; white-space: nowrap; }
+  .btn-gold { background: linear-gradient(135deg, #a07820, var(--gold)); color: #1a0a00; font-weight: 500; }
   .btn-gold:hover { filter: brightness(1.1); }
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-  }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
   .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
-  .btn-danger {
-    background: transparent;
-    border: 1px solid rgba(192,39,45,0.4);
-    color: #e57373;
-  }
+  .btn-danger { background: transparent; border: 1px solid rgba(192,39,45,0.4); color: #e57373; }
   .btn-danger:hover { background: rgba(192,39,45,0.1); }
-
-  /* Table */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
   table { width: 100%; border-collapse: collapse; }
   thead tr { background: var(--surface2); }
-  th {
-    padding: 14px 20px;
-    text-align: left;
-    font-size: 1.17rem;
-    color: var(--gold);
-    letter-spacing: 0.15em;
-    font-weight: 500;
-    border-bottom: 1px solid var(--border);
-  }
-  td {
-    padding: 14px 20px;
-    font-size: 1.35rem;
-    color: var(--text);
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    vertical-align: middle;
-  }
+  th { padding: 14px 20px; text-align: left; font-size: 1.17rem; color: var(--gold); letter-spacing: 0.15em; font-weight: 500; border-bottom: 1px solid var(--border); }
+  td { padding: 14px 20px; font-size: 1.35rem; color: var(--text); border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover { background: rgba(212,168,67,0.03); }
-
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 1.125rem;
-    letter-spacing: 0.05em;
-  }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 1.125rem; letter-spacing: 0.05em; }
   .badge-gold { background: rgba(212,168,67,0.15); color: var(--gold); }
-  .badge-red { background: rgba(192,39,45,0.15); color: #e57373; }
-
   .row-num { color: var(--text-muted); font-size: 1.2rem; }
   .yt-account { color: var(--gold-light); font-size: 1.32rem; }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-  }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
   .empty-icon { font-size: 4.5rem; margin-bottom: 12px; }
   .empty-text { font-size: 1.35rem; letter-spacing: 0.1em; }
-
-  /* Delete confirm */
-  .delete-btn {
-    background: transparent;
-    border: none;
-    color: rgba(192,39,45,0.5);
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 3px;
-    font-size: 1.2rem;
-    transition: all 0.2s;
-  }
+  .delete-btn { background: transparent; border: none; color: rgba(192,39,45,0.5); cursor: pointer; padding: 4px 8px; border-radius: 3px; font-size: 1.2rem; transition: all 0.2s; }
   .delete-btn:hover { color: #e57373; background: rgba(192,39,45,0.1); }
+  .edit-btn { background: transparent; border: none; color: rgba(212,168,67,0.4); cursor: pointer; padding: 4px 8px; border-radius: 3px; font-size: 1.2rem; transition: all 0.2s; }
+  .edit-btn:hover { color: var(--gold); background: rgba(212,168,67,0.08); }
+  .action-cell { display: flex; gap: 4px; align-items: center; white-space: nowrap; }
 
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 14px 20px;
-    color: var(--text);
-    font-size: 1.32rem;
-    z-index: 200;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  }
+  /* ── 編輯 Modal ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+  .modal-title { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; color: var(--gold); letter-spacing: 0.15em; margin-bottom: 24px; }
+  .modal-group { margin-bottom: 18px; }
+  .modal-label { display: block; font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .modal-input { width: 100%; background: var(--surface2); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 10px 14px; color: var(--text); font-family: 'Noto Sans TC', sans-serif; font-size: 1.35rem; outline: none; transition: border-color 0.2s; }
+  .modal-input:focus { border-color: var(--gold); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 20px; color: var(--text); font-size: 1.32rem; z-index: 400; display: flex; align-items: center; gap: 10px; transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  @media (max-width: 600px) {
-    .main { padding: 16px; }
-    .nav { padding: 0 16px; }
-    td, th { padding: 10px 12px; }
-  }
-
-  /* ── RWD ── */
-  @media (max-width: 900px) {
-    .nav { padding: 0 16px; gap: 0; height: auto; min-height: 56px; flex-wrap: wrap; padding: 8px 16px; }
-    .nav-brand { margin-right: 16px; font-size: 0.9rem; }
-    .nav-link { padding: 6px 10px; font-size: 0.78rem; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 600px) {
-    .main { padding: 12px; }
-    .nav { padding: 8px 12px; }
-    .nav-links { flex-wrap: wrap; gap: 2px; }
-    .nav-link { padding: 5px 8px; font-size: 0.72rem; }
-    .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .header-actions { width: 100%; justify-content: flex-start; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .stat-value { font-size: 1.8rem; }
-    .page-title { font-size: 1.2rem; }
-    th, td { padding: 8px 10px; font-size: 0.8rem; }
-    .table-wrap { overflow-x: auto; }
-    table { min-width: 500px; }
-  }
-  @media (max-width: 400px) {
-    .btn { padding: 7px 12px; font-size: 0.78rem; }
-    .stats-row { grid-template-columns: 1fr 1fr; }
-  }
-
+  @media (max-width: 900px) { .nav { padding: 8px 16px; height: auto; min-height: 56px; flex-wrap: wrap; } .nav-brand { margin-right: 16px; font-size: 0.9rem; } .nav-link { padding: 6px 10px; font-size: 0.78rem; } .stats-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .main { padding: 12px; } .nav { padding: 8px 12px; } .nav-links { flex-wrap: wrap; gap: 2px; } .nav-link { padding: 5px 8px; font-size: 0.72rem; } .page-header { flex-direction: column; align-items: flex-start; gap: 10px; } .header-actions { width: 100%; justify-content: flex-start; } .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; } .stat-value { font-size: 1.8rem; } .page-title { font-size: 1.2rem; } th, td { padding: 8px 10px; font-size: 0.8rem; } .table-wrap { overflow-x: auto; } table { min-width: 500px; } .modal { padding: 20px; } }
+  @media (max-width: 400px) { .btn { padding: 7px 12px; font-size: 0.78rem; } .stats-row { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
@@ -294,22 +112,13 @@
   </div>
 
   <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-label">總報名人數</div>
-      <div class="stat-value" id="totalCount">0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">今日報名</div>
-      <div class="stat-value" id="todayCount">0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">單位數量</div>
-      <div class="stat-value" id="unitCount">0</div>
-    </div>
+    <div class="stat-card"><div class="stat-label">總報名人數</div><div class="stat-value" id="totalCount">0</div></div>
+    <div class="stat-card"><div class="stat-label">今日報名</div><div class="stat-value" id="todayCount">0</div></div>
+    <div class="stat-card"><div class="stat-label">單位數量</div><div class="stat-value" id="unitCount">0</div></div>
   </div>
 
   <div class="toolbar">
-    <input type="text" class="search-input" id="searchInput" placeholder="搜尋姓名、YT帳號、單位名稱..." oninput="renderTable()">
+    <input type="text" class="search-input" id="searchInput" placeholder="搜尋姓名、YT帳號、單位名稱...">
   </div>
 
   <div class="table-wrap">
@@ -331,12 +140,34 @@
   </div>
 </div>
 
+<!-- 編輯 Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">✏️ 修改報名資料</div>
+    <div class="modal-group">
+      <label class="modal-label">YouTube 帳號</label>
+      <input type="text" class="modal-input" id="editYt">
+    </div>
+    <div class="modal-group">
+      <label class="modal-label">真實姓名</label>
+      <input type="text" class="modal-input" id="editName">
+    </div>
+    <div class="modal-group">
+      <label class="modal-label">單位名稱</label>
+      <input type="text" class="modal-input" id="editUnit">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" style="flex:1" onclick="saveEdit()">✓ 儲存</button>
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
-  // 1. 引入 Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+  import { getDatabase, ref, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
@@ -352,59 +183,41 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // ── 變數定義 ──
-  let allData = []; // 存放從雲端抓下來的原始陣列
+  let allData = [];
+  let editingId = null;
 
-  // ── 核心：即時監聽雲端報名資料 ──
   const registrationsRef = ref(db, 'registrations');
 
   onValue(registrationsRef, (snapshot) => {
     const val = snapshot.val();
-    if (!val) {
-      allData = [];
-    } else {
-      // Firebase 物件轉為陣列，並保留 key (firebaseId) 方便刪除
-      allData = Object.keys(val).map(key => ({
-        ...val[key],
-        firebaseId: key 
-      }));
-      // 依時間排序（新的在上面）
-      allData.sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt));
-    }
-    
+    allData = val
+      ? Object.keys(val).map(key => ({ ...val[key], firebaseId: key }))
+          .sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt))
+      : [];
     renderTable();
     updateStats();
   });
 
-  // ── 功能函式 ──
   window.updateStats = function() {
     document.getElementById('totalCount').textContent = allData.length;
-    
     const today = new Date().toLocaleDateString('zh-TW');
-    const todayItems = allData.filter(d => d.registeredAt && d.registeredAt.includes(today));
-    document.getElementById('todayCount').textContent = todayItems.length;
-    
-    const units = new Set(allData.map(d => d.unitName));
-    document.getElementById('unitCount').textContent = units.size;
+    document.getElementById('todayCount').textContent = allData.filter(d => d.registeredAt && d.registeredAt.includes(today)).length;
+    document.getElementById('unitCount').textContent = new Set(allData.map(d => d.unitName)).size;
   };
 
   window.renderTable = function() {
     const q = document.getElementById('searchInput').value.trim().toLowerCase();
-    
-    // 進行搜尋過濾
     const filtered = allData.filter(d =>
       !q ||
       (d.ytAccount && d.ytAccount.toLowerCase().includes(q)) ||
-      (d.realName && d.realName.toLowerCase().includes(q)) ||
-      (d.unitName && d.unitName.toLowerCase().includes(q))
+      (d.realName  && d.realName.toLowerCase().includes(q)) ||
+      (d.unitName  && d.unitName.toLowerCase().includes(q))
     );
-
     const tbody = document.getElementById('tableBody');
-    if (filtered.length === 0) {
+    if (!filtered.length) {
       tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">${allData.length === 0 ? '尚無報名資料' : '找不到符合的資料'}</div></div></td></tr>`;
       return;
     }
-
     tbody.innerHTML = filtered.map((d, i) => `
       <tr>
         <td class="row-num">${i + 1}</td>
@@ -412,61 +225,99 @@
         <td>${esc(d.realName)}</td>
         <td><span class="badge badge-gold">${esc(d.unitName)}</span></td>
         <td style="color:var(--text-muted);font-size:1.23rem">${d.registeredAt || '-'}</td>
-        <td><button class="delete-btn" onclick="deleteRow('${d.firebaseId}')">✕ 刪除</button></td>
+        <td>
+          <div class="action-cell">
+            <button class="edit-btn" onclick="openEdit('${d.firebaseId}')" title="修改">✏️</button>
+            <button class="delete-btn" onclick="deleteRow('${d.firebaseId}')">✕ 刪除</button>
+          </div>
+        </td>
       </tr>
     `).join('');
   };
 
-  // ── 刪除單筆資料 ──
-  window.deleteRow = function(firebaseId) {
-    if (!confirm('確定要刪除此筆資料？這會同步移除雲端紀錄。')) return;
-    const itemRef = ref(db, `registrations/${firebaseId}`);
-    remove(itemRef).then(() => {
-      showToast('已刪除 ✓');
-    });
+  // ── 編輯 ──
+  window.openEdit = function(firebaseId) {
+    const d = allData.find(x => x.firebaseId === firebaseId);
+    if (!d) return;
+    editingId = firebaseId;
+    document.getElementById('editYt').value   = d.ytAccount  || '';
+    document.getElementById('editName').value = d.realName   || '';
+    document.getElementById('editUnit').value = d.unitName   || '';
+    document.getElementById('editModal').classList.add('show');
+    document.getElementById('editYt').focus();
   };
 
-  // ── 清除全部資料 ──
+  window.saveEdit = async function() {
+    if (!editingId) return;
+    const yt   = document.getElementById('editYt').value.trim();
+    const name = document.getElementById('editName').value.trim();
+    const unit = document.getElementById('editUnit').value.trim();
+    if (!yt || !name || !unit) { showToast('三個欄位都不能空白'); return; }
+    try {
+      await update(ref(db, `registrations/${editingId}`), {
+        ytAccount: yt, realName: name, unitName: unit
+      });
+      closeModal();
+      showToast('已更新 ✓');
+    } catch(e) {
+      showToast('更新失敗：' + e.message);
+    }
+  };
+
+  window.closeModal = function() {
+    document.getElementById('editModal').classList.remove('show');
+    editingId = null;
+  };
+
+  // 點 overlay 背景關閉
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Enter 快速儲存
+  ['editYt','editName','editUnit'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') saveEdit();
+      if (e.key === 'Escape') closeModal();
+    });
+  });
+
+  window.deleteRow = function(firebaseId) {
+    if (!confirm('確定要刪除此筆資料？')) return;
+    remove(ref(db, `registrations/${firebaseId}`)).then(() => showToast('已刪除 ✓'));
+  };
+
   window.clearAll = function() {
     if (!confirm('確定要【清空雲端】所有報名資料？此操作無法復原！')) return;
-    remove(registrationsRef).then(() => {
-      showToast('已清空所有報名資料');
-    });
+    remove(registrationsRef).then(() => showToast('已清空所有報名資料'));
   };
 
-  // ── 匯出 CSV ──
   window.exportCSV = function() {
-    if (allData.length === 0) { showToast('沒有資料可以匯出'); return; }
-    const headers = ['#', 'YouTube帳號', '真實姓名', '單位名稱', '報到時間'];
-    const rows = allData.map((d, i) => [i+1, d.ytAccount, d.realName, d.unitName, d.registeredAt]);
-    const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    if (!allData.length) { showToast('沒有資料可以匯出'); return; }
+    const headers = ['#','YouTube帳號','真實姓名','單位名稱','報到時間'];
+    const rows = allData.map((d,i) => [i+1, d.ytAccount, d.realName, d.unitName, d.registeredAt]);
+    const csv = [headers,...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
     const a = document.createElement('a');
-    a.href = url; a.download = `春酒報名名單_${new Date().getTime()}.csv`; a.click();
+    a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+    a.download = `春酒報名名單_${Date.now()}.csv`; a.click();
     showToast('CSV 匯出完成 ✓');
   };
 
-  window.refresh = function() {
-    showToast('雲端已即時同步中...');
-  };
+  window.refresh = function() { showToast('雲端已即時同步中...'); };
 
-  // ── UI 與防禦 ──
   let toastTimer;
   function showToast(msg) {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
+    t.textContent = msg; t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
   }
 
   function esc(s) {
-    if (!s) return "";
+    if (!s) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // 綁定搜尋事件
   document.getElementById('searchInput').addEventListener('input', renderTable);
 </script>
 </body>
