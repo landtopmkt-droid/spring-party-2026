@@ -175,6 +175,9 @@
         <div class="bar-fill" id="barFill" style="width:100%"></div>
       </div>
     </div>
+    <div id="visibilityWarning" style="display:none;margin-top:12px;padding:10px 14px;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:4px;font-size:1.17rem;color:var(--gold)">
+      ⚠️ 此分頁目前在背景，監控可能被瀏覽器節流。建議保持此分頁為當前可見分頁，或使用獨立視窗開啟。
+    </div>
   </div>
 
   <!-- 操作 Log -->
@@ -527,6 +530,47 @@ async function resumeMonitor(vid) {
   }
 }
 
+// ══════════════════════════════════════════════════
+// 防背景節流機制
+// Chrome 對背景分頁的 setInterval 會降速到最慢 60s/次
+// 用兩個策略同時對抗：
+// 1. Web Locks API — 持續持有一把鎖，告訴瀏覽器這個分頁有重要任務
+// 2. Page Visibility API — 分頁重新可見時立刻補跑一次 fetchMessages
+// ══════════════════════════════════════════════════
+
+// ── 策略1：Web Locks（Chrome 69+，Firefox 96+）──
+function acquireWakeLock() {
+  if (!navigator.locks) return;  // 不支援就跳過
+  // 持續持有名為 'yt-monitor' 的鎖，瀏覽器不會把此分頁 throttle
+  function keepLock() {
+    navigator.locks.request('yt-monitor', { mode: 'exclusive' }, () => {
+      // 這個 Promise 永遠不 resolve = 一直持有鎖
+      return new Promise(() => {});
+    }).catch(() => {
+      // 如果被搶走就重新要
+      setTimeout(keepLock, 1000);
+    });
+  }
+  keepLock();
+  console.log('[Worker] Web Lock 已取得，防止背景節流');
+}
+
+// ── 策略2：Page Visibility — 分頁重新可見時補跑 ──
+document.addEventListener('visibilitychange', () => {
+  const warning = document.getElementById('visibilityWarning');
+  if (document.visibilityState === 'visible') {
+    if (warning) warning.style.display = 'none';
+    if (isRunning) {
+      console.log('[Worker] 分頁重新可見，立刻補抓一次留言');
+      fetchMessages().catch(e => addLog('補抓失敗：' + e.message, 'err'));
+      resetCountdown();
+    }
+  } else {
+    if (warning && isRunning) warning.style.display = 'block';
+  }
+});
+
+acquireWakeLock();
 init();
 </script>
 </body>
