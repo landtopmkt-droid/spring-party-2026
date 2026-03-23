@@ -432,6 +432,14 @@
           <button class="btn btn-red-solid" style="flex:2;padding:14px" id="btnDraw" onclick="startDraw()" disabled>▶ 開始抽獎</button>
         </div>
 
+        <!-- 重抽後推送按鈕（重抽後才顯示） -->
+        <div id="btnPushWrap" style="display:none;margin-top:10px">
+          <button class="btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;font-size:1.35rem;letter-spacing:0.1em" onclick="pushRedrawToFrontend()">
+            📡 推送重抽名單到前台
+          </button>
+          <div style="font-size:1.1rem;color:var(--text-muted);margin-top:6px;text-align:center">⚠️ 只推送顯示，不記錄中獎、不影響抽獎紀錄</div>
+        </div>
+
         <!-- 大倒數遮罩 -->
         <div id="drawCountdownOverlay" style="display:none;position:absolute;inset:0;background:rgba(10,0,0,0.92);border-radius:8px;z-index:50;flex-direction:column;align-items:center;justify-content:center;gap:16px">
           <div id="drawCountdownNum" style="font-family:'Noto Serif TC',serif;font-size:8rem;font-weight:900;color:var(--gold-light);text-shadow:0 0 40px rgba(212,168,67,0.6);line-height:1;animation:countPulse 1s ease-in-out infinite">5</div>
@@ -986,7 +994,9 @@
     document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
       `<div class="result-winner-chip ${prize.isMgrPrize ? 'mgr' : ''}">${esc(w.realName)}・${esc(w.unitName)}</div>`
     ).join('');
-    showToast(`🔀 已重新抽獎，共 ${newWinners.length} 人，按「開始抽獎」發送`);
+    // 重抽後顯示推送按鈕
+    document.getElementById('btnPushWrap').style.display = 'block';
+    showToast(`🔀 已重新抽獎，共 ${newWinners.length} 人，可推送前台或按「開始抽獎」正式發送`);
   }
 
   let drawCountdownInterval = null;
@@ -1064,12 +1074,34 @@
     document.getElementById('prizeSelect').value = '';
     document.getElementById('infoBox').className = 'info-box';
     document.getElementById('btnDraw').disabled    = true;
+    document.getElementById('btnPushWrap').style.display = 'none';  // 正式開抽後隱藏推送按鈕
     // 開始抽獎後仍可重新抽獎（用保留的 prize）
     document.getElementById('btnPreview').disabled = false;
     pendingResult = { prize: savedPrize, winners: newWinners };
 
     showToast(`🎉 已啟動抽獎：${prize.name}${prize.isMgrPrize ? '（主管專屬）' : ''}！`);
   }
+
+  // ── 推送重抽名單到前台（不記錄中獎）──
+  window.pushRedrawToFrontend = function() {
+    if (!pendingResult || !pendingResult.winners.length) {
+      showToast('沒有可推送的名單，請先重新抽獎'); return;
+    }
+    const { prize, winners: w } = pendingResult;
+    // 先送 reset 讓前台回到空白，再送新名單覆蓋
+    set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
+    setTimeout(() => {
+      set(ref(db, 'lottery_control'), {
+        status: 'start',
+        timestamp: Date.now(),
+        prizeName: prize.name,
+        prizeCount: prize.count,
+        isMgrPrize: prize.isMgrPrize || false,
+        winners: w.map(p => ({ realName: p.realName, unitName: p.unitName }))
+      });
+    }, 300);
+    showToast('📡 已推送重抽名單到前台（不記錄中獎）');
+  };
 
   function getSelectedPrize() {
     const val = document.getElementById('prizeSelect').value;
@@ -1082,6 +1114,7 @@
     clearInterval(drawCountdownInterval);
     document.getElementById('resultPreview').classList.remove('show');
     document.getElementById('drawCountdownOverlay').classList.remove('show');
+    document.getElementById('btnPushWrap').style.display = 'none';
     pendingResult = null;
     showToast('已重置前台，可進行下一輪抽獎');
   }
