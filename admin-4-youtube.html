@@ -938,6 +938,7 @@ function calcScoreResult(rid) {
   const limitTime = r.limitTime !== false;
 
   console.log('[積分] 計算結果，關鍵字:', kw, '  allMessages:', allMessages.length, '  限時間:', limitTime);
+  console.log('[積分] allMessages 內容:', allMessages.map(m => ({ yt: m.ytName, text: m.text, time: m.time })));
 
   const kwHits = allMessages.filter(m => m.text.toLowerCase().includes(kw));
   console.log('[積分] 含關鍵字留言數:', kwHits.length);
