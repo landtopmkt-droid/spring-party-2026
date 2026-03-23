@@ -236,7 +236,6 @@
     <a href="admin-3-lottery.html" class="nav-link active">抽獎管理</a>
     <a href="admin-4-youtube.html" class="nav-link">YT 監控</a>
     <a href="admin-5-roster.html" class="nav-link">參加名單</a>
-    <a href="admin-6-monitor-worker.html" class="nav-link">▶ 監控背景</a>
   </div>
 </nav>
 
@@ -667,8 +666,9 @@
         !mgrWinners.some(w => w.realName === p.realName && w.unitName === p.unitName)
       );
     }
-    // 普通獎：全員，排除已中普通獎的人
+    // 普通獎：排除主管、排除已中普通獎的人
     return personnel.filter(p =>
+      !p.isManager &&
       !winners.some(w => w.realName === p.realName && w.unitName === p.unitName)
     );
   }
@@ -681,25 +681,35 @@
     if (!personnel.length) { statsEl.style.display = 'none'; return; }
     statsEl.style.display = 'block';
 
-    const mgrCount  = personnel.filter(p => p.isManager).length;
-    const excluded  = personnel.filter(p =>
-      winners.some(w => w.realName === p.realName && w.unitName === p.unitName)
-    ).length;
-    const available = personnel.length - excluded;
+    const mgrCount     = personnel.filter(p => p.isManager).length;
+    const staffCount   = personnel.length - mgrCount;
 
-    document.getElementById('statAvailable').textContent = `可抽人數：${available} 人`;
+    // 一般員工：排除已中普通獎的人
+    const staffExcluded = personnel.filter(p =>
+      !p.isManager && winners.some(w => w.realName === p.realName && w.unitName === p.unitName)
+    ).length;
+    const staffAvail = staffCount - staffExcluded;
+
+    // 主管：排除已中主管獎的人
+    const mgrExcluded = personnel.filter(p =>
+      p.isManager && mgrWinners.some(w => w.realName === p.realName && w.unitName === p.unitName)
+    ).length;
+    const mgrAvail = mgrCount - mgrExcluded;
+
+    document.getElementById('statAvailable').textContent = `一般員工可抽：${staffAvail} 人`;
 
     const mgrEl = document.getElementById('statMgr');
     if (mgrCount > 0) {
-      mgrEl.textContent = `主管：${mgrCount} 人`;
+      mgrEl.textContent = `主管可抽：${mgrAvail} 人`;
       mgrEl.style.display = 'inline-block';
     } else {
       mgrEl.style.display = 'none';
     }
 
     const exEl = document.getElementById('statExcluded');
-    if (excluded > 0) {
-      exEl.textContent = `已中獎排除：${excluded} 人`;
+    const totalExcluded = staffExcluded + mgrExcluded;
+    if (totalExcluded > 0) {
+      exEl.textContent = `已中獎排除：${totalExcluded} 人`;
       exEl.style.display = 'inline-block';
     } else {
       exEl.style.display = 'none';
