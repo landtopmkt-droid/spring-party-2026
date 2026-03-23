@@ -677,43 +677,46 @@ function syncRounds() {
 window.addRound = function() {
   const name = document.getElementById('newRoundName').value.trim();
   if (!name) { showToast('請輸入場次名稱'); return; }
-  rounds.push({ id: Date.now(), name, options: [], answer: '', isOpen: false, openAt: null, closeAt: null, messages: [] });
+  rounds = [...rounds, { id: Date.now(), name, options: [], answer: '', isOpen: false, openAt: null, closeAt: null, messages: [] }];
   syncRounds();
   document.getElementById('newRoundName').value = '';
   showToast('已新增場次：' + name);
 };
 window.deleteRound = function(rid) {
   if (!confirm('確定刪除此場次？')) return;
-  rounds = rounds.filter(r=>r.id!=rid); syncRounds();
+  rounds = rounds.filter(r => String(r.id) !== String(rid)); syncRounds();
 };
 window.openRound = function(rid) {
-  const r = rounds.find(r=>r.id==rid); if (!r) return;
+  const r = rounds.find(r => String(r.id) === String(rid)); if (!r) return;
   r.isOpen=true; r.openAt=new Date().toISOString(); r.closeAt=null;
   syncRounds(); renderRounds();
   showToast('✅ 已開啟「'+r.name+'」，worker 頁面會自動收集留言');
 };
 window.closeRound = function(rid) {
-  const r = rounds.find(r=>r.id==rid); if (!r) return;
+  const r = rounds.find(r => String(r.id) === String(rid)); if (!r) return;
   r.isOpen=false; r.closeAt=new Date().toISOString();
   syncRounds(); renderRounds();
   showToast('⏹ 已關閉「'+r.name+'」');
 };
 window.addOptionToRound = function(rid) {
   const input = document.getElementById('optinput-'+rid);
+  if (!input) return;
   const val = input.value.trim(); if (!val) return;
-  const r = rounds.find(r=>r.id==rid); if (!r) return;
-  if (r.options.includes(val)) { showToast('選項已存在'); return; }
-  r.options.push(val); syncRounds(); input.value=''; renderRounds();
+  const r = rounds.find(r => String(r.id) === String(rid)); if (!r) return;
+  const options = r.options || [];
+  if (options.includes(val)) { showToast('選項已存在'); return; }
+  r.options = [...options, val];
+  syncRounds(); input.value='';
 };
 window.removeOptionFromRound = function(rid, opt) {
-  const r = rounds.find(r=>r.id==rid); if (!r) return;
-  r.options = r.options.filter(o=>o!==opt);
+  const r = rounds.find(r => String(r.id) === String(rid)); if (!r) return;
+  r.options = (r.options || []).filter(o=>o!==opt);
   if (r.answer===opt) r.answer='';
-  syncRounds(); renderRounds();
+  syncRounds();
 };
 window.setRoundAnswer = function(rid, val) {
-  const r = rounds.find(r=>r.id==rid); if (!r) return;
-  r.answer=val; syncRounds(); renderRounds();
+  const r = rounds.find(r => String(r.id) === String(rid)); if (!r) return;
+  r.answer=val; syncRounds();
   if (val) showToast('已設定「'+r.name+'」正確答案：'+val);
 };
 window.toggleRoundCard = function(rid) {
@@ -938,7 +941,7 @@ function calcScoreResult(rid) {
   const limitTime = r.limitTime !== false;
 
   console.log('[積分] 計算結果，關鍵字:', kw, '  allMessages:', allMessages.length, '  限時間:', limitTime);
-  console.log('[積分] allMessages 內容:', JSON.stringify(allMessages.map(m => ({ yt: m.ytName, text: m.text, time: m.time }))));
+  allMessages.forEach((m,i) => console.log(`  [${i}] ytName="${m.ytName}" text="${m.text}" time="${m.time}"`));
 
   const kwHits = allMessages.filter(m => m.text.toLowerCase().includes(kw));
   console.log('[積分] 含關鍵字留言數:', kwHits.length);
