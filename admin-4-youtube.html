@@ -180,6 +180,7 @@
   .score-status-badge{padding:3px 12px;border-radius:12px;font-size:1.1rem;font-weight:500;}
   .score-status-badge.idle{background:rgba(255,255,255,0.05);color:var(--text-muted);border:1px solid rgba(255,255,255,0.08);}
   .score-status-badge.running{background:rgba(76,175,80,0.15);color:#4caf50;border:1px solid rgba(76,175,80,0.3);animation:badgePulse 1.5s infinite;}
+  .score-status-badge.closing{background:rgba(212,168,67,0.12);color:var(--gold);border:1px solid rgba(212,168,67,0.2);animation:badgePulse 1s infinite;}
   .score-status-badge.done{background:rgba(212,168,67,0.1);color:var(--gold);border:1px solid rgba(212,168,67,0.2);}
   .score-round-body{padding:0 18px 18px;border-top:1px solid rgba(255,255,255,0.04);}
   .score-controls{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap;align-items:center;}
@@ -918,18 +919,31 @@ window.stopScoreRound = function(rid) {
   const r = scoreRounds.find(r => String(r.id) === String(rid));
   if (!r) { console.warn('[積分] stopScoreRound 找不到 rid=', rid); return; }
 
+  // 先把狀態改為 closing，讓按鈕立即變成「計算中...」
+  r.status  = 'closing';
+  r.closeAt = new Date().toISOString();
+  renderScoreRounds();
+  showToast('⏳ 等待 worker 同步最新留言（最多 12 秒）...');
+
+  // 等 12 秒讓 worker 至少跑一輪，確保最新留言都進 Firebase
+  setTimeout(() => calcScoreResult(rid), 12000);
+};
+
+function calcScoreResult(rid) {
+  const r = scoreRounds.find(r => String(r.id) === String(rid));
+  if (!r) return;
+
   const kw        = r.keyword.toLowerCase();
   const openAtMs  = new Date(r.openAt).getTime();
-  const limitTime = r.limitTime !== false; // 預設 true（限時間）
+  const limitTime = r.limitTime !== false;
 
-  console.log('[積分] 停止，關鍵字:', kw, '  allMessages:', allMessages.length, '  限時間:', limitTime);
-  console.log('[積分] openAt 原始:', r.openAt, ' ms:', openAtMs);
+  console.log('[積分] 計算結果，關鍵字:', kw, '  allMessages:', allMessages.length, '  限時間:', limitTime);
 
   const kwHits = allMessages.filter(m => m.text.toLowerCase().includes(kw));
   console.log('[積分] 含關鍵字留言數:', kwHits.length);
   kwHits.forEach(m => {
     const mMs = new Date(m.time).getTime();
-    console.log(`  ytName:${m.ytName} | time:${m.time} | ms:${mMs} | >=openAt:${mMs >= openAtMs} | 差距(秒):${((mMs-openAtMs)/1000).toFixed(1)}`);
+    console.log(`  ${m.ytName} | ${m.time} | >=openAt:${mMs >= openAtMs} | 差距(秒):${((mMs - openAtMs)/1000).toFixed(1)}`);
   });
 
   const firstHitMap = {};
@@ -945,12 +959,11 @@ window.stopScoreRound = function(rid) {
   const sorted = Object.values(firstHitMap).sort((a, b) => new Date(a.time) - new Date(b.time));
   console.log('[積分] 命中人數:', sorted.length, sorted.map(m => m.ytName));
 
-  r.hits = sorted.map((m, i) => ({
+  r.hits    = sorted.map((m, i) => ({
     ytName: m.ytName, time: m.time, text: m.text,
     rank: i + 1, pts: scoreForRank(i + 1)
   }));
   r.status  = 'done';
-  r.closeAt = new Date().toISOString();
   syncScoreRounds();
   renderScoreRounds();
   updateScoreTotalSection();
@@ -983,13 +996,17 @@ function renderScoreRounds() {
   }
 
   container.innerHTML = scoreRounds.map((r, idx) => {
-    const statusLabel = r.status === 'running' ? '統計中' : r.status === 'done' ? '已結束' : '待開始';
-    const hits        = r.hits || [];
+    const statusLabel = r.status === 'running' ? '統計中'
+      : r.status === 'closing' ? '同步中...'
+      : r.status === 'done' ? '已結束' : '待開始';
+    const hits = r.hits || [];
 
     const ctrlBtn = r.status === 'idle'
       ? `<button class="btn btn-sm" style="background:linear-gradient(135deg,#2e7d32,var(--green));color:#fff" onclick="startScoreRound('${r.id}')">▶ 開始統計</button>`
       : r.status === 'running'
       ? `<button class="btn btn-sm" style="background:linear-gradient(135deg,#8b1a1e,var(--red));color:#fff" onclick="stopScoreRound('${r.id}')">⏹ 停止統計</button>`
+      : r.status === 'closing'
+      ? `<button class="btn btn-sm" style="background:rgba(255,255,255,0.08);color:var(--text-muted);cursor:not-allowed" disabled>⏳ 等待同步中...</button>`
       : `<button class="btn btn-outline btn-sm" onclick="restartScoreRound('${r.id}')">↺ 重新開始</button>`;
 
     const timeInfo = r.openAt
@@ -1014,7 +1031,7 @@ function renderScoreRounds() {
             </tr>`;
           }).join('')}</tbody>
         </table></div>`
-      : `<div style="color:var(--text-muted);font-size:1.23rem;padding:12px 0">${r.status==='running'?'統計中，留言即時收集...' : r.status==='done'?'無人命中關鍵字':'尚未開始'}</div>`;
+      : `<div style="color:var(--text-muted);font-size:1.23rem;padding:12px 0">${r.status==='running'?'統計中，留言即時收集...' : r.status==='closing'?'⏳ 等待 worker 同步最新留言（最多 12 秒）...' : r.status==='done'?'無人命中關鍵字':'尚未開始'}</div>`;
 
     return `<div class="score-round-card ${r.status==='running'?'running':''}">
       <div class="score-round-header">
