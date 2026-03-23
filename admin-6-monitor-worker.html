@@ -264,23 +264,10 @@ window.startMonitor = async function() {
     document.getElementById('countdownBar').style.display = 'block';
 
     setStatus('running', '監控中');
-
-    // 寫入 Firebase 讓 admin-4 知道目前監控狀態
     set(ref(db, 'yt_worker_status'), { running: true, videoId: vid, startedAt: Date.now() });
 
-    await fetchMessages();
-    startCountdown();
-
-    monitorInterval = setInterval(async () => {
-      try {
-        await fetchMessages();
-      } catch(e) {
-        addLog('抓取失敗：' + e.message, 'err');
-        showError(e.message);
-      }
-      resetCountdown();
-    }, 10000);
-
+    // 用動態輪詢，間隔由 API 回傳的 pollingIntervalMillis 決定
+    scheduleNextFetch(0);
     addLog(`開始監控影片 ${vid}`, 'ok');
 
   } catch(e) {
@@ -295,9 +282,9 @@ window.startMonitor = async function() {
 // ── 停止監控 ──
 window.stopMonitor = function() {
   isRunning = false;
-  clearInterval(monitorInterval);
+  if (monitorInterval) { clearTimeout(monitorInterval); monitorInterval = null; }
   clearInterval(countdownInterval);
-  monitorInterval = liveChatId = nextPageToken = null;
+  liveChatId = nextPageToken = null;
 
   setStatus('idle', '已停止');
   document.getElementById('btnStart').disabled = false;
@@ -321,15 +308,39 @@ window.clearData = function() {
   addLog('已清除留言資料', 'info');
 };
 
-// ── 抓取留言 ──
+// ── 動態排程：用 API 建議的間隔決定下次抓取時間 ──
+const MIN_INTERVAL_MS = 5000;   // 最短 5 秒（保護下限）
+const MAX_INTERVAL_MS = 30000;  // 最長 30 秒
+
+function scheduleNextFetch(delayMs) {
+  if (!isRunning) return;
+  const clampedDelay = Math.max(MIN_INTERVAL_MS, Math.min(MAX_INTERVAL_MS, delayMs));
+  startCountdown(Math.round(clampedDelay / 1000));
+  monitorInterval = setTimeout(async () => {
+    if (!isRunning) return;
+    try {
+      const interval = await fetchMessages();
+      scheduleNextFetch(interval);
+    } catch(e) {
+      addLog('抓取失敗：' + e.message + '，15秒後重試', 'err');
+      showError(e.message);
+      scheduleNextFetch(15000);  // 出錯時等 15 秒再重試
+    }
+  }, clampedDelay);
+}
+
+// ── 抓取留言，回傳 API 建議的下次輪詢間隔（ms）──
 async function fetchMessages() {
-  if (!liveChatId) return;
+  if (!liveChatId) return MAX_INTERVAL_MS;
   let url = `https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${liveChatId}&part=snippet,authorDetails&maxResults=200&key=${API_KEY}`;
   if (nextPageToken) url += `&pageToken=${nextPageToken}`;
 
   const res  = await fetch(url);
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
+
+  // ★ 用 API 建議的輪詢間隔（通常 5000~15000ms）
+  const suggestedInterval = data.pollingIntervalMillis || 10000;
 
   nextPageToken = data.nextPageToken || nextPageToken;
 
@@ -353,20 +364,19 @@ async function fetchMessages() {
     collectRoundMessages(msg);
   });
 
-  // 裁切超過 10000 筆
   if (allMessages.length > 10000) allMessages = allMessages.slice(-10000);
 
-  // 寫入 Firebase（只寫 userCounts，allMessages 用 push 累加方式較省流量）
   syncToFirebase();
   updateStats(newCount);
 
   if (newCount > 0) {
-    addLog(`新增 ${newCount} 則留言（累計 ${allMessages.length} 則）`, 'ok');
-    // 若有開啟中的競猜場次，順便同步 rounds
+    addLog(`新增 ${newCount} 則留言（累計 ${allMessages.length} 則，下次 ${Math.round(suggestedInterval/1000)}s 後）`, 'ok');
     if (rounds.some(r => r.isOpen)) {
       set(ref(db, 'pred_rounds'), Object.fromEntries(rounds.map((r, i) => [i, r])));
     }
   }
+
+  return suggestedInterval;
 }
 
 // ── 競猜場次收集 ──
@@ -405,22 +415,20 @@ function setStatus(type, text) {
   txt.textContent = text;
 }
 
-function startCountdown() {
+function startCountdown(totalSecs = 10) {
   clearInterval(countdownInterval);
-  countdown = 10;
-  updateCountdownBar();
+  countdown = totalSecs;
+  updateCountdownBar(totalSecs);
   countdownInterval = setInterval(() => {
     countdown--;
-    if (countdown < 0) countdown = 10;
-    updateCountdownBar();
+    if (countdown < 0) countdown = 0;
+    updateCountdownBar(totalSecs);
   }, 1000);
 }
 
-function resetCountdown() { countdown = 10; }
-
-function updateCountdownBar() {
+function updateCountdownBar(totalSecs = 10) {
   document.getElementById('countdownSec').textContent = countdown + 's';
-  document.getElementById('barFill').style.width = (countdown / 10 * 100) + '%';
+  document.getElementById('barFill').style.width = (countdown / totalSecs * 100) + '%';
 }
 
 function showError(msg) {
@@ -509,15 +517,7 @@ async function resumeMonitor(vid) {
     // 不覆蓋 startedAt，保留原本的開始時間
     set(ref(db, 'yt_worker_status'), { running: true, videoId: vid, startedAt: Date.now() });
 
-    await fetchMessages();
-    startCountdown();
-
-    monitorInterval = setInterval(async () => {
-      try { await fetchMessages(); }
-      catch(e) { addLog('抓取失敗：' + e.message, 'err'); showError(e.message); }
-      resetCountdown();
-    }, 10000);
-
+    scheduleNextFetch(0);
     addLog(`已恢復監控影片 ${vid}`, 'ok');
 
   } catch(e) {
@@ -563,7 +563,6 @@ document.addEventListener('visibilitychange', () => {
     if (isRunning) {
       console.log('[Worker] 分頁重新可見，立刻補抓一次留言');
       fetchMessages().catch(e => addLog('補抓失敗：' + e.message, 'err'));
-      resetCountdown();
     }
   } else {
     if (warning && isRunning) warning.style.display = 'block';
