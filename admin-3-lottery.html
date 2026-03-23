@@ -141,6 +141,35 @@
   .icon-btn.cancel { color: var(--text-muted); }
   .icon-btn.cancel:hover { color: var(--text); background: rgba(255,255,255,0.05); }
 
+  /* ── 狀態 toggle 按鈕 ── */
+  .status-toggle-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; border: 1px solid;
+    font-size: 1.08rem; cursor: pointer; transition: all 0.18s;
+    background: transparent; font-family: 'Noto Sans TC', sans-serif;
+    white-space: nowrap;
+  }
+  .status-toggle-btn.avail {
+    color: var(--green); border-color: rgba(76,175,80,0.3);
+  }
+  .status-toggle-btn.avail:hover {
+    background: rgba(76,175,80,0.08); border-color: rgba(76,175,80,0.6);
+  }
+  .status-toggle-btn.drawn {
+    color: #e57373; border-color: rgba(192,39,45,0.3);
+    background: rgba(192,39,45,0.06);
+  }
+  .status-toggle-btn.drawn:hover {
+    background: rgba(192,39,45,0.14); border-color: rgba(192,39,45,0.6);
+  }
+  .status-toggle-btn.mgr-drawn {
+    color: var(--mgr); border-color: var(--mgr-border);
+    background: var(--mgr-bg);
+  }
+  .status-toggle-btn.mgr-drawn:hover {
+    background: rgba(167,139,250,0.2);
+  }
+
   /* ── 獎品列表 ── */
   .prize-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
   .prize-item {
@@ -666,6 +695,48 @@
     savePersonnel(updated);
   };
 
+  // ──────────────────────────────────────────────
+  // 手動切換中獎狀態
+  // ──────────────────────────────────────────────
+  window.toggleWinStatus = function(idx) {
+    const p = personnel[idx];
+    if (!p) return;
+
+    const key = (w) => w.realName === p.realName && w.unitName === p.unitName;
+
+    if (p.isManager) {
+      // 主管：切換 mgrWinners
+      const alreadyWon = mgrWinners.some(key);
+      if (alreadyWon) {
+        // 主管獎已中 → 改為可抽
+        const updated = mgrWinners.filter(w => !key(w));
+        set(ref(db, 'springFest/mgrWinners'),
+          updated.length ? Object.fromEntries(updated.map((w, i) => [i, w])) : null);
+        showToast(`已將 ${p.realName} 改為「主管可抽」`);
+      } else {
+        // 主管可抽 → 標為已中
+        const updated = [...mgrWinners, { realName: p.realName, unitName: p.unitName }];
+        set(ref(db, 'springFest/mgrWinners'), Object.fromEntries(updated.map((w, i) => [i, w])));
+        showToast(`已將 ${p.realName} 標為「主管獎已中」`);
+      }
+    } else {
+      // 一般員工：切換 winners
+      const alreadyWon = winners.some(key);
+      if (alreadyWon) {
+        // 已中獎 → 改為可抽
+        const updated = winners.filter(w => !key(w));
+        set(ref(db, 'springFest/winners'),
+          updated.length ? Object.fromEntries(updated.map((w, i) => [i, w])) : null);
+        showToast(`已將 ${p.realName} 改為「可抽」`);
+      } else {
+        // 可抽 → 標為已中獎
+        const updated = [...winners, { realName: p.realName, unitName: p.unitName }];
+        set(ref(db, 'springFest/winners'), Object.fromEntries(updated.map((w, i) => [i, w])));
+        showToast(`已將 ${p.realName} 標為「已中獎」`);
+      }
+    }
+  };
+
   function savePersonnel(arr) {
     if (!arr.length) { set(ref(db, 'springFest/personnel'), null); return; }
     const obj = Object.fromEntries(arr.map((p, i) => [i, p]));
@@ -837,18 +908,28 @@
         </tr>`;
       }
 
-      const statusCell = isExcluded
-        ? `<span class="excluded-tag">已中獎</span>`
-        : (isMgrExcluded
-            ? `<span style="font-size:1.05rem;color:var(--mgr);background:var(--mgr-bg);padding:1px 6px;border-radius:8px">主管獎已中</span>`
-            : `<span style="color:var(--green);font-size:1.17rem">可抽</span>`);
+      // ── 狀態 toggle 按鈕 ──
+      let statusBtn = '';
+      if (p.isManager) {
+        if (isMgrExcluded) {
+          statusBtn = `<button class="status-toggle-btn mgr-drawn" onclick="toggleWinStatus(${i})" title="點擊改為主管可抽">👑 主管獎已中 ↩</button>`;
+        } else {
+          statusBtn = `<button class="status-toggle-btn avail" onclick="toggleWinStatus(${i})" title="點擊標為主管獎已中">✓ 可抽</button>`;
+        }
+      } else {
+        if (isExcluded) {
+          statusBtn = `<button class="status-toggle-btn drawn" onclick="toggleWinStatus(${i})" title="點擊改為可抽">已中獎 ↩</button>`;
+        } else {
+          statusBtn = `<button class="status-toggle-btn avail" onclick="toggleWinStatus(${i})" title="點擊標為已中獎">✓ 可抽</button>`;
+        }
+      }
 
       return `<tr class="${isExcluded ? 'excluded-row' : ''}">
         <td style="color:var(--text-muted)">${i+1}</td>
         <td>${highlight(p.realName, q)}</td>
         <td>${highlight(p.unitName, q)}</td>
         <td>${p.isManager ? '<span class="mgr-badge">👑 主管</span>' : '<span style="color:var(--text-muted);font-size:1.2rem">—</span>'}</td>
-        <td>${statusCell}</td>
+        <td>${statusBtn}</td>
         <td>
           <div class="action-btns">
             <button class="icon-btn edit" onclick="startEditRow(${i})" title="編輯">✏️</button>
@@ -1228,6 +1309,7 @@
   window.cancelEditRow     = cancelEditRow;
   window.saveEditRow       = saveEditRow;
   window.toggleManagerFlag = toggleManagerFlag;
+  window.toggleWinStatus   = toggleWinStatus;
   window.clearPersonnel    = clearPersonnel;
   window.addPrize          = addPrize;
   window.deletePrize       = deletePrize;
