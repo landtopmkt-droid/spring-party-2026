@@ -53,16 +53,15 @@
   }
   #drawScreen.show { display: flex; }
 
-  #drawVideo {
+  /* 用 canvas 渲染 VP9 alpha，避免 Chrome 卡第一幀 */
+  #drawCanvas {
     max-width: 80%;
     max-height: 80%;
     width: auto;
     height: auto;
-    object-fit: contain;
-    /* ★ 關鍵：讓瀏覽器正確渲染 VP9 alpha 透明通道 */
-    mix-blend-mode: normal;
-    isolation: isolate;
   }
+  /* 隱藏的 video 元素只用來解碼，不顯示 */
+  #drawVideo { display: none; }
 
   #resultScreen {
     position: fixed; inset: 0; z-index: 20;
@@ -154,10 +153,12 @@
 </div>
 
 <div id="drawScreen">
-  <video id="drawVideo" muted playsinline preload="auto">
+  <!-- video 只用來解碼，canvas 負責渲染（解決 VP9 Alpha 卡幀問題）-->
+  <video id="drawVideo" muted playsinline preload="auto" style="display:none">
     <source src="lottery-draw.webm" type="video/webm">
     <source src="lottery-draw.mp4" type="video/mp4">
   </video>
+  <canvas id="drawCanvas"></canvas>
 </div>
 
 <div id="resultScreen">
@@ -200,14 +201,37 @@
   const drawScreen   = document.getElementById('drawScreen');
   const resultScreen = document.getElementById('resultScreen');
   const drawVideo    = document.getElementById('drawVideo');
+  const drawCanvas   = document.getElementById('drawCanvas');
+  const ctx          = drawCanvas.getContext('2d');
+  let   rafId        = null;  // requestAnimationFrame ID
 
   window.unlock = function() {
     unlocked = true;
     document.getElementById('unlockOverlay').classList.add('hidden');
-    // 預先載入影片
-    drawVideo.load();
+    drawVideo.load();  // 預先載入
     if (pendingData) { handleCommand(pendingData); pendingData = null; }
   };
+
+  // ── canvas 渲染迴圈（每幀把 video 畫到 canvas，保留 alpha）──
+  function startCanvasRender() {
+    function render() {
+      if (drawVideo.paused || drawVideo.ended) return;
+      // 確保 canvas 尺寸跟影片一致
+      if (drawCanvas.width !== drawVideo.videoWidth) {
+        drawCanvas.width  = drawVideo.videoWidth;
+        drawCanvas.height = drawVideo.videoHeight;
+      }
+      ctx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+      ctx.drawImage(drawVideo, 0, 0);
+      rafId = requestAnimationFrame(render);
+    }
+    rafId = requestAnimationFrame(render);
+  }
+
+  function stopCanvasRender() {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    ctx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+  }
 
   function startDraw(data) {
     if (state !== 'idle') return;
@@ -216,14 +240,20 @@
     drawScreen.classList.add('show');
     drawVideo.currentTime = 0;
 
-    // ★ 確保影片已載入再播放
     const tryPlay = () => {
+      // 設定 canvas 初始尺寸
+      drawCanvas.width  = drawVideo.videoWidth  || 544;
+      drawCanvas.height = drawVideo.videoHeight || 850;
+
+      startCanvasRender();  // 開始 canvas 渲染
+
       const playPromise = drawVideo.play();
       let timer = setTimeout(endDraw, DRAW_DURATION_MS);
 
       if (playPromise !== undefined) {
         playPromise.catch(e => {
           console.warn('影片播放失敗，跳到結果:', e);
+          stopCanvasRender();
           clearTimeout(timer);
           endDraw();
         });
@@ -235,7 +265,6 @@
       }, { once: true });
     };
 
-    // 如果影片還沒 ready，等 canplay 後再播
     if (drawVideo.readyState >= 3) {
       tryPlay();
     } else {
@@ -247,8 +276,9 @@
   }
 
   function endDraw() {
-    drawScreen.classList.remove('show');
+    stopCanvasRender();
     drawVideo.pause();
+    drawScreen.classList.remove('show');
     showResult(window._currentDrawData);
   }
 

@@ -195,6 +195,28 @@
   .score-total-pts{font-size:1.8rem;font-weight:600;color:var(--gold-light);}
   .score-col{font-size:1.17rem;color:var(--text-muted);text-align:center;}
 
+  /* 前5名大卡片 */
+  .top5-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    text-align: center;
+    min-width: 140px;
+    flex: 1;
+    max-width: 200px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .top5-card.rank-1 { border-color: var(--gold); background: rgba(212,168,67,0.08); box-shadow: 0 0 20px rgba(212,168,67,0.1); }
+  .top5-card.rank-2 { border-color: rgba(192,192,192,0.4); background: rgba(192,192,192,0.05); }
+  .top5-card.rank-3 { border-color: rgba(205,127,50,0.4); background: rgba(205,127,50,0.05); }
+  .top5-rank-emoji { font-size: 2.2rem; margin-bottom: 6px; }
+  .top5-name { font-size: 1.35rem; font-weight: 600; color: var(--text); margin-bottom: 4px; word-break: break-all; }
+  .top5-unit { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 10px; }
+  .top5-pts  { font-size: 2.4rem; font-weight: 700; color: var(--gold-light); line-height: 1; }
+  .top5-pts-label { font-size: 1rem; color: var(--text-muted); margin-top: 2px; letter-spacing: 0.1em; }
+
   .empty-state{text-align:center;padding:48px 20px;color:var(--text-muted);}
   .empty-icon{font-size:3.75rem;margin-bottom:10px;}
   .toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:14px 20px;color:var(--text);font-size:1.32rem;z-index:200;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(0.34,1.56,0.64,1);}
@@ -368,13 +390,18 @@
         <div style="font-size:1.35rem;font-weight:500;color:var(--gold);letter-spacing:0.1em">🏅 總積分排行榜</div>
         <button class="btn" style="background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500" onclick="calcTotalScore()">重新計算</button>
       </div>
+
+      <!-- 前5名大卡片 -->
+      <div id="scoreTop5" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:24px"></div>
+
+      <!-- 完整排行表格 -->
       <div class="count-table-wrap">
         <table>
           <thead><tr>
             <th style="width:48px">#</th>
             <th>YouTube 帳號</th><th>本名</th><th>單位</th>
             <th id="scoreRoundHeaders"></th>
-            <th style="color:var(--gold-light)">總積分</th>
+            <th style="color:var(--gold-light);text-align:center">總積分</th>
           </tr></thead>
           <tbody id="scoreTotalBody"></tbody>
         </table>
@@ -1089,6 +1116,23 @@ window.calcTotalScore = function() {
     .sort((a, b) => b.pts - a.pts);
 
   if (!sorted.length) { showToast('沒有積分資料'); return; }
+
+  // ── 前5名大卡片 ──
+  const rankEmojis = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  const rankClasses = ['rank-1','rank-2','rank-3','',''];
+  const top5 = sorted.slice(0, 5);
+  document.getElementById('scoreTop5').innerHTML = top5.map((s, i) => {
+    const m = matchUser(s.ytName);
+    const displayName = m ? m.realName : s.ytName;
+    const displayUnit = m ? m.unitName : '';
+    return `<div class="top5-card ${rankClasses[i]}">
+      <div class="top5-rank-emoji">${rankEmojis[i]}</div>
+      <div class="top5-name">${esc(displayName)}</div>
+      ${displayUnit ? `<div class="top5-unit">${esc(displayUnit)}</div>` : ''}
+      <div class="top5-pts">${s.pts}</div>
+      <div class="top5-pts-label">分</div>
+    </div>`;
+  }).join('');
 
   // 動態生成各場次欄位 header
   const hdrs = donedRounds.map(r =>
