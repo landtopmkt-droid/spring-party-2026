@@ -180,7 +180,10 @@
   .info-box.mgr-info { background: var(--mgr-bg); border-color: var(--mgr-border); }
   .info-box.mgr-info span { color: var(--mgr); }
 
-  .result-preview { background: var(--surface2); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; padding: 16px; margin-top: 14px; display: none; }
+  .result-preview { background: var(--surface2); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; padding: 16px; margin-top: 14px; display: none; position: relative; overflow: hidden; }
+  #drawCountdownOverlay { display: none; }
+  #drawCountdownOverlay.show { display: flex !important; }
+  @keyframes countPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.12);opacity:0.85} }
   .result-preview.show { display: block; }
   .result-preview-title { font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.15em; margin-bottom: 10px; }
   .result-winner-list { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -420,13 +423,19 @@
         </div>
 
         <div class="result-preview" id="resultPreview">
-          <div class="result-preview-title" id="resultPreviewTitle">⏳ 已發送抽獎指令，<span id="resultCountdown">5</span> 秒後公布得獎名單...</div>
+          <div class="result-preview-title" id="resultPreviewTitle">✅ 得獎名單</div>
           <div class="result-winner-list" id="previewWinners"></div>
         </div>
 
         <div style="margin-top:16px;display:flex;gap:10px">
           <button class="btn btn-outline" style="flex:1" id="btnPreview" onclick="previewDraw()" disabled>🔀 重新抽獎</button>
           <button class="btn btn-red-solid" style="flex:2;padding:14px" id="btnDraw" onclick="startDraw()" disabled>▶ 開始抽獎</button>
+        </div>
+
+        <!-- 大倒數遮罩 -->
+        <div id="drawCountdownOverlay" style="display:none;position:absolute;inset:0;background:rgba(10,0,0,0.92);border-radius:8px;z-index:50;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+          <div id="drawCountdownNum" style="font-family:'Noto Serif TC',serif;font-size:8rem;font-weight:900;color:var(--gold-light);text-shadow:0 0 40px rgba(212,168,67,0.6);line-height:1;animation:countPulse 1s ease-in-out infinite">5</div>
+          <div style="font-size:1.5rem;color:var(--text-muted);letter-spacing:0.2em">抽獎結果即將公布</div>
         </div>
 
         <div class="note">
@@ -963,17 +972,20 @@
   }
 
   function previewDraw() {
-    const prize = getSelectedPrize();
-    if (!prize) return;
+    // 優先用目前選取的獎項，若抽獎後 select 已清空則用 pendingResult 裡的 prize
+    const prize = getSelectedPrize() || (pendingResult && pendingResult.prize) || null;
+    if (!prize) { showToast('請先選擇獎項'); return; }
     const pool = getAvailablePool(prize);
     if (!pool.length) {
-      const label = prize.isMgrPrize ? '主管名單為空或全部已中獎' : '可抽名單為空';
-      showToast(label); return;
+      showToast(prize.isMgrPrize ? '主管名單為空或全部已中獎' : '可抽名單為空');
+      return;
     }
     const newWinners = pickWinners(prize);
     pendingResult = { prize, winners: newWinners };
-    // 預覽不再立即顯示，等按下「開始抽獎」後才顯示
-    document.getElementById('resultPreview').classList.remove('show');
+    // 先把名單填進去但不顯示（等開始抽獎後才顯示）
+    document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
+      `<div class="result-winner-chip ${prize.isMgrPrize ? 'mgr' : ''}">${esc(w.realName)}・${esc(w.unitName)}</div>`
+    ).join('');
     showToast(`🔀 已重新抽獎，共 ${newWinners.length} 人，按「開始抽獎」發送`);
   }
 
@@ -1026,36 +1038,35 @@
     // 防呆鎖
     set(ref(db, 'springFest/needsReset'), true);
 
-    // ── 倒數5秒後才顯示預覽得獎名單 ──
-    const prevEl = document.getElementById('resultPreview');
-    const titleEl = document.getElementById('resultPreviewTitle');
-    const countdownEl = document.getElementById('resultCountdown');
-    prevEl.classList.add('show');
-    document.getElementById('previewWinners').innerHTML = '';  // 先清空名單
+    // ── 大數字倒數遮罩 ──
+    const prevEl    = document.getElementById('resultPreview');
+    const overlayEl = document.getElementById('drawCountdownOverlay');
+    const numEl     = document.getElementById('drawCountdownNum');
+
+    prevEl.classList.add('show');       // 先顯示 preview 區塊（名單已在裡面但被遮住）
+    overlayEl.classList.add('show');    // 遮罩蓋住
+    numEl.textContent = '5';
+
     let cd = 5;
-    countdownEl.textContent = cd;
-    titleEl.innerHTML = `⏳ 已發送抽獎指令，<span id="resultCountdown">${cd}</span> 秒後公布得獎名單...`;
     clearInterval(drawCountdownInterval);
     drawCountdownInterval = setInterval(() => {
       cd--;
-      const el = document.getElementById('resultCountdown');
-      if (el) el.textContent = cd;
-      if (cd <= 0) {
+      if (cd > 0) {
+        numEl.textContent = String(cd);
+      } else {
         clearInterval(drawCountdownInterval);
-        // 倒數結束，顯示得獎名單
-        if (titleEl) titleEl.textContent = '✅ 得獎名單';
-        document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
-          `<div class="result-winner-chip ${isMgr ? 'mgr' : ''}">${esc(w.realName)}・${esc(w.unitName)}</div>`
-        ).join('');
+        overlayEl.classList.remove('show');  // 移除遮罩，露出名單
       }
     }, 1000);
 
-    // 重置 UI（但保留 resultPreview 顯示倒數）
+    // 重置 UI，但保留 pendingResult.prize 供「重新抽獎」使用
+    const savedPrize = pendingResult.prize;
     document.getElementById('prizeSelect').value = '';
     document.getElementById('infoBox').className = 'info-box';
     document.getElementById('btnDraw').disabled    = true;
-    document.getElementById('btnPreview').disabled = true;
-    pendingResult = null;
+    // 開始抽獎後仍可重新抽獎（用保留的 prize）
+    document.getElementById('btnPreview').disabled = false;
+    pendingResult = { prize: savedPrize, winners: newWinners };
 
     showToast(`🎉 已啟動抽獎：${prize.name}${prize.isMgrPrize ? '（主管專屬）' : ''}！`);
   }
@@ -1070,6 +1081,8 @@
     set(ref(db, 'springFest/needsReset'), false);
     clearInterval(drawCountdownInterval);
     document.getElementById('resultPreview').classList.remove('show');
+    document.getElementById('drawCountdownOverlay').classList.remove('show');
+    pendingResult = null;
     showToast('已重置前台，可進行下一輪抽獎');
   }
 
