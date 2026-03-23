@@ -21,7 +21,6 @@
     font-family: 'Noto Serif TC', serif;
   }
 
-  /* ── 點擊解鎖層（一般瀏覽器需要；OBS 可直接點一下） ── */
   #unlockOverlay {
     position: fixed;
     inset: 0;
@@ -43,39 +42,34 @@
     font-family: 'Noto Sans TC', sans-serif;
   }
 
-  /* ── 抽獎影片畫面 ── */
-#drawScreen {
-  position: fixed; 
-  inset: 0; 
-  z-index: 10;
-  background: transparent !important; /* 確保背景全透 */
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
+  #drawScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: transparent !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #drawScreen.show { display: flex; }
 
-#drawScreen.show {
-  display: flex; /* 當顯示時，從 block 改為 flex */
-}
+  #drawVideo {
+    max-width: 80%;
+    max-height: 80%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    /* ★ 關鍵：讓瀏覽器正確渲染 VP9 alpha 透明通道 */
+    mix-blend-mode: normal;
+    isolation: isolate;
+  }
 
-#drawVideo { 
-  max-width: 80%; 
-  max-height: 80%; 
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  /* 如果你的 WebM 邊緣還是有一點黑邊，可以取消註解下面這行 */
-  /* mix-blend-mode: screen; */ 
-}
-
-  /* ── 得獎結果畫面 ── */
-  /* ── 結果畫面：固定頂部標題 + 名單區可捲動 ── */
   #resultScreen {
     position: fixed; inset: 0; z-index: 20;
     background: linear-gradient(135deg, #1a0500, #0a0000, #1a0500);
     display: none;
     flex-direction: column;
-    overflow: hidden; /* 整體不捲動，只讓名單區捲動 */
+    overflow: hidden;
   }
   #resultScreen.show {
     display: flex;
@@ -86,7 +80,6 @@
     to   { opacity: 1; transform: scale(1); }
   }
 
-  /* 固定在頂部的標題區 */
   .result-header {
     text-align: center;
     padding: 16px 20px 8px;
@@ -98,7 +91,6 @@
 
   .result-divider { width: 180px; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); margin: 8px auto 6px; flex-shrink: 0; }
 
-  /* 名單區：可捲動，佔滿剩餘空間 */
   .winners-scroll {
     flex: 1;
     overflow-y: auto;
@@ -112,7 +104,6 @@
 
   .winners-grid { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; max-width: 1400px; margin: 0 auto; width: 100%; }
 
-  /* card 基礎尺寸放大 1.5x，再乘以人數縮放係數 */
   .winner-card {
     background: rgba(192,39,45,0.2);
     border: 1px solid rgba(212,168,67,0.45);
@@ -157,7 +148,6 @@
 </head>
 <body>
 
-<!-- 首次點擊解鎖（讓瀏覽器允許影片自動播放） -->
 <div id="unlockOverlay" onclick="unlock()">
   <div class="u-icon">🎊</div>
   <div class="u-text">點擊畫面以啟動抽獎系統</div>
@@ -200,33 +190,25 @@
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
 
-  // ── State ──
-  // 'idle' → 等待指令
-  // 'drawing' → 播放影片中
-  // 'result' → 顯示得獎名單
-  let state            = 'idle';
-  let unlocked         = false;
-  let pendingData      = null;   // unlock 前暫存的指令
-  let lastTimestamp    = 0;      // 已處理過的最新 timestamp，防止重複觸發
+  let state         = 'idle';
+  let unlocked      = false;
+  let pendingData   = null;
+  let lastTimestamp = 0;
 
   const DRAW_DURATION_MS = 6000;
 
-  const drawScreen  = document.getElementById('drawScreen');
+  const drawScreen   = document.getElementById('drawScreen');
   const resultScreen = document.getElementById('resultScreen');
-  const drawVideo   = document.getElementById('drawVideo');
+  const drawVideo    = document.getElementById('drawVideo');
 
-  // ── 解鎖點擊 ──
   window.unlock = function() {
     unlocked = true;
     document.getElementById('unlockOverlay').classList.add('hidden');
-
-    if (pendingData) {
-      handleCommand(pendingData);
-      pendingData = null;
-    }
+    // 預先載入影片
+    drawVideo.load();
+    if (pendingData) { handleCommand(pendingData); pendingData = null; }
   };
 
-  // ── 抽獎流程 ──
   function startDraw(data) {
     if (state !== 'idle') return;
     state = 'drawing';
@@ -234,23 +216,33 @@
     drawScreen.classList.add('show');
     drawVideo.currentTime = 0;
 
-    const playPromise = drawVideo.play();
-    let timer = setTimeout(endDraw, DRAW_DURATION_MS);
+    // ★ 確保影片已載入再播放
+    const tryPlay = () => {
+      const playPromise = drawVideo.play();
+      let timer = setTimeout(endDraw, DRAW_DURATION_MS);
 
-    if (playPromise !== undefined) {
-      playPromise.catch(e => {
-        console.warn('影片播放被阻擋，直接跳到結果:', e);
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.warn('影片播放失敗，跳到結果:', e);
+          clearTimeout(timer);
+          endDraw();
+        });
+      }
+
+      drawVideo.addEventListener('ended', () => {
         clearTimeout(timer);
         endDraw();
-      });
+      }, { once: true });
+    };
+
+    // 如果影片還沒 ready，等 canplay 後再播
+    if (drawVideo.readyState >= 3) {
+      tryPlay();
+    } else {
+      drawVideo.addEventListener('canplay', tryPlay, { once: true });
+      drawVideo.load();
     }
 
-    drawVideo.addEventListener('ended', () => {
-      clearTimeout(timer);
-      endDraw();
-    }, { once: true });
-
-    // 存好本次名單
     window._currentDrawData = data;
   }
 
@@ -281,14 +273,11 @@
       grid.appendChild(card);
     });
 
-    // 根據人數計算縮放：
-    // ≤8人: 100%, ≤15人: 80%, ≤25人: 65%, ≤40人: 50%, >40人: 40%
     const n = winners.length;
     const scale = n <= 8 ? 1 : n <= 15 ? 0.8 : n <= 25 ? 0.65 : n <= 40 ? 0.5 : 0.4;
     grid.style.setProperty('--card-scale', scale);
 
     resultScreen.classList.add('show');
-    // 捲回頂部
     requestAnimationFrame(() => {
       const scrollEl = resultScreen.querySelector('.winners-scroll');
       if (scrollEl) scrollEl.scrollTop = 0;
@@ -304,37 +293,23 @@
     state = 'idle';
   }
 
-  // ── 統一處理從 Firebase 來的指令 ──
   function handleCommand(data) {
-    console.log('執行指令:', data.status, '  timestamp:', data.timestamp);
-
     if (data.status === 'start') {
-      // 同一個 timestamp 不重複執行
       if (data.timestamp && data.timestamp === lastTimestamp) return;
       lastTimestamp = data.timestamp || Date.now();
-
       if (state === 'idle') startDraw(data);
-
     } else if (data.status === 'reset') {
       resetToIdle();
     }
   }
 
-  // ── 監聽 Firebase lottery_control ──
   onValue(ref(db, 'lottery_control'), (snapshot) => {
     const data = snapshot.val();
     if (!data) return;
-
-    if (!unlocked) {
-      // 解鎖前暫存最新指令
-      pendingData = data;
-      return;
-    }
-
+    if (!unlocked) { pendingData = data; return; }
     handleCommand(data);
   });
 
-  // ── 彩帶 ──
   function launchConfetti() {
     const colors = ['#c0272d','#d4a843','#f0c96a','#fff','#ff6b6b','#ffd700'];
     for (let i = 0; i < 90; i++) {
