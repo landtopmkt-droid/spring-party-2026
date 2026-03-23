@@ -560,10 +560,6 @@ document.addEventListener('visibilitychange', () => {
   const warning = document.getElementById('visibilityWarning');
   if (document.visibilityState === 'visible') {
     if (warning) warning.style.display = 'none';
-    if (isRunning) {
-      console.log('[Worker] 分頁重新可見，立刻補抓一次留言');
-      fetchMessages().catch(e => addLog('補抓失敗：' + e.message, 'err'));
-    }
   } else {
     if (warning && isRunning) warning.style.display = 'block';
   }
