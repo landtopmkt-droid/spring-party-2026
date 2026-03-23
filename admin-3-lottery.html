@@ -437,7 +437,7 @@
           <button class="btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;font-size:1.35rem;letter-spacing:0.1em" onclick="pushRedrawToFrontend()">
             📡 推送重抽名單到前台
           </button>
-          <div style="font-size:1.1rem;color:var(--text-muted);margin-top:6px;text-align:center">⚠️ 只推送顯示，不記錄中獎、不影響抽獎紀錄</div>
+
         </div>
 
         <!-- 大倒數遮罩 -->
@@ -956,7 +956,8 @@
 
       document.getElementById('btnDraw').disabled    = false;
       document.getElementById('btnPreview').disabled = false;
-      previewDraw();
+      document.getElementById('btnPushWrap').style.display = 'none'; // 選獎項時隱藏推送按鈕
+      previewDraw(true); // true = 由 onPrizeSelect 觸發，不顯示推送按鈕
     } else {
       infoEl.className = 'info-box';
       prevEl.classList.remove('show');
@@ -979,7 +980,7 @@
     return pool.slice(0, Math.min(prize.count, pool.length));
   }
 
-  function previewDraw() {
+  function previewDraw(fromSelect = false) {
     // 優先用目前選取的獎項，若抽獎後 select 已清空則用 pendingResult 裡的 prize
     const prize = getSelectedPrize() || (pendingResult && pendingResult.prize) || null;
     if (!prize) { showToast('請先選擇獎項'); return; }
@@ -994,8 +995,8 @@
     document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
       `<div class="result-winner-chip ${prize.isMgrPrize ? 'mgr' : ''}">${esc(w.realName)}・${esc(w.unitName)}</div>`
     ).join('');
-    // 重抽後顯示推送按鈕
-    document.getElementById('btnPushWrap').style.display = 'block';
+    // 只有手動按「重新抽獎」時才顯示推送按鈕
+    document.getElementById('btnPushWrap').style.display = fromSelect ? 'none' : 'block';
     showToast(`🔀 已重新抽獎，共 ${newWinners.length} 人，可推送前台或按「開始抽獎」正式發送`);
   }
 
