@@ -923,6 +923,14 @@ window.stopScoreRound = function(rid) {
   const limitTime = r.limitTime !== false; // 預設 true（限時間）
 
   console.log('[積分] 停止，關鍵字:', kw, '  allMessages:', allMessages.length, '  限時間:', limitTime);
+  console.log('[積分] openAt 原始:', r.openAt, ' ms:', openAtMs);
+
+  const kwHits = allMessages.filter(m => m.text.toLowerCase().includes(kw));
+  console.log('[積分] 含關鍵字留言數:', kwHits.length);
+  kwHits.forEach(m => {
+    const mMs = new Date(m.time).getTime();
+    console.log(`  ytName:${m.ytName} | time:${m.time} | ms:${mMs} | >=openAt:${mMs >= openAtMs} | 差距(秒):${((mMs-openAtMs)/1000).toFixed(1)}`);
+  });
 
   const firstHitMap = {};
   allMessages
