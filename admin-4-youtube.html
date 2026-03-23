@@ -737,9 +737,17 @@ window.openRound = function(rid) {
 };
 window.closeRound = function(rid) {
   const r = rounds.find(r => String(r.id) === String(rid)); if (!r) return;
-  r.isOpen=false; r.closeAt=new Date().toISOString();
-  syncRounds(); renderRounds();
-  showToast('⏹ 已關閉「'+r.name+'」');
+  r.isOpen = false;
+  r.closeAt = new Date().toISOString();
+  r.closing = true;   // 新狀態：等待同步中
+  syncRounds();
+  showToast('⏳ 等待 worker 同步最新留言（12 秒後鎖定）');
+  setTimeout(() => {
+    const r2 = rounds.find(r => String(r.id) === String(rid)); if (!r2) return;
+    r2.closing = false;
+    syncRounds();
+    showToast(`⏹ 已鎖定「${r2.name}」，共 ${(r2.messages||[]).length} 則留言`);
+  }, 12000);
 };
 window.addOptionToRound = function(rid) {
   const input = document.getElementById('optinput-'+rid);
@@ -778,8 +786,8 @@ function renderRounds() {
   const openCards = new Set([...document.querySelectorAll('.round-card.open')].map(el=>String(el.dataset.rid)));
   const openMsgs  = new Set([...document.querySelectorAll('.round-msgs-body.open')].map(el=>el.id.replace('msgs-body-','')));
   container.innerHTML = rounds.map((r,idx) => {
-    const statusLabel = r.isOpen?'收集中':(r.closeAt?'已關閉':'未開始');
-    const statusCls   = r.isOpen?'open':'closed';
+    const statusLabel = r.isOpen ? '收集中' : r.closing ? '同步中...' : (r.closeAt ? '已關閉' : '未開始');
+    const statusCls   = r.isOpen ? 'open' : r.closing ? 'open' : 'closed';  // closing 用 open 樣式（閃爍）
     const msgCount    = (r.messages||[]).length;
     const chips = (r.options||[]).map(opt=>`
       <div class="option-chip ${r.answer===opt?'correct':''}">
@@ -798,10 +806,12 @@ function renderRounds() {
       </tr>`;
     }).join('') : `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:16px">尚無符合留言</td></tr>`;
     const timeInfo = r.openAt ? `開啟：${new Date(r.openAt).toLocaleTimeString('zh-TW')}${r.closeAt?' ／ 關閉：'+new Date(r.closeAt).toLocaleTimeString('zh-TW'):''}` : '';
-    const ctrlBtn = !r.isOpen&&!r.closeAt
+    const ctrlBtn = !r.isOpen && !r.closeAt && !r.closing
       ? `<button class="btn btn-sm" style="background:linear-gradient(135deg,#2e7d32,var(--green));color:#fff" onclick="openRound(${r.id})">▶ 開始收集留言</button>`
       : r.isOpen
       ? `<button class="btn btn-sm" style="background:linear-gradient(135deg,#8b1a1e,var(--red));color:#fff" onclick="closeRound(${r.id})">⏹ 停止收集</button>`
+      : r.closing
+      ? `<button class="btn btn-sm" style="background:rgba(255,255,255,0.08);color:var(--text-muted);cursor:not-allowed" disabled>⏳ 等待同步中...</button>`
       : `<button class="btn btn-outline btn-sm" onclick="openRound(${r.id})">↺ 重新開啟</button>`;
     return `<div class="round-card" data-rid="${String(r.id)}">
       <div class="round-header" onclick="toggleRoundCard(${r.id})">

@@ -420,12 +420,12 @@
         </div>
 
         <div class="result-preview" id="resultPreview">
-          <div class="result-preview-title">預覽得獎名單（正式按「開始抽獎」才會發送至前台）</div>
+          <div class="result-preview-title" id="resultPreviewTitle">⏳ 已發送抽獎指令，<span id="resultCountdown">5</span> 秒後公布得獎名單...</div>
           <div class="result-winner-list" id="previewWinners"></div>
         </div>
 
         <div style="margin-top:16px;display:flex;gap:10px">
-          <button class="btn btn-outline" style="flex:1" id="btnPreview" onclick="previewDraw()" disabled>重新預覽</button>
+          <button class="btn btn-outline" style="flex:1" id="btnPreview" onclick="previewDraw()" disabled>🔀 重新抽獎</button>
           <button class="btn btn-red-solid" style="flex:2;padding:14px" id="btnDraw" onclick="startDraw()" disabled>▶ 開始抽獎</button>
         </div>
 
@@ -972,14 +972,12 @@
     }
     const newWinners = pickWinners(prize);
     pendingResult = { prize, winners: newWinners };
-
-    const prevEl  = document.getElementById('resultPreview');
-    const isMgr   = prize.isMgrPrize;
-    document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
-      `<div class="result-winner-chip ${isMgr ? 'mgr' : ''}">${esc(w.realName)}・${esc(w.unitName)}</div>`
-    ).join('');
-    prevEl.classList.add('show');
+    // 預覽不再立即顯示，等按下「開始抽獎」後才顯示
+    document.getElementById('resultPreview').classList.remove('show');
+    showToast(`🔀 已重新抽獎，共 ${newWinners.length} 人，按「開始抽獎」發送`);
   }
+
+  let drawCountdownInterval = null;
 
   function startDraw() {
     if (needsReset) { showToast('請先重置前台空白畫面'); return; }
@@ -990,6 +988,7 @@
     if (!pendingResult || !pendingResult.winners.length) { showToast('可抽人數不足'); return; }
 
     const { winners: newWinners } = pendingResult;
+    const isMgr = prize.isMgrPrize;
 
     // 送前台
     set(ref(db, 'lottery_control'), {
@@ -1027,10 +1026,33 @@
     // 防呆鎖
     set(ref(db, 'springFest/needsReset'), true);
 
-    // 重置 UI
+    // ── 倒數5秒後才顯示預覽得獎名單 ──
+    const prevEl = document.getElementById('resultPreview');
+    const titleEl = document.getElementById('resultPreviewTitle');
+    const countdownEl = document.getElementById('resultCountdown');
+    prevEl.classList.add('show');
+    document.getElementById('previewWinners').innerHTML = '';  // 先清空名單
+    let cd = 5;
+    countdownEl.textContent = cd;
+    titleEl.innerHTML = `⏳ 已發送抽獎指令，<span id="resultCountdown">${cd}</span> 秒後公布得獎名單...`;
+    clearInterval(drawCountdownInterval);
+    drawCountdownInterval = setInterval(() => {
+      cd--;
+      const el = document.getElementById('resultCountdown');
+      if (el) el.textContent = cd;
+      if (cd <= 0) {
+        clearInterval(drawCountdownInterval);
+        // 倒數結束，顯示得獎名單
+        if (titleEl) titleEl.textContent = '✅ 得獎名單';
+        document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
+          `<div class="result-winner-chip ${isMgr ? 'mgr' : ''}">${esc(w.realName)}・${esc(w.unitName)}</div>`
+        ).join('');
+      }
+    }, 1000);
+
+    // 重置 UI（但保留 resultPreview 顯示倒數）
     document.getElementById('prizeSelect').value = '';
     document.getElementById('infoBox').className = 'info-box';
-    document.getElementById('resultPreview').classList.remove('show');
     document.getElementById('btnDraw').disabled    = true;
     document.getElementById('btnPreview').disabled = true;
     pendingResult = null;
@@ -1046,6 +1068,8 @@
   function resetFrontend() {
     set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
     set(ref(db, 'springFest/needsReset'), false);
+    clearInterval(drawCountdownInterval);
+    document.getElementById('resultPreview').classList.remove('show');
     showToast('已重置前台，可進行下一輪抽獎');
   }
 
