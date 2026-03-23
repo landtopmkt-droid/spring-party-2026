@@ -1094,19 +1094,26 @@
     const { prize, winners: w } = pendingResult;
     const newWinnerObjs = w.map(p => ({ realName: p.realName, unitName: p.unitName }));
 
-    // ── 1. 更新中獎排除名單（移除舊得獎人，換成重抽的人）──
+    // ── 1. 更新中獎排除名單（移除舊這輪得獎人，換成重抽的人）──
+    // 用 _lastDrawTs 找到上一次抽的人，從 winners/mgrWinners 裡精準移除再加入新的
+    const lastEntry = _lastDrawTs ? drawHistory.find(h => h.ts === _lastDrawTs) : null;
+    // 把上一次得獎名單解析成 Set（realName+unitName 組合當 key）
+    const oldKeys = new Set();
+    if (lastEntry) {
+      lastEntry.winners.split('、').forEach(s => {
+        // 格式：「姓名（單位）」
+        const match = s.match(/^(.+?)（(.+)）$/);
+        if (match) oldKeys.add(match[1].trim() + '|' + match[2].trim());
+      });
+    }
+
     if (prize.isMgrPrize) {
-      // 找出這輪舊的主管獎得獎人（從 drawHistory 最後那筆取得）
-      const oldEntry = _lastDrawTs ? drawHistory.find(h => h.ts === _lastDrawTs) : null;
-      const oldNames = oldEntry ? oldEntry.winners.split('、').map(s => s.replace(/（.*）$/, '').trim()) : [];
-      const filtered = mgrWinners.filter(mw => !oldNames.includes(mw.realName));
+      const filtered = mgrWinners.filter(mw => !oldKeys.has(mw.realName + '|' + mw.unitName));
       const updated  = [...filtered, ...newWinnerObjs];
       set(ref(db, 'springFest/mgrWinners'),
         updated.length ? Object.fromEntries(updated.map((x, i) => [i, x])) : null);
     } else {
-      const oldEntry = _lastDrawTs ? drawHistory.find(h => h.ts === _lastDrawTs) : null;
-      const oldNames = oldEntry ? oldEntry.winners.split('、').map(s => s.replace(/（.*）$/, '').trim()) : [];
-      const filtered = winners.filter(mw => !oldNames.includes(mw.realName));
+      const filtered = winners.filter(w => !oldKeys.has(w.realName + '|' + w.unitName));
       const updated  = [...filtered, ...newWinnerObjs];
       set(ref(db, 'springFest/winners'),
         updated.length ? Object.fromEntries(updated.map((x, i) => [i, x])) : null);
