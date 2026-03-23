@@ -384,24 +384,33 @@
       <div class="empty-state"><div class="empty-icon">🎮</div><div>尚未建立任何場次</div></div>
     </div>
 
+    <!-- 總結按鈕 -->
+    <div id="scoreSummaryBtn" style="display:none;margin-top:20px;text-align:center">
+      <button class="btn" style="background:linear-gradient(135deg,#2e7d32,var(--green));color:#fff;font-size:1.35rem;padding:14px 40px;letter-spacing:0.15em" onclick="calcTotalScore()">
+        📊 總結
+      </button>
+    </div>
+
     <!-- 總積分排行 -->
     <div id="scoreTotalSection" style="display:none;margin-top:28px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
         <div style="font-size:1.35rem;font-weight:500;color:var(--gold);letter-spacing:0.1em">🏅 總積分排行榜</div>
-        <button class="btn" style="background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500" onclick="calcTotalScore()">重新計算</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="exportScoreCSV()">匯出 CSV</button>
+          <button class="btn" style="background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500" onclick="calcTotalScore()">重新計算</button>
+        </div>
       </div>
 
       <!-- 前5名大卡片 -->
       <div id="scoreTop5" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:24px"></div>
 
-      <!-- 完整排行表格 -->
-      <div class="count-table-wrap">
-        <table>
-          <thead><tr>
-            <th style="width:48px">#</th>
+      <!-- 完整總表（含每場時間戳記） -->
+      <div style="font-size:1.17rem;color:var(--text-muted);margin-bottom:10px;letter-spacing:0.1em">📋 完整明細（含各場時間戳記）</div>
+      <div class="count-table-wrap" style="overflow-x:auto">
+        <table id="scoreSummaryTable" style="min-width:700px">
+          <thead><tr id="scoreSummaryHead">
+            <th style="width:44px">#</th>
             <th>YouTube 帳號</th><th>本名</th><th>單位</th>
-            <th id="scoreRoundHeaders"></th>
-            <th style="color:var(--gold-light);text-align:center">總積分</th>
           </tr></thead>
           <tbody id="scoreTotalBody"></tbody>
         </table>
@@ -1097,20 +1106,24 @@ window.restartScoreRound = function(rid) {
 
 // ── 總積分計算 ──
 window.calcTotalScore = function() {
-  const donedRounds = scoreRounds.filter(r => r.status === 'done' && (r.hits||[]).length > 0);
+  const donedRounds = scoreRounds.filter(r => r.status === 'done');
   if (!donedRounds.length) { showToast('尚無已結束的場次'); return; }
 
-  // 累計每人積分
-  const scoreMap = {};   // ytName → { pts, perRound: {roundId: pts} }
+  // 累計每人積分，同時記錄每場的時間戳記
+  // scoreMap[ytName] = { pts, perRound: { roundId: { pts, time, rank } } }
+  const scoreMap = {};
   donedRounds.forEach(r => {
     (r.hits||[]).forEach(h => {
       if (!scoreMap[h.ytName]) scoreMap[h.ytName] = { pts: 0, perRound: {} };
       scoreMap[h.ytName].pts += h.pts;
-      scoreMap[h.ytName].perRound[String(r.id)] = h.pts;
+      scoreMap[h.ytName].perRound[String(r.id)] = {
+        pts:  h.pts,
+        rank: h.rank,
+        time: h.time   // YouTube publishedAt ISO 字串
+      };
     });
   });
 
-  // 排序：總積分降序
   const sorted = Object.entries(scoreMap)
     .map(([yt, v]) => ({ ytName: yt, ...v }))
     .sort((a, b) => b.pts - a.pts);
@@ -1118,54 +1131,75 @@ window.calcTotalScore = function() {
   if (!sorted.length) { showToast('沒有積分資料'); return; }
 
   // ── 前5名大卡片 ──
-  const rankEmojis = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  const rankEmojis  = ['🥇','🥈','🥉','4️⃣','5️⃣'];
   const rankClasses = ['rank-1','rank-2','rank-3','',''];
-  const top5 = sorted.slice(0, 5);
-  document.getElementById('scoreTop5').innerHTML = top5.map((s, i) => {
+  document.getElementById('scoreTop5').innerHTML = sorted.slice(0,5).map((s,i) => {
     const m = matchUser(s.ytName);
-    const displayName = m ? m.realName : s.ytName;
-    const displayUnit = m ? m.unitName : '';
-    return `<div class="top5-card ${rankClasses[i]}">
+    return `<div class="top5-card ${rankClasses[i]||''}">
       <div class="top5-rank-emoji">${rankEmojis[i]}</div>
-      <div class="top5-name">${esc(displayName)}</div>
-      ${displayUnit ? `<div class="top5-unit">${esc(displayUnit)}</div>` : ''}
+      <div class="top5-name">${esc(m ? m.realName : s.ytName)}</div>
+      ${m ? `<div class="top5-unit">${esc(m.unitName)}</div>` : ''}
       <div class="top5-pts">${s.pts}</div>
       <div class="top5-pts-label">分</div>
     </div>`;
   }).join('');
 
-  // 動態生成各場次欄位 header
-  const hdrs = donedRounds.map(r =>
-    `<th class="score-col" style="white-space:nowrap">${esc(r.name)}<br><span style="font-size:1rem;opacity:0.6">${esc(r.keyword)}</span></th>`
-  ).join('');
-  document.getElementById('scoreRoundHeaders').outerHTML =
-    `${hdrs}<th style="color:var(--gold-light);text-align:center">總積分</th>`;
+  // ── 重建表格 header（每場兩欄：積分 + 時間戳記）──
+  const thead = document.getElementById('scoreSummaryHead');
+  thead.innerHTML = `
+    <th style="width:44px">#</th>
+    <th>YouTube 帳號</th><th>本名</th><th>單位</th>
+    ${donedRounds.map(r => `
+      <th class="score-col" style="white-space:nowrap;min-width:80px">
+        ${esc(r.name)}<br><span style="font-size:0.95rem;opacity:0.6">積分</span>
+      </th>
+      <th class="score-col" style="white-space:nowrap;min-width:120px;font-size:1rem">
+        ${esc(r.name)}<br><span style="font-size:0.95rem;opacity:0.6">命中時間</span>
+      </th>`).join('')}
+    <th style="color:var(--gold-light);text-align:center;white-space:nowrap">總積分</th>
+  `;
 
-  // 渲染表格
+  // ── 渲染每列 ──
   const tbody = document.getElementById('scoreTotalBody');
-  tbody.innerHTML = sorted.map((s, i) => {
+  tbody.innerHTML = sorted.map((s,i) => {
     const m  = matchUser(s.ytName);
     const rc = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
     const roundCols = donedRounds.map(r => {
-      const p = s.perRound[String(r.id)];
-      return `<td class="score-col">${p !== undefined ? `<span style="color:var(--gold);font-weight:500">+${p}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>`;
+      const entry = s.perRound[String(r.id)];
+      if (!entry) return `
+        <td class="score-col"><span style="color:var(--text-muted)">—</span></td>
+        <td class="score-col"><span style="color:var(--text-muted)">—</span></td>`;
+      const t   = new Date(entry.time);
+      const timeStr = t.toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit',second:'2-digit'})
+                    + `<span style="font-size:0.9rem;color:var(--text-muted)">.${String(t.getMilliseconds()).padStart(3,'0')}</span>`;
+      const rankEmoji = entry.rank===1?'🥇':entry.rank===2?'🥈':entry.rank===3?'🥉':`#${entry.rank}`;
+      return `
+        <td class="score-col">
+          <span style="color:var(--gold);font-weight:600">+${entry.pts}</span>
+          <span style="font-size:1rem;margin-left:4px">${rankEmoji}</span>
+        </td>
+        <td class="score-col" style="font-size:1.1rem;color:var(--text-muted)">${timeStr}</td>`;
     }).join('');
     return `<tr>
       <td><div class="rank-badge ${rc}">${i+1}</div></td>
       <td><div class="yt-name">${esc(s.ytName)}</div></td>
-      <td>${m ? `<div class="real-name">${esc(m.realName)}</div>` : '<div class="unmatched">未登記</div>'}</td>
-      <td>${m ? `<span class="unit-badge">${esc(m.unitName)}</span>` : '-'}</td>
+      <td>${m?`<div class="real-name">${esc(m.realName)}</div>`:'<div class="unmatched">未登記</div>'}</td>
+      <td>${m?`<span class="unit-badge">${esc(m.unitName)}</span>`:'-'}</td>
       ${roundCols}
       <td style="text-align:center"><span class="score-total-pts">${s.pts}</span></td>
     </tr>`;
   }).join('');
 
   document.getElementById('scoreTotalSection').style.display = 'block';
+  // 捲到總表
+  document.getElementById('scoreTotalSection').scrollIntoView({ behavior: 'smooth' });
 };
 
 function updateScoreTotalSection() {
   const hasDone = scoreRounds.some(r => r.status === 'done');
-  // 如果已有結束的場次，自動更新總積分
+  const btn = document.getElementById('scoreSummaryBtn');
+  if (btn) btn.style.display = hasDone ? 'block' : 'none';
+  // 如果總表已展開，自動重算
   if (hasDone && document.getElementById('scoreTotalSection').style.display !== 'none') {
     calcTotalScore();
   }
@@ -1174,7 +1208,7 @@ function updateScoreTotalSection() {
 
 // ── 匯出總積分 CSV ──
 window.exportScoreCSV = function() {
-  const donedRounds = scoreRounds.filter(r => r.status === 'done' && (r.hits||[]).length > 0);
+  const donedRounds = scoreRounds.filter(r => r.status === 'done');
   if (!donedRounds.length) { showToast('尚無已結束的場次'); return; }
 
   const scoreMap = {};
@@ -1182,7 +1216,7 @@ window.exportScoreCSV = function() {
     (r.hits||[]).forEach(h => {
       if (!scoreMap[h.ytName]) scoreMap[h.ytName] = { pts: 0, perRound: {} };
       scoreMap[h.ytName].pts += h.pts;
-      scoreMap[h.ytName].perRound[String(r.id)] = h.pts;
+      scoreMap[h.ytName].perRound[String(r.id)] = { pts: h.pts, rank: h.rank, time: h.time };
     });
   });
 
@@ -1190,11 +1224,21 @@ window.exportScoreCSV = function() {
     .map(([yt, v]) => ({ ytName: yt, ...v }))
     .sort((a, b) => b.pts - a.pts);
 
-  const roundNames = donedRounds.map(r => `${r.name}(${r.keyword})`);
-  const hdr = ['排名','YouTube帳號','本名','單位', ...roundNames, '總積分'];
+  if (!sorted.length) { showToast('沒有積分資料'); return; }
+
+  // header：每場兩欄（積分＋命中時間）
+  const roundCols = donedRounds.flatMap(r => [`${r.name}積分`, `${r.name}命中時間`]);
+  const hdr = ['排名','YouTube帳號','本名','單位', ...roundCols, '總積分'];
   const rows = sorted.map((s, i) => {
     const m = matchUser(s.ytName);
-    const cols = donedRounds.map(r => s.perRound[String(r.id)] ?? 0);
+    const cols = donedRounds.flatMap(r => {
+      const entry = s.perRound[String(r.id)];
+      if (!entry) return ['—', '—'];
+      const t = new Date(entry.time);
+      const timeStr = t.toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit',second:'2-digit'})
+                    + '.' + String(t.getMilliseconds()).padStart(3,'0');
+      return [`+${entry.pts}（第${entry.rank}名）`, timeStr];
+    });
     return [i+1, s.ytName, m?m.realName:'未登記', m?m.unitName:'-', ...cols, s.pts];
   });
   dl([hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n'), `積分排行_${Date.now()}.csv`);
