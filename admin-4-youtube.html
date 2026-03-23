@@ -187,6 +187,13 @@
   .score-time-info{font-size:1.1rem;color:var(--text-muted);}
   .score-result-table{background:var(--surface2);border:1px solid rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;max-height:320px;overflow-y:auto;}
   .score-result-table table{min-width:520px;}
+
+  /* 命中名單折疊 */
+  .score-hits-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;color:var(--text-muted);font-size:1.23rem;user-select:none;transition:color .2s;}
+  .score-hits-toggle:hover{color:var(--gold);}
+  .score-hits-toggle-icon{font-size:1rem;transition:transform .2s;}
+  .score-hits-collapsible.open .score-hits-toggle-icon{transform:rotate(90deg);}
+  .score-hits-body{margin-top:6px;}
   .score-pts{font-size:1.5rem;font-weight:600;color:var(--gold);}
   .score-pts.s1{color:var(--gold-light);}
   .score-pts.s2{color:#c0c0c0;}
@@ -1054,23 +1061,34 @@ function renderScoreRounds() {
       : '';
 
     const hitsHTML = hits.length
-      ? `<div class="score-result-table"><table>
-          <thead><tr><th style="width:44px">名次</th><th>YouTube 帳號</th><th>本名</th><th>單位</th><th>留言時間</th><th>留言內容</th><th style="text-align:center">積分</th></tr></thead>
-          <tbody>${hits.map(h => {
-            const m  = matchUser(h.ytName);
-            const rc = h.rank===1?'s1':h.rank===2?'s2':h.rank===3?'s3':'sn';
-            const rankEmoji = h.rank===1?'🥇':h.rank===2?'🥈':h.rank===3?'🥉':`${h.rank}`;
-            return `<tr>
-              <td style="text-align:center;font-size:1.35rem">${rankEmoji}</td>
-              <td><div class="yt-name">${esc(h.ytName)}</div></td>
-              <td>${m ? `<div class="real-name">${esc(m.realName)}</div>` : '<div class="unmatched">未登記</div>'}</td>
-              <td>${m ? `<span class="unit-badge">${esc(m.unitName)}</span>` : '-'}</td>
-              <td style="font-size:1.1rem;color:var(--text-muted);white-space:nowrap">${new Date(h.time).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}<span style="font-size:0.9rem;margin-left:4px">.${String(new Date(h.time).getMilliseconds()).padStart(3,'0')}</span></td>
-              <td><div class="msg-text" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(h.text)}">${esc(h.text)}</div></td>
-              <td style="text-align:center"><span class="score-pts ${rc}">+${h.pts}</span></td>
-            </tr>`;
-          }).join('')}</tbody>
-        </table></div>`
+      ? `<div class="score-hits-collapsible" id="hits-${r.id}">
+          <div class="score-hits-toggle" onclick="toggleScoreHits('${r.id}')">
+            <span class="score-hits-toggle-icon">▸</span>
+            <span>查看命中名單（${hits.length} 人）</span>
+          </div>
+          <div class="score-hits-body" id="hits-body-${r.id}" style="display:none">
+            <div class="score-result-table"><table>
+              <thead><tr><th style="width:44px">名次</th><th>YouTube 帳號</th><th>本名</th><th>單位</th><th>留言時間</th><th>留言內容</th><th style="text-align:center">積分</th></tr></thead>
+              <tbody>${hits.map(h => {
+                const m  = matchUser(h.ytName);
+                const rc = h.rank===1?'s1':h.rank===2?'s2':h.rank===3?'s3':'sn';
+                const rankEmoji = h.rank===1?'🥇':h.rank===2?'🥈':h.rank===3?'🥉':`${h.rank}`;
+                const t = new Date(h.time);
+                const timeStr = t.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+                              + `<span style="font-size:0.9rem;margin-left:2px">.${String(t.getMilliseconds()).padStart(3,'0')}</span>`;
+                return `<tr>
+                  <td style="text-align:center;font-size:1.35rem">${rankEmoji}</td>
+                  <td><div class="yt-name">${esc(h.ytName)}</div></td>
+                  <td>${m?`<div class="real-name">${esc(m.realName)}</div>`:'<div class="unmatched">未登記</div>'}</td>
+                  <td>${m?`<span class="unit-badge">${esc(m.unitName)}</span>`:'-'}</td>
+                  <td style="font-size:1.1rem;color:var(--text-muted);white-space:nowrap">${timeStr}</td>
+                  <td><div class="msg-text" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(h.text)}">${esc(h.text)}</div></td>
+                  <td style="text-align:center"><span class="score-pts ${rc}">+${h.pts}</span></td>
+                </tr>`;
+              }).join('')}</tbody>
+            </table></div>
+          </div>
+        </div>`
       : `<div style="color:var(--text-muted);font-size:1.23rem;padding:12px 0">${r.status==='running'?'統計中，留言即時收集...' : r.status==='closing'?'⏳ 等待 worker 同步最新留言（最多 12 秒）...' : r.status==='done'?'無人命中關鍵字':'尚未開始'}</div>`;
 
     return `<div class="score-round-card ${r.status==='running'?'running':''}">
@@ -1093,6 +1111,25 @@ function renderScoreRounds() {
     </div>`;
   }).join('');
 }
+
+// ── 場次命中名單折疊 ──
+window.toggleScoreHits = function(rid) {
+  const wrap = document.getElementById(`hits-${rid}`);
+  const body = document.getElementById(`hits-body-${rid}`);
+  if (!wrap || !body) return;
+  const isOpen = wrap.classList.toggle('open');
+  body.style.display = isOpen ? 'block' : 'none';
+};
+
+// ── 總結總表：展開某人各場詳細 ──
+window.toggleSummaryDetail = function(uid) {
+  const row = document.getElementById(uid);
+  const btn = document.getElementById(uid + '-btn');
+  if (!row) return;
+  const isOpen = row.style.display !== 'none';
+  row.style.display = isOpen ? 'none' : 'table-row';
+  if (btn) btn.textContent = isOpen ? '▸ 展開' : '▾ 收合';
+};
 
 // ── 重新開始（清空 hits，回到 running）──
 window.restartScoreRound = function(rid) {
@@ -1144,50 +1181,67 @@ window.calcTotalScore = function() {
     </div>`;
   }).join('');
 
-  // ── 重建表格 header（每場兩欄：積分 + 時間戳記）──
+  // ── 重建表格 header（精簡：只有排名、帳號、本名、單位、總積分）──
   const thead = document.getElementById('scoreSummaryHead');
   thead.innerHTML = `
     <th style="width:44px">#</th>
     <th>YouTube 帳號</th><th>本名</th><th>單位</th>
-    ${donedRounds.map(r => `
-      <th class="score-col" style="white-space:nowrap;min-width:80px">
-        ${esc(r.name)}<br><span style="font-size:0.95rem;opacity:0.6">積分</span>
-      </th>
-      <th class="score-col" style="white-space:nowrap;min-width:120px;font-size:1rem">
-        ${esc(r.name)}<br><span style="font-size:0.95rem;opacity:0.6">命中時間</span>
-      </th>`).join('')}
     <th style="color:var(--gold-light);text-align:center;white-space:nowrap">總積分</th>
+    <th style="width:80px"></th>
   `;
 
-  // ── 渲染每列 ──
+  // ── 渲染每列（可折疊展開各場詳細）──
   const tbody = document.getElementById('scoreTotalBody');
-  tbody.innerHTML = sorted.map((s,i) => {
+  tbody.innerHTML = sorted.map((s, i) => {
     const m  = matchUser(s.ytName);
     const rc = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
-    const roundCols = donedRounds.map(r => {
+
+    // 各場詳細折疊列
+    const detailRow = donedRounds.map(r => {
       const entry = s.perRound[String(r.id)];
-      if (!entry) return `
-        <td class="score-col"><span style="color:var(--text-muted)">—</span></td>
-        <td class="score-col"><span style="color:var(--text-muted)">—</span></td>`;
-      const t   = new Date(entry.time);
-      const timeStr = t.toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit',second:'2-digit'})
-                    + `<span style="font-size:0.9rem;color:var(--text-muted)">.${String(t.getMilliseconds()).padStart(3,'0')}</span>`;
+      if (!entry) return `<td colspan="2" style="color:var(--text-muted);text-align:center">—</td>`;
+      const t = new Date(entry.time);
+      const timeStr = t.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+                    + `.${String(t.getMilliseconds()).padStart(3,'0')}`;
       const rankEmoji = entry.rank===1?'🥇':entry.rank===2?'🥈':entry.rank===3?'🥉':`#${entry.rank}`;
-      return `
-        <td class="score-col">
-          <span style="color:var(--gold);font-weight:600">+${entry.pts}</span>
-          <span style="font-size:1rem;margin-left:4px">${rankEmoji}</span>
-        </td>
-        <td class="score-col" style="font-size:1.1rem;color:var(--text-muted)">${timeStr}</td>`;
+      return `<td style="white-space:nowrap">
+        <span style="color:var(--gold);font-weight:600">+${entry.pts}</span>
+        <span style="margin-left:4px">${rankEmoji}</span>
+      </td>
+      <td style="font-size:1.1rem;color:var(--text-muted);white-space:nowrap">${timeStr}</td>`;
     }).join('');
-    return `<tr>
-      <td><div class="rank-badge ${rc}">${i+1}</div></td>
-      <td><div class="yt-name">${esc(s.ytName)}</div></td>
-      <td>${m?`<div class="real-name">${esc(m.realName)}</div>`:'<div class="unmatched">未登記</div>'}</td>
-      <td>${m?`<span class="unit-badge">${esc(m.unitName)}</span>`:'-'}</td>
-      ${roundCols}
-      <td style="text-align:center"><span class="score-total-pts">${s.pts}</span></td>
-    </tr>`;
+
+    const detailHeader = donedRounds.map(r =>
+      `<th colspan="2" style="color:var(--gold);font-size:1.1rem;white-space:nowrap">${esc(r.name)}<br><span style="opacity:0.6;font-weight:400">${esc(r.keyword)}</span></th>`
+    ).join('');
+
+    const uid = `summary-${i}`;
+    return `
+      <tr style="cursor:pointer" onclick="toggleSummaryDetail('${uid}')">
+        <td><div class="rank-badge ${rc}">${i+1}</div></td>
+        <td><div class="yt-name">${esc(s.ytName)}</div></td>
+        <td>${m?`<div class="real-name">${esc(m.realName)}</div>`:'<div class="unmatched">未登記</div>'}</td>
+        <td>${m?`<span class="unit-badge">${esc(m.unitName)}</span>`:'-'}</td>
+        <td style="text-align:center"><span class="score-total-pts">${s.pts}</span></td>
+        <td style="text-align:center;color:var(--text-muted);font-size:1.1rem" id="${uid}-btn">▸ 展開</td>
+      </tr>
+      <tr id="${uid}" style="display:none;background:rgba(212,168,67,0.03)">
+        <td colspan="6" style="padding:0">
+          <div style="overflow-x:auto;padding:12px 16px">
+            <table style="width:100%;border-collapse:collapse">
+              <thead><tr><th></th><th></th><th></th><th></th>${detailHeader}</tr>
+              <tr style="font-size:1rem;color:var(--text-muted)">
+                <td></td><td></td><td></td><td></td>
+                ${donedRounds.map(()=>`<td>積分/名次</td><td>命中時間</td>`).join('')}
+              </tr></thead>
+              <tbody><tr>
+                <td></td><td></td><td></td><td></td>
+                ${detailRow}
+              </tr></tbody>
+            </table>
+          </div>
+        </td>
+      </tr>`;
   }).join('');
 
   document.getElementById('scoreTotalSection').style.display = 'block';
