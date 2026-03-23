@@ -1001,6 +1001,7 @@
   }
 
   let drawCountdownInterval = null;
+  let _lastDrawTs = null;  // 記錄最後一次正式抽獎的 history key
 
   function startDraw() {
     if (needsReset) { showToast('請先重置前台空白畫面'); return; }
@@ -1045,6 +1046,8 @@
       winners: newWinners.map(w => `${w.realName}（${w.unitName}）`).join('、')
     };
     set(ref(db, `springFest/drawHistory/${entry.ts}`), entry);
+    // 記錄這次的 history ts，供推送重抽時直接覆蓋
+    _lastDrawTs = entry.ts;
 
     // 防呆鎖
     set(ref(db, 'springFest/needsReset'), true);
@@ -1083,26 +1086,60 @@
     showToast(`🎉 已啟動抽獎：${prize.name}${prize.isMgrPrize ? '（主管專屬）' : ''}！`);
   }
 
-  // ── 推送重抽名單到前台（不記錄中獎）──
+  // ── 推送重抽名單到前台（覆蓋本輪結果）──
   window.pushRedrawToFrontend = function() {
     if (!pendingResult || !pendingResult.winners.length) {
       showToast('沒有可推送的名單，請先重新抽獎'); return;
     }
     const { prize, winners: w } = pendingResult;
-    // 先送 reset 讓前台回到空白，再送新名單覆蓋
+    const newWinnerObjs = w.map(p => ({ realName: p.realName, unitName: p.unitName }));
+
+    // ── 1. 更新中獎排除名單（移除舊得獎人，換成重抽的人）──
+    if (prize.isMgrPrize) {
+      // 找出這輪舊的主管獎得獎人（從 drawHistory 最後那筆取得）
+      const oldEntry = _lastDrawTs ? drawHistory.find(h => h.ts === _lastDrawTs) : null;
+      const oldNames = oldEntry ? oldEntry.winners.split('、').map(s => s.replace(/（.*）$/, '').trim()) : [];
+      const filtered = mgrWinners.filter(mw => !oldNames.includes(mw.realName));
+      const updated  = [...filtered, ...newWinnerObjs];
+      set(ref(db, 'springFest/mgrWinners'),
+        updated.length ? Object.fromEntries(updated.map((x, i) => [i, x])) : null);
+    } else {
+      const oldEntry = _lastDrawTs ? drawHistory.find(h => h.ts === _lastDrawTs) : null;
+      const oldNames = oldEntry ? oldEntry.winners.split('、').map(s => s.replace(/（.*）$/, '').trim()) : [];
+      const filtered = winners.filter(mw => !oldNames.includes(mw.realName));
+      const updated  = [...filtered, ...newWinnerObjs];
+      set(ref(db, 'springFest/winners'),
+        updated.length ? Object.fromEntries(updated.map((x, i) => [i, x])) : null);
+    }
+
+    // ── 2. 直接覆蓋 drawHistory 那筆紀錄（用 _lastDrawTs 精準定位）──
+    if (_lastDrawTs) {
+      const updatedEntry = {
+        ts:         _lastDrawTs,
+        time:       new Date().toLocaleString('zh-TW'),
+        prizeName:  prize.name,
+        isMgrPrize: prize.isMgrPrize || false,
+        winners:    w.map(p => `${p.realName}（${p.unitName}）`).join('、')
+      };
+      set(ref(db, `springFest/drawHistory/${_lastDrawTs}`), updatedEntry);
+    }
+
+    // ── 3. 推送前台（先 reset 再推新名單）──
     set(ref(db, 'lottery_control'), { status: 'reset', timestamp: Date.now() });
     setTimeout(() => {
       set(ref(db, 'lottery_control'), {
-        status: 'start',
-        timestamp: Date.now(),
-        prizeName: prize.name,
+        status:     'start',
+        timestamp:  Date.now(),
+        prizeName:  prize.name,
         prizeCount: prize.count,
         isMgrPrize: prize.isMgrPrize || false,
-        winners: w.map(p => ({ realName: p.realName, unitName: p.unitName }))
+        winners:    newWinnerObjs
       });
     }, 300);
-    showToast('📡 已推送重抽名單到前台（不記錄中獎）');
+
+    showToast('📡 已推送重抽名單，並覆蓋本輪抽獎紀錄');
   };
+
 
   function getSelectedPrize() {
     const val = document.getElementById('prizeSelect').value;
