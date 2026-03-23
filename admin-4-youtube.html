@@ -17,40 +17,49 @@
 
   .nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;height:56px;position:sticky;top:0;z-index:100;}
   .nav-brand{font-family:'Noto Serif TC',serif;font-size:1.5rem;font-weight:900;color:var(--gold);letter-spacing:0.2em;margin-right:32px;white-space:nowrap;}
-  .nav-links{display:flex;gap:4px;}
+  .nav-links{display:flex;gap:4px;flex-wrap:wrap;}
   .nav-link{padding:8px 16px;border-radius:4px;color:var(--text-muted);text-decoration:none;font-size:1.275rem;transition:all .2s;white-space:nowrap;}
   .nav-link:hover{color:var(--text);background:var(--surface2);}
   .nav-link.active{color:var(--gold);background:rgba(212,168,67,0.08);}
+  .nav-link.worker-link{color:var(--green);border:1px solid rgba(76,175,80,0.2);}
+  .nav-link.worker-link:hover{background:rgba(76,175,80,0.08);border-color:rgba(76,175,80,0.4);}
 
   .main{padding:32px;max-width:1300px;margin:0 auto;}
   .page-title{font-family:'Noto Serif TC',serif;font-size:2.25rem;font-weight:900;color:var(--gold);letter-spacing:0.1em;margin-bottom:4px;}
-  .page-subtitle{color:var(--text-muted);font-size:1.275rem;margin-bottom:28px;}
+  .page-subtitle{color:var(--text-muted);font-size:1.275rem;margin-bottom:20px;}
 
-  .setup-panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin-bottom:24px;}
-  .setup-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}
-  .setup-group{flex:1;min-width:200px;}
-  .form-label{display:block;font-size:1.17rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:8px;}
-  .form-input{width:100%;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:10px 14px;color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:1.35rem;outline:none;transition:border-color .2s;}
-  .form-input:focus{border-color:var(--gold);}
-  .form-input::placeholder{color:var(--text-muted);font-size:1.23rem;}
+  /* ── Worker 狀態橫幅 ── */
+  .worker-banner {
+    display:flex;align-items:center;gap:14px;padding:14px 20px;
+    border-radius:6px;margin-bottom:24px;
+    background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+    transition:all .3s;
+  }
+  .worker-banner.running {
+    background:rgba(76,175,80,0.08);border-color:rgba(76,175,80,0.25);
+  }
+  .worker-banner.stopped {
+    background:rgba(192,39,45,0.06);border-color:rgba(192,39,45,0.2);
+  }
+  .worker-dot{width:9px;height:9px;border-radius:50%;background:#555;flex-shrink:0;}
+  .worker-dot.running{background:var(--green);animation:blink 1.2s infinite;}
+  .worker-dot.stopped{background:#e57373;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+  .worker-status-text{font-size:1.275rem;flex:1;}
+  .worker-status-text.running{color:#81c784;}
+  .worker-status-text.stopped{color:#e57373;}
+  .worker-status-text.unknown{color:var(--text-muted);}
+  .go-worker-btn{padding:7px 16px;border-radius:4px;border:none;font-family:'Noto Sans TC',sans-serif;font-size:1.17rem;cursor:pointer;background:rgba(76,175,80,0.15);color:#81c784;border:1px solid rgba(76,175,80,0.3);transition:all .2s;white-space:nowrap;text-decoration:none;display:inline-block;}
+  .go-worker-btn:hover{background:rgba(76,175,80,0.25);}
 
   .btn{padding:10px 20px;border-radius:4px;border:none;font-family:'Noto Sans TC',sans-serif;font-size:1.275rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
-  .btn-gold{background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500;}
-  .btn-gold:hover{filter:brightness(1.1);}
   .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
   .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
-  .btn-red{background:linear-gradient(135deg,#8b1a1e,var(--red));color:#fff;}
-  .btn-red:hover{filter:brightness(1.1);}
-  .btn-green{background:linear-gradient(135deg,#2e7d32,var(--green));color:#fff;}
-  .btn-green:hover{filter:brightness(1.1);}
   .btn-sm{padding:7px 14px;font-size:1.2rem;}
 
-  .status-bar{display:flex;align-items:center;gap:16px;padding:10px 16px;background:var(--surface2);border-radius:4px;margin-top:12px;font-size:1.23rem;flex-wrap:wrap;}
-  .status-indicator{display:flex;align-items:center;gap:6px;}
-  .dot{width:7px;height:7px;border-radius:50%;background:#555;}
-  .dot.active{background:var(--green);animation:blink 1.2s infinite;}
-  .dot.error{background:var(--red-light);}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+  /* ── 資料狀態列 ── */
+  .data-bar{display:flex;align-items:center;gap:16px;padding:10px 16px;background:var(--surface2);border-radius:4px;margin-bottom:20px;font-size:1.23rem;flex-wrap:wrap;}
+  .data-dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
 
   .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
   .tab-btn{padding:10px 20px;background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--text-muted);font-family:'Noto Sans TC',sans-serif;font-size:1.32rem;cursor:pointer;transition:all .2s;letter-spacing:0.05em;white-space:nowrap;}
@@ -59,7 +68,7 @@
   .tab-content{display:none;}
   .tab-content.active{display:block;}
 
-  /* ── Tab1: 留言次數 ── */
+  /* ── Tab1 留言次數 ── */
   .count-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
   .count-info{font-size:1.23rem;color:var(--text-muted);margin-left:auto;}
   .count-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;max-height:500px;overflow-y:auto;}
@@ -82,9 +91,13 @@
   .count-num{font-size:1.65rem;font-weight:500;}
   .last-time{font-size:1.17rem;color:var(--text-muted);}
 
-  /* ── Tab2: 關鍵字群組 ── */
+  /* ── Tab2 關鍵字群組 ── */
   .add-group-form{display:flex;gap:10px;align-items:flex-end;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:20px;flex-wrap:wrap;}
   .add-group-form .form-group{flex:1;min-width:160px;}
+  .form-label{display:block;font-size:1.17rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:8px;}
+  .form-input{width:100%;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:10px 14px;color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:1.35rem;outline:none;transition:border-color .2s;}
+  .form-input:focus{border-color:var(--gold);}
+  .form-input::placeholder{color:var(--text-muted);font-size:1.23rem;}
   .color-swatch-row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
   .color-swatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;}
   .color-swatch:hover{transform:scale(1.2);}
@@ -114,7 +127,7 @@
   .msg-text{font-size:1.275rem;color:var(--text);line-height:1.5;}
   .group-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
 
-  /* ── Tab3: 競猜活動 ── */
+  /* ── Tab3 競猜 ── */
   .pred-add-form{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin-bottom:20px;}
   .pred-form-group{flex:1;min-width:200px;}
   .round-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px;}
@@ -157,34 +170,49 @@
   .filter-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;max-height:400px;overflow-y:auto;}
   .winner-row td{background:rgba(212,168,67,0.04);}
 
+  /* ── 積分遊戲 ── */
+  .score-round-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+  .score-round-card.running{border-color:rgba(76,175,80,0.4);box-shadow:0 0 16px rgba(76,175,80,0.06);}
+  .score-round-header{display:flex;align-items:center;gap:12px;padding:14px 18px;flex-wrap:wrap;}
+  .score-round-num{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:rgba(212,168,67,0.12);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.17rem;font-weight:600;}
+  .score-round-name{font-size:1.35rem;font-weight:500;flex:1;}
+  .score-kw-badge{padding:3px 12px;border-radius:12px;font-size:1.17rem;background:rgba(74,158,255,0.1);border:1px solid rgba(74,158,255,0.2);color:#4a9eff;}
+  .score-status-badge{padding:3px 12px;border-radius:12px;font-size:1.1rem;font-weight:500;}
+  .score-status-badge.idle{background:rgba(255,255,255,0.05);color:var(--text-muted);border:1px solid rgba(255,255,255,0.08);}
+  .score-status-badge.running{background:rgba(76,175,80,0.15);color:#4caf50;border:1px solid rgba(76,175,80,0.3);animation:badgePulse 1.5s infinite;}
+  .score-status-badge.done{background:rgba(212,168,67,0.1);color:var(--gold);border:1px solid rgba(212,168,67,0.2);}
+  .score-round-body{padding:0 18px 18px;border-top:1px solid rgba(255,255,255,0.04);}
+  .score-controls{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap;align-items:center;}
+  .score-time-info{font-size:1.1rem;color:var(--text-muted);}
+  .score-result-table{background:var(--surface2);border:1px solid rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;max-height:320px;overflow-y:auto;}
+  .score-result-table table{min-width:520px;}
+  .score-pts{font-size:1.5rem;font-weight:600;color:var(--gold);}
+  .score-pts.s1{color:var(--gold-light);}
+  .score-pts.s2{color:#c0c0c0;}
+  .score-pts.s3{color:#cd7f32;}
+  .score-pts.sn{color:var(--text-muted);}
+  .score-total-pts{font-size:1.8rem;font-weight:600;color:var(--gold-light);}
+  .score-col{font-size:1.17rem;color:var(--text-muted);text-align:center;}
+
   .empty-state{text-align:center;padding:48px 20px;color:var(--text-muted);}
   .empty-icon{font-size:3.75rem;margin-bottom:10px;}
-  .error-box{padding:14px 18px;background:rgba(192,39,45,0.08);border:1px solid rgba(192,39,45,0.25);border-radius:6px;font-size:1.275rem;color:#ff8a80;margin-top:12px;display:none;}
-  .error-box.show{display:block;}
   .toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:14px 20px;color:var(--text);font-size:1.32rem;z-index:200;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(0.34,1.56,0.64,1);}
   .toast.show{transform:translateY(0);opacity:1;}
 
   @media(max-width:900px){
     .nav{padding:8px 16px;height:auto;flex-wrap:wrap;}
-    .nav-brand{margin-right:16px;font-size:0.9rem;}
-    .nav-link{padding:6px 10px;font-size:0.78rem;}
-    .setup-row{flex-direction:column;}
-    .setup-group{min-width:unset;width:100%;}
+    .nav-brand{margin-right:12px;font-size:0.9rem;}
+    .nav-link{padding:6px 10px;font-size:0.72rem;}
   }
   @media(max-width:600px){
     .main{padding:12px;}
-    .nav{padding:8px 12px;}
-    .nav-links{flex-wrap:wrap;gap:2px;}
-    .nav-link{padding:5px 8px;font-size:0.72rem;}
     .page-title{font-size:1.2rem;}
-    .setup-panel,.pred-add-form{padding:16px;}
     .count-toolbar{flex-direction:column;align-items:flex-start;gap:8px;}
     .count-info{margin-left:0;}
     .count-table-wrap,.kw-results-table,.round-msgs-table,.filter-table-wrap{overflow-x:auto;}
     table{min-width:560px;}
     th,td{padding:8px 10px;font-size:0.78rem;}
-    .add-group-form{flex-direction:column;}
-    .pred-add-form{flex-direction:column;}
+    .add-group-form,.pred-add-form{flex-direction:column;}
   }
 </style>
 </head>
@@ -194,37 +222,32 @@
   <div class="nav-brand">🏮 春酒後台</div>
   <div class="nav-links">
     <a href="admin-1-registrations.html" class="nav-link">報名名單</a>
-    <a href="admin-2-redpacket.html" class="nav-link">紅包雨</a>
-    <a href="admin-3-lottery.html" class="nav-link">抽獎管理</a>
-    <a href="admin-4-youtube.html" class="nav-link active">YT 監控</a>
-    <a href="admin-5-roster.html" class="nav-link">參加名單</a>
+    <a href="admin-2-redpacket.html"     class="nav-link">紅包雨</a>
+    <a href="admin-3-lottery.html"       class="nav-link">抽獎管理</a>
+    <a href="admin-4-youtube.html"       class="nav-link active">YT 監控</a>
+    <a href="admin-5-roster.html"        class="nav-link">參加名單</a>
+    <a href="admin-6-monitor-worker.html" class="nav-link worker-link">▶ 監控背景</a>
   </div>
 </nav>
 
 <div class="main">
   <div class="page-title">YouTube 直播監控</div>
-  <div class="page-subtitle">即時追蹤留言數量、關鍵字分類與競猜活動</div>
+  <div class="page-subtitle">即時查看留言統計、關鍵字分類與競猜活動（資料由「監控背景」分頁持續更新）</div>
 
-  <!-- 監控設定 -->
-  <div class="setup-panel">
-    <div class="setup-row">
-      <div class="setup-group" style="flex:2">
-        <label class="form-label">YouTube 直播影片 ID 或網址</label>
-        <input type="text" class="form-input" id="videoIdInput" placeholder="例：dQw4w9WgXcQ 或完整網址">
-      </div>
-      <button class="btn btn-green" id="btnStart" onclick="startMonitor()">開始監控</button>
-      <button class="btn btn-red" id="btnStop" onclick="stopMonitor()" disabled>停止</button>
-      <button class="btn btn-outline btn-sm" onclick="clearAllData()">清除資料</button>
-    </div>
-    <div class="status-bar">
-      <div class="status-indicator">
-        <div class="dot" id="statusDot"></div>
-        <span id="statusText" style="color:var(--text-muted)">未啟動</span>
-      </div>
-      <span id="nextUpdateText" style="color:var(--text-muted)"></span>
-      <span id="totalFetched" style="color:var(--text-muted)"></span>
-    </div>
-    <div class="error-box" id="errorBox"></div>
+  <!-- Worker 狀態橫幅 -->
+  <div class="worker-banner" id="workerBanner">
+    <div class="worker-dot" id="workerDot"></div>
+    <div class="worker-status-text unknown" id="workerStatusText">正在確認監控狀態...</div>
+    <a href="admin-6-monitor-worker.html" class="go-worker-btn" target="_blank">前往監控背景 ↗</a>
+  </div>
+
+  <!-- 資料狀態列 -->
+  <div class="data-bar">
+    <div class="data-dot" id="dataDot" style="background:#555"></div>
+    <span id="dataStatusText" style="color:var(--text-muted)">等待資料...</span>
+    <span id="totalFetched"   style="color:var(--text-muted);margin-left:auto"></span>
+    <button class="btn btn-outline btn-sm" onclick="sortBy('count')">依留言數排序</button>
+    <button class="btn btn-outline btn-sm" onclick="sortBy('name')">依姓名排序</button>
   </div>
 
   <!-- Tabs -->
@@ -232,13 +255,12 @@
     <button class="tab-btn active" onclick="switchTab('count')">📊 留言次數統計</button>
     <button class="tab-btn" onclick="switchTab('keyword')">🗂 關鍵字分類</button>
     <button class="tab-btn" onclick="switchTab('predict')">🏆 競猜活動</button>
+    <button class="tab-btn" onclick="switchTab('score')">🎮 積分遊戲</button>
   </div>
 
-  <!-- Tab1：留言次數統計 -->
+  <!-- Tab1 -->
   <div class="tab-content active" id="tab-count">
     <div class="count-toolbar">
-      <button class="btn btn-outline btn-sm" onclick="sortBy('count')">依留言數排序</button>
-      <button class="btn btn-outline btn-sm" onclick="sortBy('name')">依姓名排序</button>
       <button class="btn btn-outline btn-sm" onclick="exportCountCSV()">匯出 CSV</button>
       <span class="count-info" id="countInfo"></span>
     </div>
@@ -248,13 +270,13 @@
           <th style="width:48px">#</th><th>YouTube 帳號</th><th>本名</th><th>單位</th><th>留言次數</th><th>最後留言時間</th>
         </tr></thead>
         <tbody id="countTableBody">
-          <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📡</div><div>請輸入直播 ID 並開始監控</div></div></td></tr>
+          <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📡</div><div>請先到「監控背景」分頁開始監控</div></div></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Tab2：關鍵字分類（群組） -->
+  <!-- Tab2 -->
   <div class="tab-content" id="tab-keyword">
     <div class="add-group-form">
       <div class="form-group">
@@ -265,21 +287,22 @@
         <label class="form-label">顏色</label>
         <div class="color-swatch-row" id="colorSwatches"></div>
       </div>
-      <button class="btn btn-gold" style="align-self:flex-end" onclick="addGroup()">＋ 新增群組</button>
+      <button class="btn" style="align-self:flex-end;background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500" onclick="addGroup()">＋ 新增群組</button>
+      <button class="btn btn-sm" style="align-self:flex-end;background:transparent;border:1px solid rgba(192,39,45,0.3);color:#e57373" onclick="clearAllGroups()">清除所有群組</button>
     </div>
     <div id="groupsList">
       <div class="empty-state"><div class="empty-icon">🗂</div><div>尚未建立任何關鍵字群組</div></div>
     </div>
   </div>
 
-  <!-- Tab3：競猜活動 -->
+  <!-- Tab3 -->
   <div class="tab-content" id="tab-predict">
     <div class="pred-add-form">
       <div class="pred-form-group">
         <label class="form-label">場次名稱</label>
         <input type="text" class="form-input" id="newRoundName" placeholder="例：第一場喝啤酒比賽" onkeydown="if(event.key==='Enter')addRound()">
       </div>
-      <button class="btn btn-gold" onclick="addRound()">＋ 新增場次</button>
+      <button class="btn" style="background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500" onclick="addRound()">＋ 新增場次</button>
     </div>
     <div id="roundsList">
       <div class="empty-state"><div class="empty-icon">🏆</div><div>尚未建立任何場次</div></div>
@@ -289,7 +312,7 @@
         <div class="pred-filter-title">🎯 篩選全場猜對的人</div>
         <div class="pred-filter-desc">為每場次設定正確答案後，篩選出所有場次都猜對的得獎者</div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-gold" onclick="runFilter()">▶ 執行篩選</button>
+          <button class="btn" style="background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500" onclick="runFilter()">▶ 執行篩選</button>
           <button class="btn btn-outline btn-sm" onclick="exportFilterCSV()">匯出 CSV</button>
         </div>
       </div>
@@ -297,13 +320,74 @@
     </div>
   </div>
 
-</div><!-- /.main -->
+  <!-- Tab4 積分遊戲 -->
+  <div class="tab-content" id="tab-score">
+
+    <!-- 新增場次 -->
+    <div class="pred-add-form">
+      <div class="pred-form-group">
+        <label class="form-label">場次名稱</label>
+        <input type="text" class="form-input" id="newScoreRoundName" placeholder="例：第一場衝刺賽" onkeydown="if(event.key==='Enter')addScoreRound()">
+      </div>
+      <div class="pred-form-group" style="max-width:220px">
+        <label class="form-label">關鍵字（留言需包含）</label>
+        <input type="text" class="form-input" id="newScoreKeyword" placeholder="例：地標網通" onkeydown="if(event.key==='Enter')addScoreRound()">
+      </div>
+      <div style="align-self:flex-end;display:flex;flex-direction:column;gap:6px">
+        <label class="form-label" style="margin-bottom:0">時間限制</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:4px;white-space:nowrap">
+          <input type="checkbox" id="newScoreLimitTime" checked style="width:16px;height:16px;accent-color:var(--gold)">
+          <span style="font-size:1.2rem;color:var(--text-muted)">只統計開始後的留言</span>
+        </label>
+      </div>
+      <button class="btn" style="background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500;align-self:flex-end" onclick="addScoreRound()">＋ 新增場次</button>
+    </div>
+
+    <!-- 積分說明 -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center">
+      <div style="display:flex;gap:6px">
+        <span style="padding:4px 12px;border-radius:12px;background:rgba(212,168,67,0.15);color:var(--gold);font-size:1.17rem">🥇 第1名 +5分</span>
+        <span style="padding:4px 12px;border-radius:12px;background:rgba(192,192,192,0.1);color:#c0c0c0;font-size:1.17rem">🥈 第2名 +4分</span>
+        <span style="padding:4px 12px;border-radius:12px;background:rgba(205,127,50,0.12);color:#cd7f32;font-size:1.17rem">🥉 第3名 +3分</span>
+        <span style="padding:4px 12px;border-radius:12px;background:rgba(255,255,255,0.06);color:var(--text-muted);font-size:1.17rem">4名 +2分</span>
+        <span style="padding:4px 12px;border-radius:12px;background:rgba(255,255,255,0.06);color:var(--text-muted);font-size:1.17rem">5名以後 +1分</span>
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="exportScoreCSV()">匯出總積分 CSV</button>
+      <button class="btn btn-sm" style="background:transparent;border:1px solid rgba(192,39,45,0.3);color:#e57373" onclick="clearAllScoreRounds()">清除全部場次</button>
+    </div>
+
+    <!-- 場次列表 -->
+    <div id="scoreRoundsList">
+      <div class="empty-state"><div class="empty-icon">🎮</div><div>尚未建立任何場次</div></div>
+    </div>
+
+    <!-- 總積分排行 -->
+    <div id="scoreTotalSection" style="display:none;margin-top:28px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div style="font-size:1.35rem;font-weight:500;color:var(--gold);letter-spacing:0.1em">🏅 總積分排行榜</div>
+        <button class="btn" style="background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500" onclick="calcTotalScore()">重新計算</button>
+      </div>
+      <div class="count-table-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:48px">#</th>
+            <th>YouTube 帳號</th><th>本名</th><th>單位</th>
+            <th id="scoreRoundHeaders"></th>
+            <th style="color:var(--gold-light)">總積分</th>
+          </tr></thead>
+          <tbody id="scoreTotalBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey:"AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
@@ -317,152 +401,116 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
-const API_KEY = 'AIzaSyA_aSoMOEbfOtEY0gkTKajwFToB2MHQLXM';
 
-let liveChatId=null, nextPageToken=null, monitorInterval=null, roundInterval=null;
-let countdown=10, countdownInterval=null, isRunning=false, sortMode='count';
-let allMessages=[], userCounts={}, groups=[], rounds=[], cloudRegistrations=[];
+let allMessages = [], userCounts = {}, groups = [], rounds = [], cloudRegistrations = [];
+let sortMode = 'count';
 
 // ── 顏色盤 ──
-const PALETTE=['#e8474e','#d4a843','#4a9eff','#4caf50','#c084fc','#fb923c','#f472b6','#34d399'];
-let selectedColor=PALETTE[0];
-function initSwatches(){
-  document.getElementById('colorSwatches').innerHTML=PALETTE.map(c=>
+const PALETTE = ['#e8474e','#d4a843','#4a9eff','#4caf50','#c084fc','#fb923c','#f472b6','#34d399'];
+let selectedColor = PALETTE[0];
+function initSwatches() {
+  document.getElementById('colorSwatches').innerHTML = PALETTE.map(c =>
     `<div class="color-swatch ${c===selectedColor?'selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`
   ).join('');
 }
-window.selectColor=function(c){selectedColor=c;initSwatches();};
+window.selectColor = function(c) { selectedColor = c; initSwatches(); };
 
-// ── Firebase sync ──
-function syncMessages(){
-  if(allMessages.length>10000)allMessages=allMessages.slice(-10000);
-  set(ref(db,'yt_monitor'),{allMessages,userCounts});
-}
-function syncGroups(){
-  set(ref(db,'yt_groups'),groups.length?Object.fromEntries(groups.map((g,i)=>[i,g])):null);
-}
-function syncRounds(){
-  set(ref(db,'pred_rounds'),rounds.length?Object.fromEntries(rounds.map((r,i)=>[i,r])):null);
-}
+// ── 監聽 Firebase ──
 
-// ── 載入 ──
-async function loadData(){
-  const s1=await get(ref(db,'yt_monitor'));
-  if(s1.exists()){const d=s1.val();allMessages=d.allMessages||[];userCounts=d.userCounts||{};}
-  const s2=await get(ref(db,'yt_groups'));
-  if(s2.exists()){const v=s2.val();groups=Array.isArray(v)?v:Object.values(v);}
-  const s3=await get(ref(db,'pred_rounds'));
-  if(s3.exists()){const v=s3.val();rounds=Array.isArray(v)?v:Object.values(v);}
-  renderCountTable();renderGroups();renderRounds();
-  document.getElementById('totalFetched').textContent=allMessages.length?`已載入 ${allMessages.length} 則留言`:'';
-}
+// Worker 狀態
+onValue(ref(db, 'yt_worker_status'), snap => {
+  const d = snap.val();
+  const banner  = document.getElementById('workerBanner');
+  const dot     = document.getElementById('workerDot');
+  const txt     = document.getElementById('workerStatusText');
+  if (!d) {
+    banner.className = 'worker-banner';
+    dot.className = 'worker-dot';
+    txt.className = 'worker-status-text unknown';
+    txt.textContent = '尚未偵測到監控背景，請先前往開啟';
+    return;
+  }
+  if (d.running) {
+    banner.className = 'worker-banner running';
+    dot.className = 'worker-dot running';
+    txt.className = 'worker-status-text running';
+    txt.textContent = `監控中 — 影片 ${d.videoId || ''}，資料即時同步中`;
+  } else {
+    banner.className = 'worker-banner stopped';
+    dot.className = 'worker-dot stopped';
+    txt.className = 'worker-status-text stopped';
+    txt.textContent = '監控已停止，請到「監控背景」分頁重新開始';
+  }
+});
 
-onValue(ref(db,'registrations'),snap=>{
-  const v=snap.val();
-  cloudRegistrations=v?Object.values(v):[];
+// 留言資料（從 worker 同步來的）
+onValue(ref(db, 'yt_monitor'), snap => {
+  if (!snap.exists()) return;
+  const d = snap.val();
+  allMessages = d.allMessages || [];
+  userCounts  = d.userCounts  || {};
+
+  const dot = document.getElementById('dataDot');
+  dot.style.background = 'var(--green)';
+  document.getElementById('dataStatusText').textContent = `資料已更新`;
+  document.getElementById('dataStatusText').style.color = 'var(--text-muted)';
+  document.getElementById('totalFetched').textContent = `共 ${allMessages.length} 則留言`;
+
+  renderCountTable();
+  // 更新已展開的群組
+  document.querySelectorAll('.group-card.open').forEach(card => {
+    const g = groups.find(x => x.id == card.dataset.gid);
+    if (g) renderGroupResults(card, g);
+  });
+});
+
+// 關鍵字群組
+onValue(ref(db, 'yt_groups'), snap => {
+  const v = snap.val();
+  groups = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+  console.log('[yt_groups] Firebase 載入，群組數量：', groups.length, groups.map(g=>g.name));
+  renderGroups();
+});
+
+// 競猜場次
+onValue(ref(db, 'pred_rounds'), snap => {
+  const v = snap.val();
+  rounds = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+  renderRounds();
+});
+
+// 報名名單（比對身份用）
+onValue(ref(db, 'registrations'), snap => {
+  const v = snap.val();
+  cloudRegistrations = v ? Object.values(v) : [];
   renderCountTable();
 });
 
-// ── 身分比對 ──
-function matchUser(n){
-  if(!n)return null;
-  const name=n.toLowerCase().replace('@','');
-  return cloudRegistrations.find(d=>d.ytAccount&&(
-    d.ytAccount.toLowerCase()===name||
-    d.ytAccount.toLowerCase().replace('@','')===name
-  ))||null;
+// ── 身份比對 ──
+function matchUser(n) {
+  if (!n) return null;
+  const name = n.toLowerCase().replace('@','');
+  return cloudRegistrations.find(d => d.ytAccount && (
+    d.ytAccount.toLowerCase() === name ||
+    d.ytAccount.toLowerCase().replace('@','') === name
+  )) || null;
 }
 
-// ── YT 監控 ──
-window.startMonitor=async function(){
-  const input=document.getElementById('videoIdInput').value;
-  const vid=extractVideoId(input);
-  if(!vid){showError('無效的影片 ID 或網址');return;}
-  hideError();setStatus('connecting');
-  try{
-    liveChatId=await getLiveChatId(vid);
-    isRunning=true;setStatus('active');
-    document.getElementById('btnStart').disabled=true;
-    document.getElementById('btnStop').disabled=false;
-    await fetchMessages();startCountdown();
-    monitorInterval=setInterval(async()=>{
-      await fetchMessages().catch(e=>showError(e.message));
-      resetCountdown();
-    },10000);
-    showToast('監控已啟動，每10秒自動更新 ✓');
-  }catch(e){setStatus('error');showError(e.message);}
-};
-
-window.stopMonitor=function(){
-  isRunning=false;
-  clearInterval(monitorInterval);clearInterval(countdownInterval);
-  monitorInterval=liveChatId=nextPageToken=null;
-  if(roundInterval){clearInterval(roundInterval);roundInterval=null;}
-  setStatus('idle');
-  document.getElementById('btnStart').disabled=false;
-  document.getElementById('btnStop').disabled=true;
-  document.getElementById('nextUpdateText').textContent='';
-  showToast('已停止監控');
-};
-
-window.clearAllData=function(){
-  if(!confirm('確定清除所有留言資料？'))return;
-  allMessages=[];userCounts={};
-  syncMessages();renderCountTable();
-  document.getElementById('totalFetched').textContent='';
-  showToast('已清除留言資料');
-};
-
-async function fetchMessages(){
-  if(!liveChatId)return;
-  let url=`https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${liveChatId}&part=snippet,authorDetails&maxResults=200&key=${API_KEY}`;
-  if(nextPageToken)url+=`&pageToken=${nextPageToken}`;
-  const res=await fetch(url);
-  const data=await res.json();
-  if(data.error)throw new Error(data.error.message);
-  nextPageToken=data.nextPageToken||nextPageToken;
-  let newCount=0;
-  (data.items||[]).forEach(item=>{
-    if(item.snippet.type!=='textMessageEvent')return;
-    if(allMessages.find(m=>m.id===item.id))return;
-    const ytName=item.authorDetails.displayName;
-    const time=item.snippet.publishedAt;
-    const text=item.snippet.textMessageDetails?.messageText||'';
-    newCount++;
-    const msg={id:item.id,ytName,text,time};
-    allMessages.push(msg);
-    if(!userCounts[ytName])userCounts[ytName]={count:0,lastTime:time};
-    userCounts[ytName].count++;
-    userCounts[ytName].lastTime=time;
-    collectRoundMessages(msg);
-  });
-  syncMessages();
-  if(rounds.some(r=>r.isOpen))syncRounds();
-  document.getElementById('totalFetched').textContent=`已抓取 ${allMessages.length} 則留言`;
-  renderCountTable();
-  document.querySelectorAll('.group-card.open').forEach(card=>{
-    const g=groups.find(x=>x.id==card.dataset.gid);
-    if(g)renderGroupResults(card,g);
-  });
-  // 如有開啟中的場次，更新留言記錄顯示
-  if(rounds.some(r=>r.isOpen))renderRounds();
-  if(newCount>0)showToast(`新增 ${newCount} 則留言`);
-}
-
-// ── Tab1 渲染 ──
-window.renderCountTable=function(){
-  const tbody=document.getElementById('countTableBody');
-  let entries=Object.entries(userCounts).map(([yt,v])=>({ytName:yt,...v}));
-  if(sortMode==='count')entries.sort((a,b)=>b.count-a.count);
-  else entries.sort((a,b)=>a.ytName.localeCompare(b.ytName));
-  if(!entries.length){
-    tbody.innerHTML='<tr><td colspan="6"><div class="empty-state">📡 尚無留言資料</div></td></tr>';
-    document.getElementById('countInfo').textContent='';return;
+// ── Tab1 ──
+function renderCountTable() {
+  const tbody = document.getElementById('countTableBody');
+  let entries = Object.entries(userCounts).map(([yt,v]) => ({ ytName: yt, ...v }));
+  if (sortMode === 'count') entries.sort((a,b) => b.count - a.count);
+  else entries.sort((a,b) => a.ytName.localeCompare(b.ytName));
+  if (!entries.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">📡 尚無留言資料</div></td></tr>';
+    document.getElementById('countInfo').textContent = '';
+    return;
   }
-  tbody.innerHTML=entries.map((e,i)=>{
-    const m=matchUser(e.ytName);
-    const rc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
-    return`<tr>
+  tbody.innerHTML = entries.map((e,i) => {
+    const m = matchUser(e.ytName);
+    const rc = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
+    return `<tr>
       <td><div class="rank-badge ${rc}">${i+1}</div></td>
       <td><div class="yt-name">${esc(e.ytName)}</div></td>
       <td>${m?`<div class="real-name">${esc(m.realName)}</div>`:'<div class="unmatched">未登記</div>'}</td>
@@ -471,86 +519,108 @@ window.renderCountTable=function(){
       <td><div class="last-time">${new Date(e.lastTime).toLocaleTimeString('zh-TW')}</div></td>
     </tr>`;
   }).join('');
-  document.getElementById('countInfo').textContent=`共 ${entries.length} 位使用者`;
-};
+  document.getElementById('countInfo').textContent = `共 ${entries.length} 位使用者`;
+}
 
-window.exportCountCSV=function(){
-  const entries=Object.entries(userCounts).map(([yt,v])=>({ytName:yt,...v}));
-  if(!entries.length){showToast('沒有資料可匯出');return;}
-  entries.sort((a,b)=>b.count-a.count);
-  const hdr=['排名','YouTube帳號','本名','單位','留言次數','最後留言時間'];
-  const rows=entries.map((e,i)=>{const m=matchUser(e.ytName);return[i+1,e.ytName,m?m.realName:'未登記',m?m.unitName:'-',e.count,new Date(e.lastTime).toLocaleString('zh-TW')];});
-  const csv=[hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
-  dl(csv,`YT留言統計_${Date.now()}.csv`);
+window.sortBy = function(mode) { sortMode = mode; renderCountTable(); };
+
+window.exportCountCSV = function() {
+  const entries = Object.entries(userCounts).map(([yt,v]) => ({ ytName: yt, ...v }));
+  if (!entries.length) { showToast('沒有資料可匯出'); return; }
+  entries.sort((a,b) => b.count - a.count);
+  const hdr = ['排名','YouTube帳號','本名','單位','留言次數','最後留言時間'];
+  const rows = entries.map((e,i) => { const m = matchUser(e.ytName); return [i+1,e.ytName,m?m.realName:'未登記',m?m.unitName:'-',e.count,new Date(e.lastTime).toLocaleString('zh-TW')]; });
+  dl([hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n'), `YT留言統計_${Date.now()}.csv`);
   showToast('CSV 匯出完成 ✓');
 };
 
-// ── Tab2: 關鍵字群組 ──
-window.addGroup=function(){
-  const name=document.getElementById('newGroupName').value.trim();
-  if(!name){showToast('請輸入群組名稱');return;}
-  if(groups.find(g=>g.name===name)){showToast('群組名稱已存在');return;}
-  groups.push({id:Date.now(),name,color:selectedColor,keywords:[]});
+// ── Tab2 群組 ──
+function syncGroups() {
+  set(ref(db,'yt_groups'), groups.length ? Object.fromEntries(groups.map((g,i)=>[i,g])) : null);
+  renderGroups();
+}
+
+window.addGroup = function() {
+  const name = document.getElementById('newGroupName').value.trim();
+  if (!name) { showToast('請輸入群組名稱'); return; }
+  // 重複檢查：用 name 比對，避免舊資料殘留誤判
+  if (groups.some(g => g.name === name)) { showToast('群組名稱已存在'); return; }
+  groups = [...groups, { id: Date.now(), name, color: selectedColor, keywords: [] }];
   syncGroups();
-  document.getElementById('newGroupName').value='';
-  renderGroups();showToast(`已新增群組：${name}`);
+  document.getElementById('newGroupName').value = '';
+  showToast(`已新增群組：${name}`);
 };
-window.deleteGroup=function(gid){
-  if(!confirm('確定刪除此群組？'))return;
-  groups=groups.filter(g=>g.id!=gid);syncGroups();renderGroups();
+window.deleteGroup = function(gid) {
+  if (!confirm('確定刪除此群組？')) return;
+  groups = groups.filter(g => String(g.id) !== String(gid)); syncGroups();
 };
-window.addKeywordToGroup=function(gid){
-  const input=document.getElementById(`kwinput-${gid}`);
-  const kw=input.value.trim();if(!kw)return;
-  const g=groups.find(g=>g.id==gid);if(!g)return;
-  if(g.keywords.includes(kw)){showToast('關鍵字已存在');return;}
-  g.keywords.push(kw);syncGroups();input.value='';renderGroups();
-  const card=document.querySelector(`.group-card[data-gid="${gid}"]`);
-  if(card&&card.classList.contains('open'))renderGroupResults(card,g);
+window.clearAllGroups = function() {
+  if (!confirm('確定清除所有群組？（包含 Firebase 中的舊資料）')) return;
+  groups = [];
+  set(ref(db,'yt_groups'), null);
+  renderGroups();
+  showToast('已清除所有群組');
 };
-window.removeKeywordFromGroup=function(gid,kw){
-  const g=groups.find(g=>g.id==gid);if(!g)return;
-  g.keywords=g.keywords.filter(k=>k!==kw);syncGroups();renderGroups();
-  const card=document.querySelector(`.group-card[data-gid="${gid}"]`);
-  if(card&&card.classList.contains('open'))renderGroupResults(card,g);
+window.addKeywordToGroup = function(gid) {
+  const input = document.getElementById(`kwinput-${gid}`);
+  if (!input) { console.warn('找不到 input，gid=', gid); return; }
+  const kw = input.value.trim(); if (!kw) return;
+  const g = groups.find(g => String(g.id) === String(gid));
+  console.log('addKeywordToGroup gid=', gid, ' 找到群組=', g?.name, ' groups=', groups.map(x=>({id:x.id,name:x.name})));
+  if (!g) { showToast('找不到此群組，請重新整理頁面'); return; }
+  const keywords = g.keywords || [];
+  if (keywords.includes(kw)) { showToast('關鍵字已存在'); return; }
+  g.keywords = [...keywords, kw];
+  syncGroups(); input.value = '';
+  const card = document.querySelector(`.group-card[data-gid="${gid}"]`);
+  if (card && card.classList.contains('open')) renderGroupResults(card, g);
 };
-window.toggleGroup=function(gid){
-  const card=document.querySelector(`.group-card[data-gid="${gid}"]`);if(!card)return;
-  const wasOpen=card.classList.contains('open');
+window.removeKeywordFromGroup = function(gid, kw) {
+  const g = groups.find(g => String(g.id) === String(gid)); if (!g) return;
+  g.keywords = (g.keywords || []).filter(k=>k!==kw); syncGroups();
+  const card = document.querySelector(`.group-card[data-gid="${gid}"]`);
+  if (card && card.classList.contains('open')) renderGroupResults(card, g);
+};
+window.toggleGroup = function(gid) {
+  const card = document.querySelector(`.group-card[data-gid="${gid}"]`); if (!card) return;
+  const wasOpen = card.classList.contains('open');
   card.classList.toggle('open');
-  if(!wasOpen){const g=groups.find(g=>g.id==gid);if(g)renderGroupResults(card,g);}
+  if (!wasOpen) { const g = groups.find(g=>g.id==gid); if (g) renderGroupResults(card, g); }
 };
-window.exportGroupCSV=function(gid){
-  const g=groups.find(g=>g.id==gid);
-  if(!g||!g.keywords.length){showToast('此群組沒有關鍵字');return;}
-  const results=allMessages.filter(m=>g.keywords.some(kw=>m.text.toLowerCase().includes(kw.toLowerCase())));
-  if(!results.length){showToast('沒有符合的留言');return;}
-  const hdr=['時間','YouTube帳號','本名','單位','留言內容','命中關鍵字'];
-  const rows=results.map(m=>{
-    const mt=matchUser(m.ytName);
-    const hit=g.keywords.filter(kw=>m.text.toLowerCase().includes(kw.toLowerCase())).join('、');
-    return[new Date(m.time).toLocaleString('zh-TW'),m.ytName,mt?mt.realName:'未登記',mt?mt.unitName:'-',m.text,hit];
+window.exportGroupCSV = function(gid) {
+  const g = groups.find(g=>g.id==gid);
+  const keywords = g?.keywords || [];
+  if (!g || !keywords.length) { showToast('此群組沒有關鍵字'); return; }
+  const results = allMessages.filter(m=>keywords.some(kw=>m.text.toLowerCase().includes(kw.toLowerCase())));
+  if (!results.length) { showToast('沒有符合的留言'); return; }
+  const hdr = ['時間','YouTube帳號','本名','單位','留言內容','命中關鍵字'];
+  const rows = results.map(m => {
+    const mt = matchUser(m.ytName);
+    const hit = keywords.filter(kw=>m.text.toLowerCase().includes(kw.toLowerCase())).join('、');
+    return [new Date(m.time).toLocaleString('zh-TW'),m.ytName,mt?mt.realName:'未登記',mt?mt.unitName:'-',m.text,hit];
   });
-  dl([hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n'),`${g.name}_留言_${Date.now()}.csv`);
+  dl([hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n'), `${g.name}_留言_${Date.now()}.csv`);
   showToast('CSV 匯出完成 ✓');
 };
-function renderGroupResults(card,g){
-  const container=card.querySelector('.group-results');if(!container)return;
-  const results=allMessages.filter(m=>g.keywords.some(kw=>m.text.toLowerCase().includes(kw.toLowerCase())));
-  const badge=card.querySelector('.results-count-badge');
-  if(badge)badge.textContent=results.length+' 則';
-  if(!results.length){
-    container.innerHTML=`<div style="color:var(--text-muted);font-size:1.23rem;padding:12px 0">${g.keywords.length?'尚無符合的留言':'請先新增關鍵字'}</div>`;
+
+function renderGroupResults(card, g) {
+  const container = card.querySelector('.group-results'); if (!container) return;
+  const keywords = g.keywords || [];
+  const results = allMessages.filter(m=>keywords.some(kw=>m.text.toLowerCase().includes(kw.toLowerCase())));
+  const badge = card.querySelector('.results-count-badge');
+  if (badge) badge.textContent = results.length + ' 則';
+  if (!results.length) {
+    container.innerHTML = `<div style="color:var(--text-muted);font-size:1.23rem;padding:12px 0">${keywords.length?'尚無符合的留言':'請先新增關鍵字'}</div>`;
     return;
   }
-  const rows=[...results].reverse().map(m=>{
-    const mt=matchUser(m.ytName);
-    let text=esc(m.text);
-    g.keywords.forEach(kw=>{
-      const re=new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
-      text=text.replace(re,`<span class="keyword-highlight" style="background:${g.color}22;color:${g.color}">$&</span>`);
+  const rows = [...results].reverse().map(m => {
+    const mt = matchUser(m.ytName);
+    let text = esc(m.text);
+    keywords.forEach(kw => {
+      const re = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+      text = text.replace(re, `<span class="keyword-highlight" style="background:${g.color}22;color:${g.color}">$&</span>`);
     });
-    return`<tr>
+    return `<tr>
       <td style="font-size:1.1rem;white-space:nowrap">${new Date(m.time).toLocaleTimeString('zh-TW')}</td>
       <td><div class="yt-name">${esc(m.ytName)}</div></td>
       <td>${mt?esc(mt.realName):'<span class="unmatched">未登記</span>'}</td>
@@ -558,23 +628,26 @@ function renderGroupResults(card,g){
       <td><div class="msg-text">${text}</div></td>
     </tr>`;
   }).join('');
-  container.innerHTML=`<div class="kw-results-table"><table>
+  container.innerHTML = `<div class="kw-results-table"><table>
     <thead><tr><th>時間</th><th>YouTube帳號</th><th>本名</th><th>單位</th><th>留言內容</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
-function renderGroups(){
-  const container=document.getElementById('groupsList');
-  if(!groups.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">🗂</div><div>尚未建立任何關鍵字群組</div></div>';return;}
-  container.innerHTML=groups.map(g=>{
-    const chips=g.keywords.map(kw=>`
+
+function renderGroups() {
+  const container = document.getElementById('groupsList');
+  if (!groups.length) { container.innerHTML='<div class="empty-state"><div class="empty-icon">🗂</div><div>尚未建立任何關鍵字群組</div></div>'; return; }
+  container.innerHTML = groups.map(g => {
+    if (!g || !g.name) return '';            // 跳過損壞的資料
+    const keywords = g.keywords || [];       // keywords 若為 undefined 就用空陣列
+    const chips = keywords.map(kw=>`
       <div class="kw-chip" style="border-color:${g.color}44;color:${g.color}">
         ${esc(kw)}<button class="kw-chip-del" onclick="removeKeywordFromGroup(${g.id},'${esc(kw)}')">✕</button>
       </div>`).join('');
-    return`<div class="group-card" data-gid="${g.id}">
+    return `<div class="group-card" data-gid="${g.id}">
       <div class="group-card-header" onclick="toggleGroup(${g.id})">
         <div class="group-color-dot" style="background:${g.color}"></div>
         <div class="group-name">${esc(g.name)}</div>
-        <div class="group-meta">${g.keywords.length} 個關鍵字</div>
+        <div class="group-meta">${keywords.length} 個關鍵字</div>
         <div class="results-count-badge">— 則</div>
         <div class="group-chevron">▾</div>
       </div>
@@ -582,7 +655,7 @@ function renderGroups(){
         <div class="kw-chips-area">${chips||'<span style="color:var(--text-muted);font-size:1.2rem">尚未新增關鍵字</span>'}</div>
         <div class="add-kw-row">
           <input type="text" class="add-kw-input" id="kwinput-${g.id}" placeholder="新增關鍵字..." onkeydown="if(event.key==='Enter')addKeywordToGroup(${g.id})">
-          <button class="btn btn-gold btn-sm" onclick="addKeywordToGroup(${g.id})">新增</button>
+          <button class="btn" style="background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500;padding:8px 14px;font-size:1.2rem" onclick="addKeywordToGroup(${g.id})">新增</button>
         </div>
         <div class="group-actions">
           <button class="btn btn-outline btn-sm" onclick="exportGroupCSV(${g.id})">匯出 CSV</button>
@@ -594,176 +667,96 @@ function renderGroups(){
   }).join('');
 }
 
-// ── Tab3: 競猜活動 ──
-function collectRoundMessages(msg){
-  const now=new Date(msg.time);
-  rounds.forEach(r=>{
-    if(!r.isOpen)return;
-    if(!r.messages)r.messages=[];
-    if(r.messages.find(m=>m.id===msg.id))return;
-    if(r.openAt&&now<new Date(r.openAt))return;
-    const hit=r.options.find(opt=>msg.text.toLowerCase().includes(opt.toLowerCase()));
-    if(!hit)return;
-    r.messages.push({id:msg.id,ytName:msg.ytName,text:msg.text,time:msg.time,matched:hit});
-  });
+// ── Tab3 競猜 ──
+function syncRounds() {
+  set(ref(db,'pred_rounds'), rounds.length ? Object.fromEntries(rounds.map((r,i)=>[i,r])) : null);
+  renderRounds();
 }
 
-window.addRound=function(){
-  const name=document.getElementById('newRoundName').value.trim();
-  if(!name){showToast('請輸入場次名稱');return;}
-  rounds.push({id:Date.now(),name,options:[],answer:'',isOpen:false,openAt:null,closeAt:null,messages:[]});
+window.addRound = function() {
+  const name = document.getElementById('newRoundName').value.trim();
+  if (!name) { showToast('請輸入場次名稱'); return; }
+  rounds.push({ id: Date.now(), name, options: [], answer: '', isOpen: false, openAt: null, closeAt: null, messages: [] });
   syncRounds();
-  document.getElementById('newRoundName').value='';
-  renderRounds();showToast('已新增場次：'+name);
+  document.getElementById('newRoundName').value = '';
+  showToast('已新增場次：' + name);
 };
-window.deleteRound=function(rid){
-  if(!confirm('確定刪除此場次？'))return;
-  rounds=rounds.filter(r=>r.id!=rid);syncRounds();renderRounds();
+window.deleteRound = function(rid) {
+  if (!confirm('確定刪除此場次？')) return;
+  rounds = rounds.filter(r=>r.id!=rid); syncRounds();
 };
-window.openRound=function(rid){
-  const r=rounds.find(r=>r.id==rid);if(!r)return;
-  r.isOpen=true;r.openAt=new Date().toISOString();r.closeAt=null;
-  syncRounds();renderRounds();
-  // 立即抓一次
-  if(liveChatId)fetchMessages().catch(e=>showError(e.message));
-  // 啟動場次專屬輪詢（10秒），與主統計60秒分開
-  if(!roundInterval&&liveChatId){
-    roundInterval=setInterval(()=>{
-      if(rounds.some(r=>r.isOpen))fetchMessages().catch(e=>console.warn(e));
-      else{clearInterval(roundInterval);roundInterval=null;}
-    },10000);
-  }
-  showToast('✅ 已開啟「'+r.name+'」，開始收集留言（每10秒更新）');
+window.openRound = function(rid) {
+  const r = rounds.find(r=>r.id==rid); if (!r) return;
+  r.isOpen=true; r.openAt=new Date().toISOString(); r.closeAt=null;
+  syncRounds(); renderRounds();
+  showToast('✅ 已開啟「'+r.name+'」，worker 頁面會自動收集留言');
 };
-window.closeRound=function(rid){
-  const r=rounds.find(r=>r.id==rid);if(!r)return;
-  r.isOpen=false;r.closeAt=new Date().toISOString();
-  syncRounds();
-  // 立即補抓最後留言
-  if(liveChatId)fetchMessages().catch(e=>showError(e.message));
-  // 若所有場次都已關閉，停止場次輪詢
-  if(!rounds.some(r=>r.isOpen)&&roundInterval){
-    clearInterval(roundInterval);roundInterval=null;
-  }
-  renderRounds();showToast('⏹ 已關閉「'+r.name+'」，已補抓最新留言');
+window.closeRound = function(rid) {
+  const r = rounds.find(r=>r.id==rid); if (!r) return;
+  r.isOpen=false; r.closeAt=new Date().toISOString();
+  syncRounds(); renderRounds();
+  showToast('⏹ 已關閉「'+r.name+'」');
 };
-window.addOptionToRound=function(rid){
-  const input=document.getElementById('optinput-'+rid);
-  const val=input.value.trim();if(!val)return;
-  const r=rounds.find(r=>r.id==rid);if(!r)return;
-  if(r.options.includes(val)){showToast('選項已存在');return;}
-  r.options.push(val);syncRounds();input.value='';renderRounds();
+window.addOptionToRound = function(rid) {
+  const input = document.getElementById('optinput-'+rid);
+  const val = input.value.trim(); if (!val) return;
+  const r = rounds.find(r=>r.id==rid); if (!r) return;
+  if (r.options.includes(val)) { showToast('選項已存在'); return; }
+  r.options.push(val); syncRounds(); input.value=''; renderRounds();
 };
-window.removeOptionFromRound=function(rid,opt){
-  const r=rounds.find(r=>r.id==rid);if(!r)return;
-  r.options=r.options.filter(o=>o!==opt);
-  if(r.answer===opt)r.answer='';
-  syncRounds();renderRounds();
+window.removeOptionFromRound = function(rid, opt) {
+  const r = rounds.find(r=>r.id==rid); if (!r) return;
+  r.options = r.options.filter(o=>o!==opt);
+  if (r.answer===opt) r.answer='';
+  syncRounds(); renderRounds();
 };
-window.setRoundAnswer=function(rid,val){
-  const r=rounds.find(r=>r.id==rid);if(!r)return;
-  r.answer=val;syncRounds();renderRounds();
-  if(val)showToast('已設定「'+r.name+'」正確答案：'+val);
+window.setRoundAnswer = function(rid, val) {
+  const r = rounds.find(r=>r.id==rid); if (!r) return;
+  r.answer=val; syncRounds(); renderRounds();
+  if (val) showToast('已設定「'+r.name+'」正確答案：'+val);
 };
-window.toggleRoundCard=function(rid){
-  const card=document.querySelector(`.round-card[data-rid="${rid}"]`);
-  if(card)card.classList.toggle('open');
+window.toggleRoundCard = function(rid) {
+  const card = document.querySelector(`.round-card[data-rid="${rid}"]`);
+  if (card) card.classList.toggle('open');
 };
-window.toggleRoundMsgs=function(rid){
-  const el=document.getElementById('msgs-body-'+rid);
-  if(el)el.classList.toggle('open');
+window.toggleRoundMsgs = function(rid) {
+  const el = document.getElementById('msgs-body-'+rid);
+  if (el) el.classList.toggle('open');
 };
-window.runFilter=function(){
-  const answered=rounds.filter(r=>r.answer);
-  if(!answered.length){
-    document.getElementById('filterResult').innerHTML='<div style="color:var(--text-muted);padding:16px;font-size:1.23rem">請先為每個場次設定正確答案</div>';return;
-  }
-  const perRound=answered.map(r=>{
-    const correct=new Set();
-    (r.messages||[]).forEach(m=>{
-      if(m.matched&&m.matched.toLowerCase()===r.answer.toLowerCase())correct.add(m.ytName);
-    });
-    return{round:r,correct};
-  });
-  let winners=[...perRound[0].correct];
-  for(let i=1;i<perRound.length;i++)winners=winners.filter(yt=>perRound[i].correct.has(yt));
-  renderFilterResult(winners,answered);
-};
-function renderFilterResult(winners,answered){
-  const container=document.getElementById('filterResult');
-  const cond=answered.map((r,i)=>`第${i+1}場「${esc(r.name)}」→ <strong style="color:var(--gold)">${esc(r.answer)}</strong>`).join('　＋　');
-  if(!winners.length){
-    container.innerHTML=`<div class="filter-result-header"><div class="filter-result-title">${cond}</div><div class="filter-winner-count">0 人</div></div><div style="color:var(--text-muted);padding:16px;font-size:1.23rem">沒有人全部猜對</div>`;return;
-  }
-  const rows=winners.map((yt,i)=>{
-    const m=matchUser(yt);
-    return`<tr class="winner-row">
-      <td><div class="rank-badge ${i<3?'rank-'+(i+1):'rank-n'}">${i+1}</div></td>
-      <td><div class="yt-name">${esc(yt)}</div></td>
-      <td>${m?`<div class="real-name">${esc(m.realName)}</div>`:'<div class="unmatched">未登記</div>'}</td>
-      <td>${m?`<span class="unit-badge">${esc(m.unitName)}</span>`:'-'}</td>
-    </tr>`;
-  }).join('');
-  container.innerHTML=`
-    <div class="filter-result-header">
-      <div class="filter-result-title">${cond}</div>
-      <div class="filter-winner-count">🎉 ${winners.length} 人全部猜對</div>
-    </div>
-    <div class="filter-table-wrap"><table>
-      <thead><tr><th style="width:48px">#</th><th>YouTube帳號</th><th>本名</th><th>單位</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
-}
-window.exportFilterCSV=function(){
-  const answered=rounds.filter(r=>r.answer);
-  if(!answered.length){showToast('請先設定正確答案');return;}
-  const perRound=answered.map(r=>{
-    const correct=new Set();
-    (r.messages||[]).forEach(m=>{if(m.matched&&m.matched.toLowerCase()===r.answer.toLowerCase())correct.add(m.ytName);});
-    return{round:r,correct};
-  });
-  let winners=[...perRound[0].correct];
-  for(let i=1;i<perRound.length;i++)winners=winners.filter(yt=>perRound[i].correct.has(yt));
-  if(!winners.length){showToast('沒有全部猜對的人');return;}
-  const hdr=['#','YouTube帳號','本名','單位'];
-  const rows=winners.map((yt,i)=>{const m=matchUser(yt);return[i+1,yt,m?m.realName:'未登記',m?m.unitName:'-'];});
-  dl([hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n'),`競猜得獎名單_${Date.now()}.csv`);
-  showToast('匯出完成 ✓');
-};
-function renderRounds(){
-  const container=document.getElementById('roundsList');
-  document.getElementById('predFilterSection').style.display=rounds.length?'block':'none';
-  if(!rounds.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">🏆</div><div>尚未建立任何場次</div></div>';return;}
-  // 記錄目前展開狀態，重繪後恢復（rid 全部轉字串確保比對一致）
-  const openCards=new Set([...document.querySelectorAll('.round-card.open')].map(el=>String(el.dataset.rid)));
-  const openMsgs=new Set([...document.querySelectorAll('.round-msgs-body.open')].map(el=>el.id.replace('msgs-body-','')));
-  container.innerHTML=rounds.map((r,idx)=>{
-    const statusLabel=r.isOpen?'收集中':(r.closeAt?'已關閉':'未開始');
-    const statusCls=r.isOpen?'open':'closed';
-    const msgCount=(r.messages||[]).length;
-    const chips=(r.options||[]).map(opt=>`
+
+function renderRounds() {
+  const container = document.getElementById('roundsList');
+  document.getElementById('predFilterSection').style.display = rounds.length ? 'block' : 'none';
+  if (!rounds.length) { container.innerHTML='<div class="empty-state"><div class="empty-icon">🏆</div><div>尚未建立任何場次</div></div>'; return; }
+  const openCards = new Set([...document.querySelectorAll('.round-card.open')].map(el=>String(el.dataset.rid)));
+  const openMsgs  = new Set([...document.querySelectorAll('.round-msgs-body.open')].map(el=>el.id.replace('msgs-body-','')));
+  container.innerHTML = rounds.map((r,idx) => {
+    const statusLabel = r.isOpen?'收集中':(r.closeAt?'已關閉':'未開始');
+    const statusCls   = r.isOpen?'open':'closed';
+    const msgCount    = (r.messages||[]).length;
+    const chips = (r.options||[]).map(opt=>`
       <div class="option-chip ${r.answer===opt?'correct':''}">
         ${esc(opt)}${r.answer===opt?'<span style="font-size:1rem;margin-left:2px">✓</span>':''}
         <button class="option-chip-del" onclick="removeOptionFromRound(${r.id},'${esc(opt)}')">✕</button>
       </div>`).join('');
-    const ansOpts='<option value="">— 選擇正確答案 —</option>'+(r.options||[]).map(opt=>`<option value="${esc(opt)}" ${r.answer===opt?'selected':''}>${esc(opt)}</option>`).join('');
-    const msgRows=(r.messages||[]).length?[...(r.messages||[])].reverse().slice(0,200).map(m=>{
-      const mt=matchUser(m.ytName);
-      return`<tr>
+    const ansOpts = '<option value="">— 選擇正確答案 —</option>'+(r.options||[]).map(opt=>`<option value="${esc(opt)}" ${r.answer===opt?'selected':''}>${esc(opt)}</option>`).join('');
+    const msgRows = (r.messages||[]).length ? [...(r.messages||[])].reverse().slice(0,200).map(m=>{
+      const mt = matchUser(m.ytName);
+      return `<tr>
         <td style="font-size:1.1rem;white-space:nowrap">${new Date(m.time).toLocaleTimeString('zh-TW')}</td>
         <td><div class="yt-name">${esc(m.ytName)}</div></td>
         <td>${mt?esc(mt.realName):'<span class="unmatched">未登記</span>'}</td>
         <td><span style="color:#4a9eff;font-size:1.2rem">${esc(m.matched)}</span></td>
         <td><div class="msg-text">${esc(m.text)}</div></td>
       </tr>`;
-    }).join(''):`<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:16px">尚無符合留言</td></tr>`;
-    const timeInfo=r.openAt?`開啟：${new Date(r.openAt).toLocaleTimeString('zh-TW')}${r.closeAt?' ／ 關閉：'+new Date(r.closeAt).toLocaleTimeString('zh-TW'):''}` :'';
-    const ctrlBtn=!r.isOpen&&!r.closeAt
-      ?`<button class="btn btn-green btn-sm" onclick="openRound(${r.id})">▶ 開始收集留言</button>`
-      :r.isOpen
-      ?`<button class="btn btn-red btn-sm" onclick="closeRound(${r.id})">⏹ 停止收集</button>`
-      :`<button class="btn btn-outline btn-sm" onclick="openRound(${r.id})">↺ 重新開啟</button>`;
-    return`<div class="round-card" data-rid="${String(r.id)}">
+    }).join('') : `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:16px">尚無符合留言</td></tr>`;
+    const timeInfo = r.openAt ? `開啟：${new Date(r.openAt).toLocaleTimeString('zh-TW')}${r.closeAt?' ／ 關閉：'+new Date(r.closeAt).toLocaleTimeString('zh-TW'):''}` : '';
+    const ctrlBtn = !r.isOpen&&!r.closeAt
+      ? `<button class="btn btn-sm" style="background:linear-gradient(135deg,#2e7d32,var(--green));color:#fff" onclick="openRound(${r.id})">▶ 開始收集留言</button>`
+      : r.isOpen
+      ? `<button class="btn btn-sm" style="background:linear-gradient(135deg,#8b1a1e,var(--red));color:#fff" onclick="closeRound(${r.id})">⏹ 停止收集</button>`
+      : `<button class="btn btn-outline btn-sm" onclick="openRound(${r.id})">↺ 重新開啟</button>`;
+    return `<div class="round-card" data-rid="${String(r.id)}">
       <div class="round-header" onclick="toggleRoundCard(${r.id})">
         <div class="round-num">${idx+1}</div>
         <div class="round-name-text">${esc(r.name)}</div>
@@ -776,7 +769,7 @@ function renderRounds(){
         <div class="option-chips">${chips||'<span style="color:var(--text-muted);font-size:1.2rem">尚未新增選項</span>'}</div>
         <div class="add-kw-row">
           <input type="text" class="add-kw-input" id="optinput-${r.id}" placeholder="新增選手名稱..." onkeydown="if(event.key==='Enter')addOptionToRound(${r.id})">
-          <button class="btn btn-gold btn-sm" onclick="addOptionToRound(${r.id})">新增</button>
+          <button class="btn" style="background:linear-gradient(135deg,#a07820,var(--gold));color:#1a0a00;font-weight:500;padding:8px 14px;font-size:1.2rem" onclick="addOptionToRound(${r.id})">新增</button>
         </div>
         <div class="round-section-label" style="margin-top:16px">賽後設定正確答案</div>
         <select class="answer-select" onchange="setRoundAnswer(${r.id},this.value)">${ansOpts}</select>
@@ -795,65 +788,348 @@ function renderRounds(){
       </div>
     </div>`;
   }).join('');
-  // 恢復展開狀態（rid 統一用字串比對）
-  openCards.forEach(rid=>{
-    const card=document.querySelector('.round-card[data-rid="'+rid+'"]');
-    if(card)card.classList.add('open');
-  });
-  openMsgs.forEach(rid=>{
-    const el=document.getElementById('msgs-body-'+rid);
-    if(el)el.classList.add('open');
-  });
+  openCards.forEach(rid => { const c=document.querySelector('.round-card[data-rid="'+rid+'"]'); if(c)c.classList.add('open'); });
+  openMsgs.forEach(rid  => { const e=document.getElementById('msgs-body-'+rid); if(e)e.classList.add('open'); });
 }
 
+window.runFilter = function() {
+  const answered = rounds.filter(r=>r.answer);
+  if (!answered.length) { document.getElementById('filterResult').innerHTML='<div style="color:var(--text-muted);padding:16px;font-size:1.23rem">請先為每個場次設定正確答案</div>'; return; }
+  const perRound = answered.map(r => {
+    const correct = new Set();
+    (r.messages||[]).forEach(m => { if(m.matched&&m.matched.toLowerCase()===r.answer.toLowerCase()) correct.add(m.ytName); });
+    return { round: r, correct };
+  });
+  let winners = [...perRound[0].correct];
+  for (let i=1;i<perRound.length;i++) winners = winners.filter(yt=>perRound[i].correct.has(yt));
+  renderFilterResult(winners, answered);
+};
+
+function renderFilterResult(winners, answered) {
+  const container = document.getElementById('filterResult');
+  const cond = answered.map((r,i)=>`第${i+1}場「${esc(r.name)}」→ <strong style="color:var(--gold)">${esc(r.answer)}</strong>`).join('　＋　');
+  if (!winners.length) { container.innerHTML=`<div class="filter-result-header"><div class="filter-result-title">${cond}</div><div class="filter-winner-count">0 人</div></div><div style="color:var(--text-muted);padding:16px;font-size:1.23rem">沒有人全部猜對</div>`; return; }
+  const rows = winners.map((yt,i) => {
+    const m = matchUser(yt);
+    return `<tr class="winner-row">
+      <td><div class="rank-badge ${i<3?'rank-'+(i+1):'rank-n'}">${i+1}</div></td>
+      <td><div class="yt-name">${esc(yt)}</div></td>
+      <td>${m?`<div class="real-name">${esc(m.realName)}</div>`:'<div class="unmatched">未登記</div>'}</td>
+      <td>${m?`<span class="unit-badge">${esc(m.unitName)}</span>`:'-'}</td>
+    </tr>`;
+  }).join('');
+  container.innerHTML=`<div class="filter-result-header"><div class="filter-result-title">${cond}</div><div class="filter-winner-count">🎉 ${winners.length} 人全部猜對</div></div>
+    <div class="filter-table-wrap"><table>
+      <thead><tr><th style="width:48px">#</th><th>YouTube帳號</th><th>本名</th><th>單位</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+}
+
+window.exportFilterCSV = function() {
+  const answered = rounds.filter(r=>r.answer);
+  if (!answered.length) { showToast('請先設定正確答案'); return; }
+  const perRound = answered.map(r => {
+    const correct = new Set();
+    (r.messages||[]).forEach(m => { if(m.matched&&m.matched.toLowerCase()===r.answer.toLowerCase()) correct.add(m.ytName); });
+    return { round: r, correct };
+  });
+  let winners = [...perRound[0].correct];
+  for (let i=1;i<perRound.length;i++) winners = winners.filter(yt=>perRound[i].correct.has(yt));
+  if (!winners.length) { showToast('沒有全部猜對的人'); return; }
+  const hdr = ['#','YouTube帳號','本名','單位'];
+  const rows = winners.map((yt,i) => { const m=matchUser(yt); return [i+1,yt,m?m.realName:'未登記',m?m.unitName:'-']; });
+  dl([hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n'), `競猜得獎名單_${Date.now()}.csv`);
+  showToast('匯出完成 ✓');
+};
+
 // ── 工具 ──
-function extractVideoId(input){
-  const ps=[/(?:v=|youtu\.be\/|\/live\/)([A-Za-z0-9_-]{11})/,/^([A-Za-z0-9_-]{11})$/];
-  for(const p of ps){const m=input.match(p);if(m)return m[1];}return null;
-}
-async function getLiveChatId(vid){
-  const res=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${vid}&key=${API_KEY}`);
-  const data=await res.json();
-  const d=data.items?.[0]?.liveStreamingDetails;
-  if(!d?.activeLiveChatId)throw new Error('找不到直播聊天室，請確認是否正在直播');
-  return d.activeLiveChatId;
-}
-window.sortBy=function(mode){sortMode=mode;renderCountTable();};
-window.switchTab=function(name){
+window.switchTab = function(name) {
   document.querySelectorAll('.tab-btn,.tab-content').forEach(el=>el.classList.remove('active'));
   document.querySelector(`.tab-btn[onclick*="${name}"]`).classList.add('active');
   document.getElementById(`tab-${name}`).classList.add('active');
 };
-function setStatus(s){
-  document.getElementById('statusDot').className='dot'+(s==='active'?' active':s==='error'?' error':'');
-  document.getElementById('statusText').textContent=s==='active'?'監控中':s==='connecting'?'連線中...':s==='error'?'發生錯誤':'未啟動';
-}
-function startCountdown(){
-  clearInterval(countdownInterval);countdown=10;
-  countdownInterval=setInterval(()=>{
-    countdown--;
-    document.getElementById('nextUpdateText').textContent=`下次更新：${countdown}s 後`;
-    if(countdown<=0)countdown=10;
-  },1000);
-}
-function resetCountdown(){countdown=10;}
-function showError(msg){const b=document.getElementById('errorBox');b.textContent='⚠️ '+msg;b.classList.add('show');}
-function hideError(){document.getElementById('errorBox').classList.remove('show');}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function dl(csv,filename){
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
-  a.download=filename;a.click();
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;'); }
+function dl(csv, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = filename; a.click();
 }
 let tTimer;
-function showToast(m){
-  const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
-  clearTimeout(tTimer);tTimer=setTimeout(()=>t.classList.remove('show'),3000);
+function showToast(m) {
+  const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
+  clearTimeout(tTimer); tTimer=setTimeout(()=>t.classList.remove('show'),3000);
 }
+
+// ════════════════════════════════════════
+// 積分遊戲
+// ════════════════════════════════════════
+let scoreRounds = [];   // [{ id, name, keyword, status:'idle'|'running'|'done', openAt, closeAt, hits:[] }]
+// hits: [{ ytName, time(ISO), rank, pts }]
+
+const SCORE_MAP = { 1:5, 2:4, 3:3, 4:2 };  // 5名以後預設 1
+
+function scoreForRank(rank) { return SCORE_MAP[rank] ?? 1; }
+
+function syncScoreRounds() {
+  // 只寫 Firebase，畫面更新完全由 onValue 負責，避免競態覆蓋
+  set(ref(db,'score_rounds'),
+    scoreRounds.length ? Object.fromEntries(scoreRounds.map((r,i)=>[i,r])) : null
+  );
+}
+
+onValue(ref(db,'score_rounds'), snap => {
+  const v = snap.val();
+  scoreRounds = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+  console.log('[score_rounds] Firebase 更新，場次狀態:', scoreRounds.map(r=>({name:r.name, status:r.status, hits:(r.hits||[]).length})));
+  renderScoreRounds();
+  updateScoreTotalSection();
+});
+
+// ── 新增場次 ──
+window.addScoreRound = function() {
+  const name      = document.getElementById('newScoreRoundName').value.trim();
+  const kw        = document.getElementById('newScoreKeyword').value.trim();
+  const limitTime = document.getElementById('newScoreLimitTime').checked;
+  if (!name) { showToast('請輸入場次名稱'); return; }
+  if (!kw)   { showToast('請輸入關鍵字'); return; }
+  scoreRounds = [...scoreRounds, { id: Date.now(), name, keyword: kw, limitTime, status:'idle', openAt:null, closeAt:null, hits:[] }];
+  syncScoreRounds();
+  document.getElementById('newScoreRoundName').value = '';
+  document.getElementById('newScoreKeyword').value   = '';
+  showToast(`已新增場次：${name}（關鍵字：${kw}，${limitTime?'限開始後':'不限時間'}）`);
+};
+
+// ── 開始統計 ──
+window.startScoreRound = function(rid) {
+  const r = scoreRounds.find(r => String(r.id) === String(rid));
+  if (!r) { console.warn('[積分] startScoreRound 找不到 rid=', rid, scoreRounds.map(x=>x.id)); return; }
+  r.status  = 'running';
+  r.openAt  = new Date().toISOString();
+  r.closeAt = null;
+  r.hits    = [];
+  syncScoreRounds();
+  renderScoreRounds();          // 立即更新按鈕，不等 Firebase
+  showToast(`▶ 開始統計「${r.name}」，關鍵字：${r.keyword}`);
+};
+
+// ── 停止統計 ──
+window.stopScoreRound = function(rid) {
+  const r = scoreRounds.find(r => String(r.id) === String(rid));
+  if (!r) { console.warn('[積分] stopScoreRound 找不到 rid=', rid); return; }
+
+  const kw        = r.keyword.toLowerCase();
+  const openAtMs  = new Date(r.openAt).getTime();
+  const limitTime = r.limitTime !== false; // 預設 true（限時間）
+
+  console.log('[積分] 停止，關鍵字:', kw, '  allMessages:', allMessages.length, '  限時間:', limitTime);
+
+  const firstHitMap = {};
+  allMessages
+    .filter(m => {
+      if (!m.text.toLowerCase().includes(kw)) return false;
+      if (limitTime && new Date(m.time).getTime() < openAtMs) return false;
+      return true;
+    })
+    .sort((a, b) => new Date(a.time) - new Date(b.time))
+    .forEach(m => { if (!firstHitMap[m.ytName]) firstHitMap[m.ytName] = m; });
+
+  const sorted = Object.values(firstHitMap).sort((a, b) => new Date(a.time) - new Date(b.time));
+  console.log('[積分] 命中人數:', sorted.length, sorted.map(m => m.ytName));
+
+  r.hits = sorted.map((m, i) => ({
+    ytName: m.ytName, time: m.time, text: m.text,
+    rank: i + 1, pts: scoreForRank(i + 1)
+  }));
+  r.status  = 'done';
+  r.closeAt = new Date().toISOString();
+  syncScoreRounds();
+  renderScoreRounds();
+  updateScoreTotalSection();
+  showToast(`⏹ 已停止「${r.name}」，共 ${r.hits.length} 人命中`);
+};
+
+// ── 刪除場次 ──
+window.deleteScoreRound = function(rid) {
+  if (!confirm('確定刪除此場次？')) return;
+  scoreRounds = scoreRounds.filter(r => String(r.id) !== String(rid));
+  syncScoreRounds();
+};
+
+// ── 清除全部 ──
+window.clearAllScoreRounds = function() {
+  if (!confirm('確定清除所有積分場次資料？')) return;
+  scoreRounds = [];
+  set(ref(db,'score_rounds'), null);
+  renderScoreRounds();
+  updateScoreTotalSection();
+  showToast('已清除所有場次');
+};
+
+// ── 渲染場次列表 ──
+function renderScoreRounds() {
+  const container = document.getElementById('scoreRoundsList');
+  if (!scoreRounds.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🎮</div><div>尚未建立任何場次</div></div>';
+    return;
+  }
+
+  container.innerHTML = scoreRounds.map((r, idx) => {
+    const statusLabel = r.status === 'running' ? '統計中' : r.status === 'done' ? '已結束' : '待開始';
+    const hits        = r.hits || [];
+
+    const ctrlBtn = r.status === 'idle'
+      ? `<button class="btn btn-sm" style="background:linear-gradient(135deg,#2e7d32,var(--green));color:#fff" onclick="startScoreRound('${r.id}')">▶ 開始統計</button>`
+      : r.status === 'running'
+      ? `<button class="btn btn-sm" style="background:linear-gradient(135deg,#8b1a1e,var(--red));color:#fff" onclick="stopScoreRound('${r.id}')">⏹ 停止統計</button>`
+      : `<button class="btn btn-outline btn-sm" onclick="restartScoreRound('${r.id}')">↺ 重新開始</button>`;
+
+    const timeInfo = r.openAt
+      ? `開始：${new Date(r.openAt).toLocaleTimeString('zh-TW')}${r.closeAt ? ' ／ 結束：'+new Date(r.closeAt).toLocaleTimeString('zh-TW') : ''}`
+      : '';
+
+    const hitsHTML = hits.length
+      ? `<div class="score-result-table"><table>
+          <thead><tr><th style="width:44px">名次</th><th>YouTube 帳號</th><th>本名</th><th>單位</th><th>留言時間</th><th>留言內容</th><th style="text-align:center">積分</th></tr></thead>
+          <tbody>${hits.map(h => {
+            const m  = matchUser(h.ytName);
+            const rc = h.rank===1?'s1':h.rank===2?'s2':h.rank===3?'s3':'sn';
+            const rankEmoji = h.rank===1?'🥇':h.rank===2?'🥈':h.rank===3?'🥉':`${h.rank}`;
+            return `<tr>
+              <td style="text-align:center;font-size:1.35rem">${rankEmoji}</td>
+              <td><div class="yt-name">${esc(h.ytName)}</div></td>
+              <td>${m ? `<div class="real-name">${esc(m.realName)}</div>` : '<div class="unmatched">未登記</div>'}</td>
+              <td>${m ? `<span class="unit-badge">${esc(m.unitName)}</span>` : '-'}</td>
+              <td style="font-size:1.1rem;color:var(--text-muted);white-space:nowrap">${new Date(h.time).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}<span style="font-size:0.9rem;margin-left:4px">.${String(new Date(h.time).getMilliseconds()).padStart(3,'0')}</span></td>
+              <td><div class="msg-text" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(h.text)}">${esc(h.text)}</div></td>
+              <td style="text-align:center"><span class="score-pts ${rc}">+${h.pts}</span></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table></div>`
+      : `<div style="color:var(--text-muted);font-size:1.23rem;padding:12px 0">${r.status==='running'?'統計中，留言即時收集...' : r.status==='done'?'無人命中關鍵字':'尚未開始'}</div>`;
+
+    return `<div class="score-round-card ${r.status==='running'?'running':''}">
+      <div class="score-round-header">
+        <div class="score-round-num">${idx+1}</div>
+        <div class="score-round-name">${esc(r.name)}</div>
+        <div class="score-kw-badge">🔑 ${esc(r.keyword)}</div>
+        <div class="score-status-badge ${r.status}">${statusLabel}</div>
+        <div style="font-size:1.1rem;color:var(--text-muted);padding:2px 8px;border-radius:8px;background:rgba(255,255,255,0.04)">${r.limitTime !== false ? '⏱ 限開始後' : '🔓 不限時間'}</div>
+        <div style="color:var(--text-muted);font-size:1.17rem">${hits.length} 人命中</div>
+      </div>
+      <div class="score-round-body">
+        <div class="score-controls">
+          ${ctrlBtn}
+          <button class="btn btn-sm" style="background:transparent;border:1px solid rgba(192,39,45,0.3);color:#e57373" onclick="deleteScoreRound('${r.id}')">刪除</button>
+          <div class="score-time-info">${timeInfo}</div>
+        </div>
+        ${hitsHTML}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── 重新開始（清空 hits，回到 running）──
+window.restartScoreRound = function(rid) {
+  if (!confirm('重新開始會清除此場次的命中紀錄，確定嗎？')) return;
+  const r = scoreRounds.find(r => String(r.id) === String(rid));
+  if (!r) return;
+  r.status = 'running'; r.openAt = new Date().toISOString(); r.closeAt = null; r.hits = [];
+  syncScoreRounds();
+  showToast(`已重新開始「${r.name}」`);
+};
+
+// ── 總積分計算 ──
+window.calcTotalScore = function() {
+  const donedRounds = scoreRounds.filter(r => r.status === 'done' && (r.hits||[]).length > 0);
+  if (!donedRounds.length) { showToast('尚無已結束的場次'); return; }
+
+  // 累計每人積分
+  const scoreMap = {};   // ytName → { pts, perRound: {roundId: pts} }
+  donedRounds.forEach(r => {
+    (r.hits||[]).forEach(h => {
+      if (!scoreMap[h.ytName]) scoreMap[h.ytName] = { pts: 0, perRound: {} };
+      scoreMap[h.ytName].pts += h.pts;
+      scoreMap[h.ytName].perRound[String(r.id)] = h.pts;
+    });
+  });
+
+  // 排序：總積分降序
+  const sorted = Object.entries(scoreMap)
+    .map(([yt, v]) => ({ ytName: yt, ...v }))
+    .sort((a, b) => b.pts - a.pts);
+
+  if (!sorted.length) { showToast('沒有積分資料'); return; }
+
+  // 動態生成各場次欄位 header
+  const hdrs = donedRounds.map(r =>
+    `<th class="score-col" style="white-space:nowrap">${esc(r.name)}<br><span style="font-size:1rem;opacity:0.6">${esc(r.keyword)}</span></th>`
+  ).join('');
+  document.getElementById('scoreRoundHeaders').outerHTML =
+    `${hdrs}<th style="color:var(--gold-light);text-align:center">總積分</th>`;
+
+  // 渲染表格
+  const tbody = document.getElementById('scoreTotalBody');
+  tbody.innerHTML = sorted.map((s, i) => {
+    const m  = matchUser(s.ytName);
+    const rc = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
+    const roundCols = donedRounds.map(r => {
+      const p = s.perRound[String(r.id)];
+      return `<td class="score-col">${p !== undefined ? `<span style="color:var(--gold);font-weight:500">+${p}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>`;
+    }).join('');
+    return `<tr>
+      <td><div class="rank-badge ${rc}">${i+1}</div></td>
+      <td><div class="yt-name">${esc(s.ytName)}</div></td>
+      <td>${m ? `<div class="real-name">${esc(m.realName)}</div>` : '<div class="unmatched">未登記</div>'}</td>
+      <td>${m ? `<span class="unit-badge">${esc(m.unitName)}</span>` : '-'}</td>
+      ${roundCols}
+      <td style="text-align:center"><span class="score-total-pts">${s.pts}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('scoreTotalSection').style.display = 'block';
+};
+
+function updateScoreTotalSection() {
+  const hasDone = scoreRounds.some(r => r.status === 'done');
+  // 如果已有結束的場次，自動更新總積分
+  if (hasDone && document.getElementById('scoreTotalSection').style.display !== 'none') {
+    calcTotalScore();
+  }
+  if (!hasDone) document.getElementById('scoreTotalSection').style.display = 'none';
+}
+
+// ── 匯出總積分 CSV ──
+window.exportScoreCSV = function() {
+  const donedRounds = scoreRounds.filter(r => r.status === 'done' && (r.hits||[]).length > 0);
+  if (!donedRounds.length) { showToast('尚無已結束的場次'); return; }
+
+  const scoreMap = {};
+  donedRounds.forEach(r => {
+    (r.hits||[]).forEach(h => {
+      if (!scoreMap[h.ytName]) scoreMap[h.ytName] = { pts: 0, perRound: {} };
+      scoreMap[h.ytName].pts += h.pts;
+      scoreMap[h.ytName].perRound[String(r.id)] = h.pts;
+    });
+  });
+
+  const sorted = Object.entries(scoreMap)
+    .map(([yt, v]) => ({ ytName: yt, ...v }))
+    .sort((a, b) => b.pts - a.pts);
+
+  const roundNames = donedRounds.map(r => `${r.name}(${r.keyword})`);
+  const hdr = ['排名','YouTube帳號','本名','單位', ...roundNames, '總積分'];
+  const rows = sorted.map((s, i) => {
+    const m = matchUser(s.ytName);
+    const cols = donedRounds.map(r => s.perRound[String(r.id)] ?? 0);
+    return [i+1, s.ytName, m?m.realName:'未登記', m?m.unitName:'-', ...cols, s.pts];
+  });
+  dl([hdr,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n'), `積分排行_${Date.now()}.csv`);
+  showToast('匯出完成 ✓');
+};
 
 // ── 初始化 ──
 initSwatches();
-loadData();
 </script>
 </body>
 </html>

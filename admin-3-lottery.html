@@ -19,10 +19,15 @@
     --text: #e8e0d0;
     --text-muted: rgba(232,224,208,0.45);
     --green: #4caf50;
+    /* 主管色系 */
+    --mgr: #a78bfa;
+    --mgr-bg: rgba(167,139,250,0.1);
+    --mgr-border: rgba(167,139,250,0.3);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; }
 
+  /* ── NAV ── */
   .nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; }
   .nav-brand { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; font-weight: 900; color: var(--gold); letter-spacing: 0.2em; margin-right: 32px; white-space: nowrap; }
   .nav-links { display: flex; gap: 4px; }
@@ -30,16 +35,16 @@
   .nav-link:hover { color: var(--text); background: var(--surface2); }
   .nav-link.active { color: var(--gold); background: rgba(212,168,67,0.08); }
 
-  .main { padding: 32px; max-width: 1100px; margin: 0 auto; }
+  .main { padding: 32px; max-width: 1200px; margin: 0 auto; }
   .page-title { font-family: 'Noto Serif TC', serif; font-size: 2.25rem; font-weight: 900; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 4px; }
   .page-subtitle { color: var(--text-muted); font-size: 1.275rem; margin-bottom: 32px; }
 
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } .main { padding: 16px; } .nav { padding: 0 16px; } }
 
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 28px; margin-bottom: 20px; }
-  .panel-title { font-size: 1.2rem; color: var(--gold); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .panel-title { font-size: 1.2rem; color: var(--gold); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 
+  /* ── FORM ── */
   .form-group { margin-bottom: 16px; }
   .form-label { display: block; font-size: 1.2rem; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 8px; }
   .form-input, .form-select {
@@ -49,9 +54,9 @@
   }
   .form-input:focus, .form-select:focus { border-color: var(--gold); }
   .form-input::placeholder { color: var(--text-muted); font-size: 1.275rem; }
-
   .row-inline { display: grid; grid-template-columns: 1fr 90px; gap: 10px; align-items: end; }
 
+  /* ── BUTTONS ── */
   .btn { padding: 10px 20px; border-radius: 4px; border: none; font-family: 'Noto Sans TC', sans-serif; font-size: 1.275rem; cursor: pointer; letter-spacing: 0.05em; transition: all 0.2s; white-space: nowrap; }
   .btn-gold { background: linear-gradient(135deg, #a07820, var(--gold)); color: #1a0a00; font-weight: 500; }
   .btn-gold:hover { filter: brightness(1.1); }
@@ -64,43 +69,79 @@
   .btn-red-solid:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; filter: none; }
   .btn-full { width: 100%; padding: 14px; }
   .btn-sm { padding: 6px 12px; font-size: 1.17rem; }
+  .btn-mgr { background: var(--mgr-bg); border: 1px solid var(--mgr-border); color: var(--mgr); }
+  .btn-mgr:hover { background: rgba(167,139,250,0.2); }
 
-  /* Upload zone */
+  /* ── UPLOAD ── */
   .upload-zone {
-    border: 2px dashed rgba(212,168,67,0.25); border-radius: 6px; padding: 28px 20px;
+    border: 2px dashed rgba(212,168,67,0.25); border-radius: 6px; padding: 22px 20px;
     text-align: center; cursor: pointer; transition: all 0.25s; position: relative;
   }
   .upload-zone:hover, .upload-zone.drag-over { border-color: var(--gold); background: rgba(212,168,67,0.04); }
   .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .upload-icon { font-size: 3rem; margin-bottom: 8px; }
-  .upload-label { font-size: 1.275rem; color: var(--text-muted); line-height: 1.7; }
+  .upload-icon { font-size: 2.5rem; margin-bottom: 6px; }
+  .upload-label { font-size: 1.2rem; color: var(--text-muted); line-height: 1.7; }
   .upload-label strong { color: var(--gold); }
 
-  /* Column mapping */
+  /* ── COLUMN MAP ── */
   .map-panel { background: var(--surface2); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; padding: 16px; margin-top: 14px; display: none; }
   .map-panel.show { display: block; }
-  .map-title { font-size: 1.17rem; color: var(--gold); letter-spacing: 0.15em; margin-bottom: 12px; }
-  .map-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .map-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
   .map-select { background: var(--surface); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 8px 12px; color: var(--text); font-family: 'Noto Sans TC', sans-serif; font-size: 1.275rem; outline: none; width: 100%; }
   .map-select:focus { border-color: var(--gold); }
   .map-label { font-size: 1.17rem; color: var(--text-muted); margin-bottom: 5px; }
 
-  /* Personnel stats */
-  .personnel-stats { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+  /* ── 人員統計 & 名單折疊區 ── */
+  .personnel-stats { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
   .stat-chip { padding: 5px 14px; background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.15); border-radius: 20px; font-size: 1.2rem; color: var(--gold); }
+  .stat-chip.mgr { background: var(--mgr-bg); border-color: var(--mgr-border); color: var(--mgr); }
   .stat-chip.excluded { background: rgba(192,39,45,0.08); border-color: rgba(192,39,45,0.2); color: #e57373; }
 
-  .personnel-table-wrap { margin-top: 14px; max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: 4px; display: none; }
-  .personnel-table-wrap.show { display: block; }
+  /* 折疊面板 */
+  .collapsible { margin-top: 16px; background: var(--surface2); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; }
+  .collapsible-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; user-select: none; transition: background 0.2s; }
+  .collapsible-header:hover { background: rgba(255,255,255,0.02); }
+  .collapsible-title { font-size: 1.2rem; color: var(--text-muted); letter-spacing: 0.1em; }
+  .collapsible-chevron { color: var(--text-muted); transition: transform 0.2s; font-size: 1.1rem; }
+  .collapsible.open .collapsible-chevron { transform: rotate(180deg); }
+  .collapsible-body { display: none; padding: 16px; border-top: 1px solid rgba(255,255,255,0.04); }
+  .collapsible.open .collapsible-body { display: block; }
+
+  /* 人員編輯區 — 新增列 */
+  .add-person-row { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .add-person-row .form-input { padding: 9px 12px; }
+  .mgr-toggle { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--surface); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+  .mgr-toggle.on { background: var(--mgr-bg); border-color: var(--mgr-border); }
+  .mgr-toggle-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); transition: background 0.2s; }
+  .mgr-toggle.on .mgr-toggle-dot { background: var(--mgr); }
+  .mgr-toggle-label { font-size: 1.17rem; color: var(--text-muted); transition: color 0.2s; }
+  .mgr-toggle.on .mgr-toggle-label { color: var(--mgr); }
+
+  /* 人員表格 */
+  .personnel-table-wrap { max-height: 240px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: 4px; }
   table { width: 100%; border-collapse: collapse; }
   th { padding: 8px 12px; font-size: 1.11rem; color: var(--gold); background: var(--surface2); letter-spacing: 0.1em; text-align: left; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2; }
-  td { padding: 8px 12px; font-size: 1.26rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+  td { padding: 8px 12px; font-size: 1.26rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover { background: rgba(212,168,67,0.02); }
   .excluded-row td { opacity: 0.4; text-decoration: line-through; }
-  .excluded-tag { font-size: 1.05rem; color: #e57373; background: rgba(192,39,45,0.15); padding: 1px 6px; border-radius: 8px; margin-left: 6px; }
+  .mgr-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 1.05rem; color: var(--mgr); background: var(--mgr-bg); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--mgr-border); }
+  .excluded-tag { font-size: 1.05rem; color: #e57373; background: rgba(192,39,45,0.15); padding: 1px 6px; border-radius: 8px; }
 
-  /* Prize list */
+  /* 行內編輯 */
+  .inline-edit-input { background: var(--surface); border: 1px solid var(--gold); border-radius: 3px; padding: 3px 8px; color: var(--text); font-family: 'Noto Sans TC', sans-serif; font-size: 1.26rem; outline: none; width: 100%; }
+  .action-btns { display: flex; gap: 4px; }
+  .icon-btn { background: transparent; border: none; cursor: pointer; padding: 3px 6px; border-radius: 3px; font-size: 1.17rem; transition: all 0.2s; }
+  .icon-btn.edit { color: rgba(212,168,67,0.45); }
+  .icon-btn.edit:hover { color: var(--gold); background: rgba(212,168,67,0.08); }
+  .icon-btn.del { color: rgba(192,39,45,0.45); }
+  .icon-btn.del:hover { color: #e57373; background: rgba(192,39,45,0.1); }
+  .icon-btn.save { color: rgba(76,175,80,0.6); }
+  .icon-btn.save:hover { color: var(--green); background: rgba(76,175,80,0.1); }
+  .icon-btn.cancel { color: var(--text-muted); }
+  .icon-btn.cancel:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+  /* ── 獎品列表 ── */
   .prize-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
   .prize-item {
     display: flex; align-items: center; gap: 10px;
@@ -109,38 +150,55 @@
     transition: all 0.2s;
   }
   .prize-item.drawn { border-color: rgba(192,39,45,0.2); background: rgba(192,39,45,0.05); }
+  .prize-item.mgr-prize { border-color: var(--mgr-border); background: var(--mgr-bg); }
   .prize-order { width: 26px; height: 26px; border-radius: 50%; background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.11rem; color: var(--gold); flex-shrink: 0; }
   .prize-name { flex: 1; font-size: 1.35rem; }
   .prize-count { font-size: 1.17rem; color: var(--text-muted); white-space: nowrap; }
   .prize-drawn-badge { font-size: 1.08rem; color: #e57373; background: rgba(192,39,45,0.12); padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
-  .prize-delete-btn {
-    background: transparent; border: none; color: rgba(192,39,45,0.45);
-    cursor: pointer; font-size: 1.275rem; padding: 4px 6px; border-radius: 3px; transition: all 0.2s; flex-shrink: 0;
-  }
+  .prize-delete-btn { background: transparent; border: none; color: rgba(192,39,45,0.45); cursor: pointer; font-size: 1.275rem; padding: 4px 6px; border-radius: 3px; transition: all 0.2s; flex-shrink: 0; }
   .prize-delete-btn:hover { color: #e57373; background: rgba(192,39,45,0.1); }
 
-  /* Draw control */
+  /* 主管專屬 checkbox */
+  .mgr-check-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px 14px; background: var(--surface2); border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); transition: all 0.2s; cursor: pointer; }
+  .mgr-check-row.checked { background: var(--mgr-bg); border-color: var(--mgr-border); }
+  .mgr-check-row input[type="checkbox"] { display: none; }
+  .custom-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+  .mgr-check-row.checked .custom-check { background: var(--mgr); border-color: var(--mgr); }
+  .custom-check-mark { color: #fff; font-size: 0.8rem; display: none; }
+  .mgr-check-row.checked .custom-check-mark { display: block; }
+  .mgr-check-label { font-size: 1.275rem; color: var(--text-muted); transition: color 0.2s; }
+  .mgr-check-row.checked .mgr-check-label { color: var(--mgr); }
+  .mgr-check-desc { font-size: 1.11rem; color: var(--text-muted); margin-top: 4px; letter-spacing: 0.02em; }
+
+  /* ── 抽獎右側 ── */
   .select-wrapper { position: relative; margin-bottom: 16px; }
   .form-select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 36px; }
   .select-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--gold); pointer-events: none; font-size: 1.125rem; }
 
   .info-box { padding: 12px 16px; background: rgba(212,168,67,0.05); border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; margin-bottom: 16px; font-size: 1.275rem; display: none; }
   .info-box.show { display: block; }
+  .info-box.mgr-info { background: var(--mgr-bg); border-color: var(--mgr-border); }
+  .info-box.mgr-info span { color: var(--mgr); }
 
   .result-preview { background: var(--surface2); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; padding: 16px; margin-top: 14px; display: none; }
   .result-preview.show { display: block; }
   .result-preview-title { font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.15em; margin-bottom: 10px; }
   .result-winner-list { display: flex; flex-wrap: wrap; gap: 8px; }
   .result-winner-chip { padding: 5px 12px; background: rgba(192,39,45,0.15); border: 1px solid rgba(192,39,45,0.2); border-radius: 20px; font-size: 1.23rem; }
+  .result-winner-chip.mgr { background: var(--mgr-bg); border-color: var(--mgr-border); }
 
   .note { margin-top: 12px; padding: 10px 14px; background: rgba(212,168,67,0.04); border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; font-size: 1.17rem; color: var(--text-muted); line-height: 1.7; }
 
   .history-list { display: flex; flex-direction: column; gap: 10px; }
   .history-item { padding: 12px 16px; background: var(--surface2); border-radius: 4px; border-left: 3px solid var(--gold); }
+  .history-item.mgr { border-left-color: var(--mgr); }
   .history-prize { font-size: 1.35rem; color: var(--gold); margin-bottom: 4px; }
+  .history-item.mgr .history-prize { color: var(--mgr); }
   .history-winners { font-size: 1.23rem; color: var(--text-muted); line-height: 1.6; }
 
   .empty-msg { color: var(--text-muted); font-size: 1.275rem; text-align: center; padding: 20px; }
+
+  .reset-warning { display: none; padding: 12px 16px; background: rgba(192,39,45,0.12); border: 1px solid rgba(192,39,45,0.35); border-radius: 6px; margin-bottom: 16px; font-size: 1.275rem; color: #ff8a80; line-height: 1.6; }
 
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 20px; color: var(--text); font-size: 1.32rem; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); max-width: 340px; }
   .toast.show { transform: translateY(0); opacity: 1; }
@@ -161,18 +219,11 @@
     .page-title { font-size: 1.2rem; }
     .row-inline { grid-template-columns: 1fr; }
     .map-row { grid-template-columns: 1fr; }
+    .add-person-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
     .btn-red-solid { font-size: 0.9rem; padding: 12px; }
-    .personnel-stats { gap: 6px; }
-    .stat-chip { font-size: 0.75rem; padding: 4px 10px; }
-    .result-winner-chip { font-size: 0.75rem; padding: 4px 9px; }
-    .prize-item { flex-wrap: wrap; gap: 6px; }
-    .history-item { padding: 10px 12px; }
-    .history-prize { font-size: 0.85rem; }
-    .history-winners { font-size: 0.78rem; }
-    table { min-width: 360px; }
+    table { min-width: 420px; }
     .personnel-table-wrap { overflow-x: auto; }
   }
-
 </style>
 </head>
 <body>
@@ -190,34 +241,33 @@
 
 <div class="main">
   <div class="page-title">抽獎管理</div>
-  <div class="page-subtitle">匯入人員名單、設定獎品，並操控前台抽獎流程。中獎過的人不會再被抽中。</div>
+  <div class="page-subtitle">匯入人員名單、設定獎品，並操控前台抽獎流程。主管專屬獎可獨立抽取，不受普通獎中獎紀錄影響。</div>
 
   <div class="grid-2">
 
     <!-- ─── LEFT ─── -->
     <div>
 
-      <!-- Excel Import -->
+      <!-- Excel Import & 人員管理 -->
       <div class="panel">
         <div class="panel-title">
-          <span>人員名單匯入（Excel）</span>
+          <span>人員名單管理</span>
         </div>
 
+        <!-- Upload -->
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="onFileSelect(event)">
           <div class="upload-icon">📂</div>
           <div class="upload-label">
             <strong>點擊選擇</strong>或拖曳 Excel 到此<br>
             支援 .xlsx / .xls / .csv<br>
-            <span style="font-size:1.17rem;opacity:0.7">欄位順序沒有限制，上傳後可自行對應</span>
+            <span style="font-size:1.1rem;opacity:0.7">欄位：姓名、單位、（選填）主管標記</span>
           </div>
         </div>
 
-
-
-        <!-- Column mapping -->
+        <!-- Column mapping — 3欄（含主管） -->
         <div class="map-panel" id="mapPanel">
-          <div class="map-title">欄位對應（請選擇哪欄是姓名、哪欄是單位）</div>
+          <div style="font-size:1.17rem;color:var(--gold);margin-bottom:12px;">欄位對應</div>
           <div class="map-row">
             <div>
               <div class="map-label">姓名欄位</div>
@@ -227,24 +277,78 @@
               <div class="map-label">單位欄位</div>
               <select class="map-select" id="colUnit"></select>
             </div>
+            <div>
+              <div class="map-label">主管欄位 <span style="color:var(--text-muted);font-size:1.05rem">（選填）</span></div>
+              <select class="map-select" id="colMgr">
+                <option value="-1">— 無此欄位 —</option>
+              </select>
+            </div>
           </div>
-          <button class="btn btn-gold" style="width:100%;margin-top:4px" onclick="confirmImport()">確認匯入</button>
+          <div style="font-size:1.11rem;color:var(--text-muted);margin-bottom:10px;">主管欄位值含「主管」「manager」「是」「Y」「1」時自動標記</div>
+          <button class="btn btn-gold" style="width:100%" onclick="confirmImport()">確認匯入</button>
         </div>
 
-        <!-- Stats & preview -->
+        <!-- Stats -->
         <div id="personnelStats" style="display:none">
           <div class="personnel-stats">
             <div class="stat-chip" id="statAvailable"></div>
+            <div class="stat-chip mgr" id="statMgr" style="display:none"></div>
             <div class="stat-chip excluded" id="statExcluded" style="display:none"></div>
-            <button class="btn btn-outline btn-sm" onclick="togglePreview()" style="margin-left:auto">預覽名單</button>
-            <button class="btn btn-danger btn-sm" onclick="clearPersonnel()">清除</button>
           </div>
-          <div class="personnel-table-wrap" id="previewTableWrap">
-            <table>
-              <thead><tr><th>#</th><th>姓名</th><th>單位</th><th>狀態</th></tr></thead>
-              <tbody id="previewTableBody"></tbody>
-            </table>
+
+          <!-- 折疊：手動新增 / 編輯 -->
+          <div class="collapsible" id="editCollapsible">
+            <div class="collapsible-header" onclick="toggleCollapsible('editCollapsible')">
+              <span class="collapsible-title">✏️ 手動新增 / 編輯名單</span>
+              <span class="collapsible-chevron">▾</span>
+            </div>
+            <div class="collapsible-body">
+              <!-- 新增一列 -->
+              <div class="add-person-row">
+                <input type="text" class="form-input" id="newPersonName" placeholder="姓名" onkeydown="if(event.key==='Enter')addPersonManual()">
+                <input type="text" class="form-input" id="newPersonUnit" placeholder="單位" onkeydown="if(event.key==='Enter')addPersonManual()">
+                <div class="mgr-toggle" id="newPersonMgrToggle" onclick="toggleNewMgr()" title="標記為主管">
+                  <div class="mgr-toggle-dot"></div>
+                  <span class="mgr-toggle-label">主管</span>
+                </div>
+                <button class="btn btn-gold btn-sm" onclick="addPersonManual()">＋ 新增</button>
+              </div>
+
+              <!-- 搜尋欄 -->
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+                <div style="position:relative;flex:1;">
+                  <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:1.2rem;">🔍</span>
+                  <input type="text" class="form-input" id="personnelSearch"
+                    placeholder="搜尋姓名、單位、主管..."
+                    style="padding-left:36px;padding-top:8px;padding-bottom:8px;"
+                    oninput="onPersonnelSearch()">
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="clearPersonnelSearch()" id="searchClearBtn" style="display:none;">✕ 清除</button>
+              </div>
+              <div id="searchResultInfo" style="font-size:1.17rem;color:var(--text-muted);margin-bottom:8px;display:none;"></div>
+
+              <!-- 表格 -->
+              <div class="personnel-table-wrap" id="personnelTableWrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>姓名</th>
+                      <th>單位</th>
+                      <th>身份</th>
+                      <th>狀態</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="personnelTableBody"></tbody>
+                </table>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
+                <button class="btn btn-danger btn-sm" onclick="clearPersonnel()">清除全部名單</button>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -261,6 +365,19 @@
             <input type="number" class="form-input" id="prizeCount" placeholder="1" min="1" style="padding:10px 10px">
           </div>
         </div>
+
+        <!-- 主管專屬 checkbox -->
+        <div class="mgr-check-row" id="mgrCheckRow" onclick="toggleMgrPrize()">
+          <input type="checkbox" id="mgrPrizeCheck">
+          <div class="custom-check">
+            <span class="custom-check-mark">✓</span>
+          </div>
+          <div>
+            <div class="mgr-check-label">👑 主管專屬獎</div>
+            <div class="mgr-check-desc">勾選後只從「主管」人員中抽取，不受普通獎中獎紀錄影響</div>
+          </div>
+        </div>
+
         <button class="btn btn-gold" style="margin-top:12px;width:100%" onclick="addPrize()">＋ 新增獎項</button>
 
         <div style="margin-top:20px">
@@ -282,8 +399,7 @@
       <div class="panel">
         <div class="panel-title">抽獎操作</div>
 
-        <!-- 防呆提示 -->
-        <div id="resetWarning" style="display:none;padding:12px 16px;background:rgba(192,39,45,0.12);border:1px solid rgba(192,39,45,0.35);border-radius:6px;margin-bottom:16px;font-size:1.275rem;color:#ff8a80;line-height:1.6">
+        <div class="reset-warning" id="resetWarning">
           ⚠️ 前台正在顯示得獎名單<br>
           <strong>請先按下方「重置前台空白畫面」</strong>，才能進行下一輪抽獎
         </div>
@@ -314,9 +430,9 @@
         </div>
 
         <div class="note">
-          ⚠️ 按下「開始抽獎」後前台播放 6 秒影片並公布名單。<br>
-          ✓ 已中獎的人員會從後續抽獎名單中排除。<br>
-          ✓ 已抽過的獎項可以從列表中刪除。
+          ⚠️ 按下「開始抽獎」後前台播放動畫並公布名單。<br>
+          ✓ 普通獎：已中獎者自動排除。<br>
+          👑 主管專屬獎：只從主管中抽取，普通獎中獎不影響資格。
         </div>
       </div>
 
@@ -362,17 +478,41 @@
 
   // ── State ──
   let prizes      = [];
-  let personnel   = [];
-  let winners     = [];
+  let personnel   = [];   // { realName, unitName, isManager }
+  let winners     = [];   // 普通獎得獎者
+  let mgrWinners  = [];   // 主管專屬獎得獎者（獨立追蹤）
   let drawHistory = [];
   let pendingResult = null;
-  let needsReset = false;
+  let needsReset  = false;
 
-  // Raw excel data
+  // Excel raw data
   let rawSheet = [], rawHeaders = [];
-  let previewVisible = false;
 
+  // 新增人員的主管狀態
+  let newPersonIsManager = false;
 
+  // 行內編輯狀態
+  let editingIndex = null;
+
+  // ── 折疊面板 ──
+  window.toggleCollapsible = function(id) {
+    document.getElementById(id).classList.toggle('open');
+  };
+
+  // ── 主管 toggle（新增列） ──
+  window.toggleNewMgr = function() {
+    newPersonIsManager = !newPersonIsManager;
+    const el = document.getElementById('newPersonMgrToggle');
+    el.classList.toggle('on', newPersonIsManager);
+  };
+
+  // ── 主管專屬獎 checkbox ──
+  window.toggleMgrPrize = function() {
+    const check = document.getElementById('mgrPrizeCheck');
+    const row   = document.getElementById('mgrCheckRow');
+    check.checked = !check.checked;
+    row.classList.toggle('checked', check.checked);
+  };
 
   // ──────────────────────────────────────────────
   // Excel / CSV import
@@ -380,7 +520,6 @@
   function onFileSelect(e) {
     const file = e.target.files[0];
     if (file) readFile(file);
-    // Reset input so same file can be re-selected
     e.target.value = '';
   }
 
@@ -401,17 +540,11 @@
         const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-
-        // Filter out completely empty rows first
         const nonEmptyRows = rows.filter(r => r.some(c => String(c).trim() !== ''));
-        if (nonEmptyRows.length === 0) { showToast('檔案為空，請確認內容'); return; }
-
-        // Always treat first row as header
+        if (nonEmptyRows.length === 0) { showToast('檔案為空'); return; }
         rawHeaders = nonEmptyRows[0].map((h, i) => String(h).trim() || `欄${i+1}`);
         rawSheet   = nonEmptyRows.slice(1);
-
-        if (rawSheet.length === 0) { showToast('沒有資料列（只有標題行），請確認 Excel 內容'); return; }
-
+        if (rawSheet.length === 0) { showToast('沒有資料列'); return; }
         populateColSelects();
         document.getElementById('mapPanel').classList.add('show');
         showToast(`已讀取 ${rawSheet.length} 筆資料，請確認欄位對應`);
@@ -422,43 +555,146 @@
 
   function populateColSelects() {
     ['colName','colUnit'].forEach(id => {
-      document.getElementById(id).innerHTML = rawHeaders
-        .map((h,i) => `<option value="${i}">${h || '欄'+(i+1)}</option>`).join('');
+      document.getElementById(id).innerHTML = rawHeaders.map((h,i) => `<option value="${i}">${h}</option>`).join('');
     });
-    // Auto-detect
+    const mgrSel = document.getElementById('colMgr');
+    mgrSel.innerHTML = '<option value="-1">— 無此欄位 —</option>' +
+      rawHeaders.map((h,i) => `<option value="${i}">${h}</option>`).join('');
+
+    // 自動偵測欄位
     rawHeaders.forEach((h,i) => {
-      if (/姓名|名字|name/i.test(h)) document.getElementById('colName').value = i;
+      if (/姓名|名字|name/i.test(h))  document.getElementById('colName').value = i;
       if (/單位|部門|unit|dept/i.test(h)) document.getElementById('colUnit').value = i;
+      if (/主管|manager|管理/i.test(h)) mgrSel.value = i;
     });
+  }
+
+  function isMgrValue(val) {
+    const s = String(val).trim().toLowerCase();
+    return ['主管','manager','是','y','1','yes','true','✓','v'].includes(s);
   }
 
   function confirmImport() {
-    const ni = parseInt(document.getElementById('colName').value);
-    const ui = parseInt(document.getElementById('colUnit').value);
+    const ni  = parseInt(document.getElementById('colName').value);
+    const ui  = parseInt(document.getElementById('colUnit').value);
+    const mi  = parseInt(document.getElementById('colMgr').value);
     const imported = rawSheet
-      .map(r => ({ realName: String(r[ni]||'').trim(), unitName: String(r[ui]||'').trim() }))
+      .map(r => ({
+        realName:  String(r[ni]||'').trim(),
+        unitName:  String(r[ui]||'').trim(),
+        isManager: mi >= 0 ? isMgrValue(r[mi]) : false
+      }))
       .filter(p => p.realName);
-    if (!imported.length) { showToast('沒有有效資料，請確認欄位'); return; }
+    if (!imported.length) { showToast('沒有有效資料'); return; }
     document.getElementById('mapPanel').classList.remove('show');
-    const personnelObj = Object.fromEntries(imported.map((p, i) => [i, p]));
-    set(ref(db, 'springFest/personnel'), personnelObj);
+    const obj = Object.fromEntries(imported.map((p, i) => [i, p]));
+    set(ref(db, 'springFest/personnel'), obj);
     showToast(`✓ 已匯入 ${imported.length} 位人員`);
   }
 
-  function getAvailablePool() {
-    // Exclude anyone who has already won
-    return personnel.filter(p => !winners.some(w => w.realName === p.realName && w.unitName === p.unitName));
+  // ──────────────────────────────────────────────
+  // 手動新增 / 編輯
+  // ──────────────────────────────────────────────
+  window.addPersonManual = function() {
+    const name = document.getElementById('newPersonName').value.trim();
+    const unit = document.getElementById('newPersonUnit').value.trim();
+    if (!name) { showToast('請填寫姓名'); return; }
+    if (!unit) { showToast('請填寫單位'); return; }
+    const dup = personnel.find(p => p.realName === name && p.unitName === unit);
+    if (dup) { showToast('此人已存在（姓名＋單位相同）'); return; }
+    const updated = [...personnel, { realName: name, unitName: unit, isManager: newPersonIsManager }];
+    savePersonnel(updated);
+    document.getElementById('newPersonName').value = '';
+    document.getElementById('newPersonUnit').value = '';
+    // 重置主管 toggle
+    newPersonIsManager = false;
+    document.getElementById('newPersonMgrToggle').classList.remove('on');
+    showToast(`已新增：${name}${newPersonIsManager ? '（主管）' : ''}`);
+  };
+
+  window.deletePersonRow = function(idx) {
+    if (!confirm('確定刪除此人員？')) return;
+    const updated = personnel.filter((_, i) => i !== idx);
+    savePersonnel(updated);
+  };
+
+  // 進入行內編輯
+  window.startEditRow = function(idx) {
+    editingIndex = idx;
+    renderPersonnelTable();
+  };
+
+  window.cancelEditRow = function() {
+    editingIndex = null;
+    renderPersonnelTable();
+  };
+
+  window.saveEditRow = function(idx) {
+    const nameEl = document.getElementById(`edit-name-${idx}`);
+    const unitEl = document.getElementById(`edit-unit-${idx}`);
+    if (!nameEl || !unitEl) return;
+    const newName = nameEl.value.trim();
+    const newUnit = unitEl.value.trim();
+    if (!newName || !newUnit) { showToast('姓名與單位不能為空'); return; }
+    const updated = personnel.map((p, i) => i === idx ? { ...p, realName: newName, unitName: newUnit } : p);
+    savePersonnel(updated);
+    editingIndex = null;
+    showToast('已更新 ✓');
+  };
+
+  window.toggleManagerFlag = function(idx) {
+    const updated = personnel.map((p, i) =>
+      i === idx ? { ...p, isManager: !p.isManager } : p
+    );
+    savePersonnel(updated);
+  };
+
+  function savePersonnel(arr) {
+    if (!arr.length) { set(ref(db, 'springFest/personnel'), null); return; }
+    const obj = Object.fromEntries(arr.map((p, i) => [i, p]));
+    set(ref(db, 'springFest/personnel'), obj);
   }
 
+  // ──────────────────────────────────────────────
+  // Pool helpers
+  // ──────────────────────────────────────────────
+  function getAvailablePool(prize) {
+    if (prize && prize.isMgrPrize) {
+      // 主管專屬獎：只從主管中選，排除已中主管獎的人
+      return personnel.filter(p =>
+        p.isManager &&
+        !mgrWinners.some(w => w.realName === p.realName && w.unitName === p.unitName)
+      );
+    }
+    // 普通獎：全員，排除已中普通獎的人
+    return personnel.filter(p =>
+      !winners.some(w => w.realName === p.realName && w.unitName === p.unitName)
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // Render
+  // ──────────────────────────────────────────────
   function renderPersonnelStats() {
     const statsEl = document.getElementById('personnelStats');
     if (!personnel.length) { statsEl.style.display = 'none'; return; }
     statsEl.style.display = 'block';
 
-    const available = getAvailablePool().length;
-    const excluded  = personnel.length - available;
+    const mgrCount  = personnel.filter(p => p.isManager).length;
+    const excluded  = personnel.filter(p =>
+      winners.some(w => w.realName === p.realName && w.unitName === p.unitName)
+    ).length;
+    const available = personnel.length - excluded;
 
     document.getElementById('statAvailable').textContent = `可抽人數：${available} 人`;
+
+    const mgrEl = document.getElementById('statMgr');
+    if (mgrCount > 0) {
+      mgrEl.textContent = `主管：${mgrCount} 人`;
+      mgrEl.style.display = 'inline-block';
+    } else {
+      mgrEl.style.display = 'none';
+    }
 
     const exEl = document.getElementById('statExcluded');
     if (excluded > 0) {
@@ -468,29 +704,138 @@
       exEl.style.display = 'none';
     }
 
-    const tbody = document.getElementById('previewTableBody');
-    tbody.innerHTML = personnel.map((p, i) => {
-      const isExcluded = winners.some(w => w.realName === p.realName && w.unitName === p.unitName);
+    renderPersonnelTable();
+  }
+
+  // 搜尋關鍵字（全域，供 renderPersonnelTable 使用）
+  let personnelSearchQuery = '';
+
+  window.onPersonnelSearch = function() {
+    const input = document.getElementById('personnelSearch');
+    personnelSearchQuery = input.value.trim().toLowerCase();
+    const clearBtn = document.getElementById('searchClearBtn');
+    clearBtn.style.display = personnelSearchQuery ? 'inline-block' : 'none';
+    editingIndex = null; // 搜尋時取消行內編輯，避免 index 錯位
+    renderPersonnelTable();
+  };
+
+  window.clearPersonnelSearch = function() {
+    document.getElementById('personnelSearch').value = '';
+    personnelSearchQuery = '';
+    document.getElementById('searchClearBtn').style.display = 'none';
+    document.getElementById('searchResultInfo').style.display = 'none';
+    renderPersonnelTable();
+  };
+
+  // 關鍵字高亮：把命中文字包上 <mark>
+  function highlight(text, query) {
+    if (!query) return esc(text);
+    const escaped = esc(text);
+    const escapedQ = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return escaped.replace(new RegExp(escapedQ, 'gi'), m =>
+      `<mark style="background:rgba(212,168,67,0.3);color:var(--gold-light);border-radius:2px;padding:0 2px">${m}</mark>`
+    );
+  }
+
+  function renderPersonnelTable() {
+    const tbody = document.getElementById('personnelTableBody');
+    if (!tbody) return;
+
+    const infoEl = document.getElementById('searchResultInfo');
+
+    if (!personnel.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:16px">尚無人員資料</td></tr>';
+      infoEl.style.display = 'none';
+      return;
+    }
+
+    // 過濾：搜尋姓名、單位、身份（「主管」關鍵字）
+    const q = personnelSearchQuery;
+    const filtered = personnel
+      .map((p, i) => ({ p, i }))  // 保留原始 index（供編輯/刪除用）
+      .filter(({ p }) => {
+        if (!q) return true;
+        const nameMatch = p.realName.toLowerCase().includes(q);
+        const unitMatch = p.unitName.toLowerCase().includes(q);
+        const mgrMatch  = p.isManager && '主管'.includes(q);
+        const statusMatch = (() => {
+          const isExcluded = winners.some(w => w.realName === p.realName && w.unitName === p.unitName);
+          const isMgrExcl  = p.isManager && mgrWinners.some(w => w.realName === p.realName && w.unitName === p.unitName);
+          if (isExcluded && '已中獎'.includes(q)) return true;
+          if (isMgrExcl  && '主管獎已中'.includes(q)) return true;
+          if (!isExcluded && !isMgrExcl && '可抽'.includes(q)) return true;
+          return false;
+        })();
+        return nameMatch || unitMatch || mgrMatch || statusMatch;
+      });
+
+    // 顯示搜尋結果筆數
+    if (q) {
+      infoEl.style.display = 'block';
+      infoEl.textContent = filtered.length
+        ? `找到 ${filtered.length} 筆（共 ${personnel.length} 人）`
+        : `找不到符合「${q}」的人員`;
+    } else {
+      infoEl.style.display = 'none';
+    }
+
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">🔍 找不到符合「${esc(q)}」的人員</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(({ p, i }) => {
+      const isExcluded    = winners.some(w => w.realName === p.realName && w.unitName === p.unitName);
+      const isMgrExcluded = p.isManager && mgrWinners.some(w => w.realName === p.realName && w.unitName === p.unitName);
+
+      if (editingIndex === i) {
+        // 行內編輯模式（搜尋時仍可編輯，但不高亮）
+        return `<tr>
+          <td style="color:var(--text-muted)">${i+1}</td>
+          <td><input class="inline-edit-input" id="edit-name-${i}" value="${esc(p.realName)}"></td>
+          <td><input class="inline-edit-input" id="edit-unit-${i}" value="${esc(p.unitName)}"></td>
+          <td>
+            <button class="icon-btn"
+              style="padding:4px 10px;border:1px solid ${p.isManager ? 'var(--mgr-border)' : 'rgba(255,255,255,0.1)'};border-radius:12px;font-size:1.1rem;color:${p.isManager ? 'var(--mgr)' : 'var(--text-muted)'}"
+              onclick="toggleManagerFlag(${i})" title="切換主管身份">${p.isManager ? '👑 主管' : '— 一般'}</button>
+          </td>
+          <td>—</td>
+          <td>
+            <div class="action-btns">
+              <button class="icon-btn save" onclick="saveEditRow(${i})" title="儲存">✓</button>
+              <button class="icon-btn cancel" onclick="cancelEditRow()" title="取消">✕</button>
+            </div>
+          </td>
+        </tr>`;
+      }
+
+      const statusCell = isExcluded
+        ? `<span class="excluded-tag">已中獎</span>`
+        : (isMgrExcluded
+            ? `<span style="font-size:1.05rem;color:var(--mgr);background:var(--mgr-bg);padding:1px 6px;border-radius:8px">主管獎已中</span>`
+            : `<span style="color:var(--green);font-size:1.17rem">可抽</span>`);
+
       return `<tr class="${isExcluded ? 'excluded-row' : ''}">
         <td style="color:var(--text-muted)">${i+1}</td>
-        <td>${esc(p.realName)}</td>
-        <td>${esc(p.unitName)}</td>
-        <td>${isExcluded ? '<span class="excluded-tag">已中獎</span>' : '<span style="color:var(--green);font-size:1.17rem">可抽</span>'}</td>
+        <td>${highlight(p.realName, q)}</td>
+        <td>${highlight(p.unitName, q)}</td>
+        <td>${p.isManager ? '<span class="mgr-badge">👑 主管</span>' : '<span style="color:var(--text-muted);font-size:1.2rem">—</span>'}</td>
+        <td>${statusCell}</td>
+        <td>
+          <div class="action-btns">
+            <button class="icon-btn edit" onclick="startEditRow(${i})" title="編輯">✏️</button>
+            <button class="icon-btn del"  onclick="deletePersonRow(${i})" title="刪除">🗑</button>
+          </div>
+        </td>
       </tr>`;
     }).join('');
   }
 
-  function togglePreview() {
-    previewVisible = !previewVisible;
-    document.getElementById('previewTableWrap').classList.toggle('show', previewVisible);
-  }
-
   function clearPersonnel() {
-    if (!confirm('確定清除人員名單？（中獎紀錄也會一併清除）')) return;
+    if (!confirm('確定清除人員名單？（所有中獎紀錄也會一併清除）')) return;
     set(ref(db, 'springFest/personnel'), null);
     set(ref(db, 'springFest/winners'), null);
-    previewVisible = false;
-    document.getElementById('previewTableWrap').classList.remove('show');
+    set(ref(db, 'springFest/mgrWinners'), null);
     showToast('已清除人員名單');
   }
 
@@ -498,19 +843,23 @@
   // Prizes
   // ──────────────────────────────────────────────
   function addPrize() {
-    const name  = document.getElementById('prizeName').value.trim();
-    const count = parseInt(document.getElementById('prizeCount').value) || 1;
+    const name       = document.getElementById('prizeName').value.trim();
+    const count      = parseInt(document.getElementById('prizeCount').value) || 1;
+    const isMgrPrize = document.getElementById('mgrPrizeCheck').checked;
     if (!name) { showToast('請輸入獎項名稱'); return; }
-    prizes.push({ id: Date.now(), name, count, drawn: false, order: prizes.length + 1 });
+    prizes.push({ id: Date.now(), name, count, drawn: false, isMgrPrize, order: prizes.length + 1 });
     savePrizes();
     document.getElementById('prizeName').value  = '';
     document.getElementById('prizeCount').value = '';
-    showToast(`已新增：${name}`);
+    // 重置主管 checkbox
+    document.getElementById('mgrPrizeCheck').checked = false;
+    document.getElementById('mgrCheckRow').classList.remove('checked');
+    showToast(`已新增：${name}${isMgrPrize ? '（主管專屬）' : ''}`);
   }
 
   function deletePrize(id) {
     if (!confirm('確定刪除此獎項？')) return;
-    prizes = prizes.filter(p => p.id !== id);
+    prizes = prizes.filter(p => String(p.id) !== String(id));
     savePrizes();
   }
 
@@ -523,20 +872,23 @@
 
   function savePrizes() {
     if (!prizes.length) { set(ref(db, 'springFest/prizes'), null); return; }
-    const prizesObj = Object.fromEntries(prizes.map((p, i) => [i, p]));
-    set(ref(db, 'springFest/prizes'), prizesObj);
+    const obj = Object.fromEntries(prizes.map((p, i) => [i, p]));
+    set(ref(db, 'springFest/prizes'), obj);
   }
 
   function renderPrizeList() {
     const el = document.getElementById('prizeList');
     if (!prizes.length) { el.innerHTML = '<div class="empty-msg">尚未新增任何獎項</div>'; return; }
     el.innerHTML = prizes.map(p => `
-      <div class="prize-item ${p.drawn ? 'drawn' : ''}">
+      <div class="prize-item ${p.drawn ? 'drawn' : ''} ${p.isMgrPrize && !p.drawn ? 'mgr-prize' : ''}">
         <div class="prize-order">${p.order}</div>
-        <div class="prize-name">${esc(p.name)}</div>
+        <div class="prize-name">
+          ${esc(p.name)}
+          ${p.isMgrPrize ? '<span class="mgr-badge" style="margin-left:8px;font-size:1.05rem">👑 主管專屬</span>' : ''}
+        </div>
         <div class="prize-count">${p.count} 人</div>
         ${p.drawn ? '<div class="prize-drawn-badge">✓ 已抽出</div>' : ''}
-        <button class="prize-delete-btn" onclick="deletePrize(${p.id})" title="刪除此獎項">🗑</button>
+        <button class="prize-delete-btn" onclick="deletePrize('${p.id}')" title="刪除此獎項">🗑</button>
       </div>
     `).join('');
   }
@@ -545,34 +897,41 @@
     const sel = document.getElementById('prizeSelect');
     const cur = sel.value;
     sel.innerHTML = '<option value="">— 請選擇獎項 —</option>';
-    // All prizes appear in dropdown (including drawn), but drawn ones are disabled
     prizes.forEach(p => {
       const o = document.createElement('option');
-      o.value = p.id;
-      o.textContent = p.drawn ? `${p.name}（已抽出）` : `${p.name}（${p.count} 人）`;
+      o.value = String(p.id);
+      const label = p.isMgrPrize ? `👑 ${p.name}（主管專屬 ${p.count}人）` : `${p.name}（${p.count} 人）`;
+      o.textContent = p.drawn ? label + ' ✓已抽' : label;
       o.disabled = p.drawn;
       sel.appendChild(o);
     });
-    // Restore selection if still valid
     if (cur) sel.value = cur;
   }
 
   function onPrizeSelect() {
-    const prize = getSelectedPrize();
-    const infoEl    = document.getElementById('infoBox');
-    const previewEl = document.getElementById('resultPreview');
+    const prize    = getSelectedPrize();
+    const infoEl   = document.getElementById('infoBox');
+    const prevEl   = document.getElementById('resultPreview');
 
     if (prize && !prize.drawn) {
-      const pool = getAvailablePool();
-      infoEl.classList.add('show');
+      const pool = getAvailablePool(prize);
+      const isMgr = prize.isMgrPrize;
+
+      infoEl.className = 'info-box show' + (isMgr ? ' mgr-info' : '');
       document.getElementById('poolCount').textContent = pool.length;
       document.getElementById('selectedCountText').textContent = Math.min(prize.count, pool.length);
+
+      if (isMgr) {
+        infoEl.querySelector('#poolCount').style.color = 'var(--mgr)';
+        infoEl.querySelector('#selectedCountText').style.color = 'var(--mgr)';
+      }
+
       document.getElementById('btnDraw').disabled    = false;
       document.getElementById('btnPreview').disabled = false;
       previewDraw();
     } else {
-      infoEl.classList.remove('show');
-      previewEl.classList.remove('show');
+      infoEl.className = 'info-box';
+      prevEl.classList.remove('show');
       document.getElementById('btnDraw').disabled    = true;
       document.getElementById('btnPreview').disabled = true;
       pendingResult = null;
@@ -580,12 +939,11 @@
   }
 
   // ──────────────────────────────────────────────
-  // Draw logic — excludes past winners
+  // Draw
   // ──────────────────────────────────────────────
   function pickWinners(prize) {
-    const pool = getAvailablePool();
+    const pool = [...getAvailablePool(prize)];
     if (!pool.length) return [];
-    // Fisher-Yates shuffle
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -596,73 +954,82 @@
   function previewDraw() {
     const prize = getSelectedPrize();
     if (!prize) return;
-    const pool = getAvailablePool();
-    if (!pool.length) { showToast('可抽名單為空（所有人都已中獎）'); return; }
+    const pool = getAvailablePool(prize);
+    if (!pool.length) {
+      const label = prize.isMgrPrize ? '主管名單為空或全部已中獎' : '可抽名單為空';
+      showToast(label); return;
+    }
     const newWinners = pickWinners(prize);
     pendingResult = { prize, winners: newWinners };
 
-    const previewEl  = document.getElementById('resultPreview');
+    const prevEl  = document.getElementById('resultPreview');
+    const isMgr   = prize.isMgrPrize;
     document.getElementById('previewWinners').innerHTML = newWinners.map(w =>
-      `<div class="result-winner-chip">${esc(w.realName)}・${esc(w.unitName)}</div>`
+      `<div class="result-winner-chip ${isMgr ? 'mgr' : ''}">${esc(w.realName)}・${esc(w.unitName)}</div>`
     ).join('');
-    previewEl.classList.add('show');
+    prevEl.classList.add('show');
   }
 
   function startDraw() {
-    if (needsReset) { showToast('請先重置前台空白畫面，才能進行下一輪抽獎'); return; }
+    if (needsReset) { showToast('請先重置前台空白畫面'); return; }
     const prize = getSelectedPrize();
     if (!prize) return;
-    if (!personnel.length) { showToast('人員名單為空，無法抽獎'); return; }
+    if (!personnel.length) { showToast('人員名單為空'); return; }
     if (!pendingResult) previewDraw();
     if (!pendingResult || !pendingResult.winners.length) { showToast('可抽人數不足'); return; }
 
     const { winners: newWinners } = pendingResult;
 
-    // Save result for frontend via Firebase（前台監聽 lottery_control）
+    // 送前台
     set(ref(db, 'lottery_control'), {
       status: 'start',
       timestamp: Date.now(),
       prizeName: prize.name,
       prizeCount: prize.count,
+      isMgrPrize: prize.isMgrPrize || false,
       winners: newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))
     });
 
-    // Mark prize as drawn
-    prizes = prizes.map(p => p.id == prize.id ? { ...p, drawn: true } : p);
+    // 標記獎項已抽
+    prizes = prizes.map(p => String(p.id) === String(prize.id) ? { ...p, drawn: true } : p);
     savePrizes();
 
-    // Add new winners to cumulative exclusion list
-    const updatedWinners = [...winners, ...newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))];
-    // 用物件格式存，key = index，避免 Firebase 陣列轉換問題
-    const winnersObj = Object.fromEntries(updatedWinners.map((w, i) => [i, w]));
-    set(ref(db, 'springFest/winners'), winnersObj);
+    // 更新得獎名單（普通獎 / 主管獎分開）
+    if (prize.isMgrPrize) {
+      const updatedMgr = [...mgrWinners, ...newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))];
+      set(ref(db, 'springFest/mgrWinners'), Object.fromEntries(updatedMgr.map((w, i) => [i, w])));
+    } else {
+      const updatedW = [...winners, ...newWinners.map(w => ({ realName: w.realName, unitName: w.unitName }))];
+      set(ref(db, 'springFest/winners'), Object.fromEntries(updatedW.map((w, i) => [i, w])));
+    }
 
     // History
-    const newEntry = {
+    const entry = {
       ts: Date.now(),
       time: new Date().toLocaleString('zh-TW'),
       prizeName: prize.name,
+      isMgrPrize: prize.isMgrPrize || false,
       winners: newWinners.map(w => `${w.realName}（${w.unitName}）`).join('、')
     };
-    set(ref(db, `springFest/drawHistory/${newEntry.ts}`), newEntry);
+    set(ref(db, `springFest/drawHistory/${entry.ts}`), entry);
 
-    // 防呆：鎖住抽獎，等待重置前台
+    // 防呆鎖
     set(ref(db, 'springFest/needsReset'), true);
 
-    // Reset UI
+    // 重置 UI
     document.getElementById('prizeSelect').value = '';
-    document.getElementById('infoBox').classList.remove('show');
+    document.getElementById('infoBox').className = 'info-box';
     document.getElementById('resultPreview').classList.remove('show');
     document.getElementById('btnDraw').disabled    = true;
     document.getElementById('btnPreview').disabled = true;
     pendingResult = null;
 
-    showToast(`🎉 已啟動抽獎：${prize.name}，前台播放中！`);
+    showToast(`🎉 已啟動抽獎：${prize.name}${prize.isMgrPrize ? '（主管專屬）' : ''}！`);
   }
 
   function getSelectedPrize() {
     const val = document.getElementById('prizeSelect').value;
-    return prizes.find(p => p.id == val) || null;
+    return prizes.find(p => String(p.id) === String(val)) || null;
   }
 
   function resetFrontend() {
@@ -672,15 +1039,14 @@
   }
 
   function updateResetWarning() {
-    const warning = document.getElementById('resetWarning');
+    const warning     = document.getElementById('resetWarning');
     const prizeSelect = document.getElementById('prizeSelect');
     warning.style.display = needsReset ? 'block' : 'none';
-    // 鎖住選單與按鈕
-    prizeSelect.disabled = needsReset;
+    prizeSelect.disabled  = needsReset;
     if (needsReset) {
       document.getElementById('btnDraw').disabled    = true;
       document.getElementById('btnPreview').disabled = true;
-      document.getElementById('infoBox').classList.remove('show');
+      document.getElementById('infoBox').className   = 'info-box';
       document.getElementById('resultPreview').classList.remove('show');
     }
   }
@@ -692,8 +1058,10 @@
     const el = document.getElementById('historyList');
     if (!drawHistory.length) { el.innerHTML = '<div class="empty-msg">尚無抽獎紀錄</div>'; return; }
     el.innerHTML = drawHistory.map(h => `
-      <div class="history-item">
-        <div class="history-prize">🏆 ${esc(h.prizeName)}
+      <div class="history-item ${h.isMgrPrize ? 'mgr' : ''}">
+        <div class="history-prize">
+          ${h.isMgrPrize ? '👑' : '🏆'} ${esc(h.prizeName)}
+          ${h.isMgrPrize ? '<span class="mgr-badge" style="margin-left:6px;font-size:1rem">主管專屬</span>' : ''}
           <span style="color:var(--text-muted);font-size:1.125rem;margin-left:8px">${h.time}</span>
         </div>
         <div class="history-winners">${esc(h.winners)}</div>
@@ -702,7 +1070,7 @@
   }
 
   function clearHistory() {
-    if (!confirm('確定清除抽獎紀錄？（不會影響已中獎排除名單）')) return;
+    if (!confirm('確定清除抽獎紀錄？（不影響已中獎排除名單）')) return;
     set(ref(db, 'springFest/drawHistory'), null);
     showToast('已清除紀錄');
   }
@@ -711,9 +1079,7 @@
   // Helpers
   // ──────────────────────────────────────────────
   function esc(s) {
-    return String(s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
   let toastTimer;
@@ -725,10 +1091,17 @@
     toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  // ── 暴露給 HTML onclick 使用（module 作用域必須掛到 window）──
-  window.onFileSelect      = onFileSelect;
-  window.confirmImport     = confirmImport;
-  window.togglePreview     = togglePreview;
+  // ── 掛到 window（module scope）──
+  window.onFileSelect           = onFileSelect;
+  window.confirmImport          = confirmImport;
+  window.onPersonnelSearch      = onPersonnelSearch;
+  window.clearPersonnelSearch   = clearPersonnelSearch;
+  window.addPersonManual        = addPersonManual;
+  window.deletePersonRow   = deletePersonRow;
+  window.startEditRow      = startEditRow;
+  window.cancelEditRow     = cancelEditRow;
+  window.saveEditRow       = saveEditRow;
+  window.toggleManagerFlag = toggleManagerFlag;
   window.clearPersonnel    = clearPersonnel;
   window.addPrize          = addPrize;
   window.deletePrize       = deletePrize;
@@ -739,7 +1112,7 @@
   window.resetFrontend     = resetFrontend;
   window.clearHistory      = clearHistory;
 
-  // ── Init：在所有函式定義完後才註冊監聽，避免 ReferenceError ──
+  // ── Firebase 監聽 ──
   onValue(ref(db, 'springFest/personnel'), snap => {
     const v = snap.val();
     personnel = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
@@ -749,6 +1122,11 @@
   onValue(ref(db, 'springFest/winners'), snap => {
     const v = snap.val();
     winners = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+    renderPersonnelStats();
+  });
+  onValue(ref(db, 'springFest/mgrWinners'), snap => {
+    const v = snap.val();
+    mgrWinners = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
     renderPersonnelStats();
   });
   onValue(ref(db, 'springFest/prizes'), snap => {

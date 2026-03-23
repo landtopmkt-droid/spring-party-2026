@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>後台6 — 監控背景工作</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: rgba(212,168,67,0.15);
+    --gold: #d4a843;
+    --gold-light: #f0c96a;
+    --red: #c0272d;
+    --text: #e8e0d0;
+    --text-muted: rgba(232,224,208,0.45);
+    --green: #4caf50;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; }
+
+  .nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; font-weight: 900; color: var(--gold); letter-spacing: 0.2em; margin-right: 32px; white-space: nowrap; }
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-link { padding: 8px 16px; border-radius: 4px; color: var(--text-muted); text-decoration: none; font-size: 1.275rem; letter-spacing: 0.05em; transition: all 0.2s; white-space: nowrap; }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--gold); background: rgba(212,168,67,0.08); }
+
+  .main { padding: 40px 32px; max-width: 680px; margin: 0 auto; }
+  .page-title { font-family: 'Noto Serif TC', serif; font-size: 2.25rem; font-weight: 900; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 6px; }
+  .page-subtitle { color: var(--text-muted); font-size: 1.275rem; margin-bottom: 32px; line-height: 1.7; }
+
+  /* ── 輸入區 ── */
+  .setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 28px; margin-bottom: 24px; }
+  .form-label { display: block; font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .form-input { width: 100%; background: var(--surface2); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 11px 14px; color: var(--text); font-family: 'Noto Sans TC', sans-serif; font-size: 1.35rem; outline: none; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--gold); }
+  .form-input::placeholder { color: var(--text-muted); font-size: 1.2rem; }
+  .form-input:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+  .btn { padding: 11px 24px; border-radius: 4px; border: none; font-family: 'Noto Sans TC', sans-serif; font-size: 1.275rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; letter-spacing: 0.05em; }
+  .btn-green { background: linear-gradient(135deg, #2e7d32, var(--green)); color: #fff; }
+  .btn-green:hover { filter: brightness(1.1); }
+  .btn-green:disabled { opacity: 0.35; cursor: not-allowed; filter: none; }
+  .btn-red { background: linear-gradient(135deg, #8b1a1e, var(--red)); color: #fff; }
+  .btn-red:hover { filter: brightness(1.1); }
+  .btn-red:disabled { opacity: 0.25; cursor: not-allowed; filter: none; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── 狀態卡 ── */
+  .status-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 28px; margin-bottom: 24px; transition: border-color 0.3s; }
+  .status-card.running { border-color: rgba(76,175,80,0.4); box-shadow: 0 0 24px rgba(76,175,80,0.06); }
+  .status-card.error   { border-color: rgba(192,39,45,0.4); }
+
+  .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #555; flex-shrink: 0; }
+  .status-dot.running { background: var(--green); animation: blink 1.2s infinite; }
+  .status-dot.error   { background: #e57373; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  .status-text { font-size: 1.35rem; font-weight: 500; }
+  .status-text.running { color: var(--green); }
+  .status-text.error   { color: #e57373; }
+  .status-text.idle    { color: var(--text-muted); }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+  .stat-item { background: var(--surface2); border-radius: 6px; padding: 14px 16px; text-align: center; }
+  .stat-label { font-size: 1.1rem; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 4px; }
+  .stat-value { font-size: 1.8rem; font-weight: 500; color: var(--gold); }
+
+  .countdown-bar { margin-top: 16px; }
+  .countdown-label { font-size: 1.17rem; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .bar-track { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 1s linear; }
+
+  /* ── Log ── */
+  .log-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+  .log-title { font-size: 1.17rem; color: var(--text-muted); letter-spacing: 0.2em; margin-bottom: 14px; text-transform: uppercase; }
+  .log-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+  .log-item { display: flex; gap: 10px; align-items: flex-start; font-size: 1.23rem; }
+  .log-time { color: var(--text-muted); font-size: 1.1rem; white-space: nowrap; flex-shrink: 0; padding-top: 1px; }
+  .log-msg  { color: var(--text); line-height: 1.5; }
+  .log-msg.ok  { color: #81c784; }
+  .log-msg.err { color: #e57373; }
+  .log-msg.info{ color: var(--text-muted); }
+
+  .note { padding: 12px 16px; background: rgba(212,168,67,0.05); border: 1px solid rgba(212,168,67,0.1); border-radius: 6px; font-size: 1.17rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px; }
+
+  .error-box { display: none; padding: 12px 16px; background: rgba(192,39,45,0.08); border: 1px solid rgba(192,39,45,0.25); border-radius: 6px; font-size: 1.23rem; color: #ff8a80; margin-top: 12px; }
+  .error-box.show { display: block; }
+
+  @media (max-width: 600px) {
+    .main { padding: 16px; }
+    .nav { padding: 8px 12px; height: auto; flex-wrap: wrap; }
+    .nav-brand { font-size: 0.9rem; margin-right: 12px; }
+    .nav-link { padding: 5px 8px; font-size: 0.72rem; }
+    .page-title { font-size: 1.4rem; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-value { font-size: 1.4rem; }
+    .btn-row { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">🏮 春酒後台</div>
+  <div class="nav-links">
+    <a href="admin-1-registrations.html" class="nav-link">報名名單</a>
+    <a href="admin-2-redpacket.html"     class="nav-link">紅包雨</a>
+    <a href="admin-3-lottery.html"       class="nav-link">抽獎管理</a>
+    <a href="admin-4-youtube.html"       class="nav-link">YT 監控</a>
+    <a href="admin-5-roster.html"        class="nav-link">參加名單</a>
+    <a href="admin-6-monitor-worker.html" class="nav-link active">▶ 監控背景</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-title">監控背景工作</div>
+  <div class="page-subtitle">
+    此頁面負責持續抓取 YouTube 直播留言並儲存至 Firebase。<br>
+    開始後請<strong style="color:var(--gold)">保持此分頁開著</strong>，切換到其他後台頁面操作不影響監控。
+  </div>
+
+  <div class="note">
+    💡 操作流程：在此頁按「開始監控」→ 切到「YT 監控」查看統計與競猜 →
+    需要對照名單時切到「報名名單」→ 活動結束後回此頁按「停止」
+  </div>
+
+  <!-- 輸入區 -->
+  <div class="setup-card">
+    <label class="form-label">YouTube 直播影片 ID 或網址</label>
+    <input type="text" class="form-input" id="videoInput" placeholder="例：dQw4w9WgXcQ 或完整網址">
+    <div class="error-box" id="errorBox"></div>
+    <div class="btn-row">
+      <button class="btn btn-green" id="btnStart" onclick="startMonitor()">▶ 開始監控</button>
+      <button class="btn btn-red"   id="btnStop"  onclick="stopMonitor()" disabled>■ 停止</button>
+      <button class="btn btn-outline" onclick="clearData()">清除留言資料</button>
+    </div>
+  </div>
+
+  <!-- 狀態卡 -->
+  <div class="status-card" id="statusCard">
+    <div class="status-row">
+      <div class="status-dot" id="statusDot"></div>
+      <div class="status-text idle" id="statusText">尚未啟動</div>
+    </div>
+    <div id="videoIdDisplay" style="font-size:1.17rem;color:var(--text-muted);margin-top:4px;display:none">
+      影片 ID：<span id="videoIdSpan" style="color:var(--gold)"></span>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-label">已抓取留言</div>
+        <div class="stat-value" id="statMessages">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">不重複用戶</div>
+        <div class="stat-value" id="statUsers">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">本次新增</div>
+        <div class="stat-value" id="statNew">—</div>
+      </div>
+    </div>
+
+    <div class="countdown-bar" id="countdownBar" style="display:none">
+      <div class="countdown-label">
+        <span>下次更新</span>
+        <span id="countdownSec">10s</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="barFill" style="width:100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作 Log -->
+  <div class="log-card">
+    <div class="log-title">操作記錄</div>
+    <div class="log-list" id="logList">
+      <div class="log-item">
+        <span class="log-time">—</span>
+        <span class="log-msg info">尚未開始</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyCNFt387HP9NZdoIx517GcfUO5RFHdmtMA",
+  authDomain:"springfestival-4aaea.firebaseapp.com",
+  projectId:"springfestival-4aaea",
+  databaseURL:"https://springfestival-4aaea-default-rtdb.firebaseio.com",
+  storageBucket:"springfestival-4aaea.firebasestorage.app",
+  messagingSenderId:"64196762294",
+  appId:"1:64196762294:web:2fb6e766f38f8d47332417",
+  measurementId:"G-4MZF0HPLJV"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+const API_KEY = 'AIzaSyA_aSoMOEbfOtEY0gkTKajwFToB2MHQLXM';
+
+// ── State ──
+let liveChatId    = null;
+let nextPageToken = null;
+let monitorInterval   = null;
+let countdownInterval = null;
+let isRunning     = false;
+let countdown     = 10;
+let allMessages   = [];
+let userCounts    = {};
+let rounds        = [];   // 監聽 Firebase 取得
+
+// ── 監聽 Firebase rounds（供 collectRoundMessages 使用）──
+onValue(ref(db, 'pred_rounds'), snap => {
+  const v = snap.val();
+  rounds = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+});
+
+// ── 載入已存的留言資料 ──
+async function loadExisting() {
+  try {
+    const snap = await get(ref(db, 'yt_monitor'));
+    if (snap.exists()) {
+      const d = snap.val();
+      allMessages = d.allMessages || [];
+      userCounts  = d.userCounts  || {};
+      updateStats(0);
+      addLog(`已載入既有資料：${allMessages.length} 則留言`, 'info');
+    }
+  } catch(e) {
+    addLog('載入既有資料失敗：' + e.message, 'err');
+  }
+}
+
+// ── 開始監控 ──
+window.startMonitor = async function() {
+  const input = document.getElementById('videoInput').value.trim();
+  const vid   = extractVideoId(input);
+  if (!vid) { showError('無效的影片 ID 或網址'); return; }
+  hideError();
+
+  setStatus('connecting', '連線中...');
+  document.getElementById('btnStart').disabled = true;
+  document.getElementById('videoInput').disabled = true;
+
+  try {
+    liveChatId = await getLiveChatId(vid);
+    isRunning  = true;
+
+    document.getElementById('videoIdDisplay').style.display = 'block';
+    document.getElementById('videoIdSpan').textContent = vid;
+    document.getElementById('btnStop').disabled = false;
+    document.getElementById('countdownBar').style.display = 'block';
+
+    setStatus('running', '監控中');
+
+    // 寫入 Firebase 讓 admin-4 知道目前監控狀態
+    set(ref(db, 'yt_worker_status'), { running: true, videoId: vid, startedAt: Date.now() });
+
+    await fetchMessages();
+    startCountdown();
+
+    monitorInterval = setInterval(async () => {
+      try {
+        await fetchMessages();
+      } catch(e) {
+        addLog('抓取失敗：' + e.message, 'err');
+        showError(e.message);
+      }
+      resetCountdown();
+    }, 10000);
+
+    addLog(`開始監控影片 ${vid}`, 'ok');
+
+  } catch(e) {
+    setStatus('error', '連線失敗');
+    showError(e.message);
+    addLog('連線失敗：' + e.message, 'err');
+    document.getElementById('btnStart').disabled = false;
+    document.getElementById('videoInput').disabled = false;
+  }
+};
+
+// ── 停止監控 ──
+window.stopMonitor = function() {
+  isRunning = false;
+  clearInterval(monitorInterval);
+  clearInterval(countdownInterval);
+  monitorInterval = liveChatId = nextPageToken = null;
+
+  setStatus('idle', '已停止');
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnStop').disabled  = true;
+  document.getElementById('videoInput').disabled = false;
+  document.getElementById('countdownBar').style.display = 'none';
+  document.getElementById('videoIdDisplay').style.display = 'none';
+
+  // 更新 Firebase worker 狀態
+  set(ref(db, 'yt_worker_status'), { running: false, stoppedAt: Date.now() });
+
+  addLog('監控已停止', 'info');
+};
+
+// ── 清除留言資料 ──
+window.clearData = function() {
+  if (!confirm('確定清除所有留言資料？')) return;
+  allMessages = []; userCounts = {};
+  set(ref(db, 'yt_monitor'), null);
+  updateStats(0);
+  addLog('已清除留言資料', 'info');
+};
+
+// ── 抓取留言 ──
+async function fetchMessages() {
+  if (!liveChatId) return;
+  let url = `https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${liveChatId}&part=snippet,authorDetails&maxResults=200&key=${API_KEY}`;
+  if (nextPageToken) url += `&pageToken=${nextPageToken}`;
+
+  const res  = await fetch(url);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+
+  nextPageToken = data.nextPageToken || nextPageToken;
+
+  let newCount = 0;
+  (data.items || []).forEach(item => {
+    if (item.snippet.type !== 'textMessageEvent') return;
+    if (allMessages.find(m => m.id === item.id)) return;
+
+    const ytName = item.authorDetails.displayName;
+    const time   = item.snippet.publishedAt;
+    const text   = item.snippet.textMessageDetails?.messageText || '';
+    newCount++;
+
+    const msg = { id: item.id, ytName, text, time };
+    allMessages.push(msg);
+
+    if (!userCounts[ytName]) userCounts[ytName] = { count: 0, lastTime: time };
+    userCounts[ytName].count++;
+    userCounts[ytName].lastTime = time;
+
+    collectRoundMessages(msg);
+  });
+
+  // 裁切超過 10000 筆
+  if (allMessages.length > 10000) allMessages = allMessages.slice(-10000);
+
+  // 寫入 Firebase（只寫 userCounts，allMessages 用 push 累加方式較省流量）
+  syncToFirebase();
+  updateStats(newCount);
+
+  if (newCount > 0) {
+    addLog(`新增 ${newCount} 則留言（累計 ${allMessages.length} 則）`, 'ok');
+    // 若有開啟中的競猜場次，順便同步 rounds
+    if (rounds.some(r => r.isOpen)) {
+      set(ref(db, 'pred_rounds'), Object.fromEntries(rounds.map((r, i) => [i, r])));
+    }
+  }
+}
+
+// ── 競猜場次收集 ──
+function collectRoundMessages(msg) {
+  const now = new Date(msg.time);
+  rounds.forEach(r => {
+    if (!r.isOpen) return;
+    if (!r.messages) r.messages = [];
+    if (r.messages.find(m => m.id === msg.id)) return;
+    if (r.openAt && now < new Date(r.openAt)) return;
+    const hit = (r.options || []).find(opt => msg.text.toLowerCase().includes(opt.toLowerCase()));
+    if (!hit) return;
+    r.messages.push({ id: msg.id, ytName: msg.ytName, text: msg.text, time: msg.time, matched: hit });
+  });
+}
+
+// ── Firebase 同步（分開寫，省流量）──
+function syncToFirebase() {
+  set(ref(db, 'yt_monitor'), { allMessages, userCounts });
+}
+
+// ── UI 工具 ──
+function updateStats(newCount) {
+  document.getElementById('statMessages').textContent = allMessages.length;
+  document.getElementById('statUsers').textContent    = Object.keys(userCounts).length;
+  document.getElementById('statNew').textContent      = newCount > 0 ? `+${newCount}` : (isRunning ? '0' : '—');
+}
+
+function setStatus(type, text) {
+  const card = document.getElementById('statusCard');
+  const dot  = document.getElementById('statusDot');
+  const txt  = document.getElementById('statusText');
+  card.className = 'status-card ' + (type === 'running' ? 'running' : type === 'error' ? 'error' : '');
+  dot.className  = 'status-dot '  + (type === 'running' ? 'running' : type === 'error' ? 'error' : '');
+  txt.className  = 'status-text ' + (type === 'running' ? 'running' : type === 'error' ? 'error' : 'idle');
+  txt.textContent = text;
+}
+
+function startCountdown() {
+  clearInterval(countdownInterval);
+  countdown = 10;
+  updateCountdownBar();
+  countdownInterval = setInterval(() => {
+    countdown--;
+    if (countdown < 0) countdown = 10;
+    updateCountdownBar();
+  }, 1000);
+}
+
+function resetCountdown() { countdown = 10; }
+
+function updateCountdownBar() {
+  document.getElementById('countdownSec').textContent = countdown + 's';
+  document.getElementById('barFill').style.width = (countdown / 10 * 100) + '%';
+}
+
+function showError(msg) {
+  const b = document.getElementById('errorBox');
+  b.textContent = '⚠️ ' + msg;
+  b.classList.add('show');
+}
+function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+
+const logEntries = [];
+function addLog(msg, type = 'info') {
+  const now = new Date().toLocaleTimeString('zh-TW', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  logEntries.unshift({ time: now, msg, type });
+  if (logEntries.length > 50) logEntries.pop();
+  const list = document.getElementById('logList');
+  list.innerHTML = logEntries.map(e =>
+    `<div class="log-item">
+      <span class="log-time">${e.time}</span>
+      <span class="log-msg ${e.type}">${e.msg}</span>
+    </div>`
+  ).join('');
+}
+
+function extractVideoId(input) {
+  const ps = [/(?:v=|youtu\.be\/|\/live\/)([A-Za-z0-9_-]{11})/, /^([A-Za-z0-9_-]{11})$/];
+  for (const p of ps) { const m = input.match(p); if (m) return m[1]; }
+  return null;
+}
+
+async function getLiveChatId(vid) {
+  const res  = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${vid}&key=${API_KEY}`);
+  const data = await res.json();
+  const d    = data.items?.[0]?.liveStreamingDetails;
+  if (!d?.activeLiveChatId) throw new Error('找不到直播聊天室，請確認是否正在直播');
+  return d.activeLiveChatId;
+}
+
+// ── 頁面離開警告 ──
+window.addEventListener('beforeunload', e => {
+  if (isRunning) {
+    e.preventDefault();
+    e.returnValue = '監控正在進行中，確定要離開嗎？';
+  }
+});
+
+// ── 初始化：先載入資料，再檢查是否需要恢復監控 ──
+async function init() {
+  await loadExisting();
+
+  // 讀取 Firebase 目前的 worker 狀態
+  try {
+    const snap = await get(ref(db, 'yt_worker_status'));
+    const status = snap.val();
+
+    if (status && status.running && status.videoId) {
+      // Firebase 說監控中 → 自動恢復
+      addLog(`偵測到進行中的監控（影片 ${status.videoId}），正在恢復...`, 'info');
+      document.getElementById('videoInput').value = status.videoId;
+      await resumeMonitor(status.videoId);
+    } else {
+      // 沒有進行中的監控，正常待機
+      set(ref(db, 'yt_worker_status'), { running: false });
+    }
+  } catch(e) {
+    addLog('讀取監控狀態失敗：' + e.message, 'err');
+    set(ref(db, 'yt_worker_status'), { running: false });
+  }
+}
+
+// ── 恢復監控（切回頁面時用）──
+async function resumeMonitor(vid) {
+  setStatus('connecting', '恢復連線中...');
+  document.getElementById('btnStart').disabled = true;
+  document.getElementById('videoInput').disabled = true;
+
+  try {
+    liveChatId = await getLiveChatId(vid);
+    isRunning  = true;
+
+    document.getElementById('videoIdDisplay').style.display = 'block';
+    document.getElementById('videoIdSpan').textContent = vid;
+    document.getElementById('btnStop').disabled = false;
+    document.getElementById('countdownBar').style.display = 'block';
+    setStatus('running', '監控中（已恢復）');
+
+    // 不覆蓋 startedAt，保留原本的開始時間
+    set(ref(db, 'yt_worker_status'), { running: true, videoId: vid, startedAt: Date.now() });
+
+    await fetchMessages();
+    startCountdown();
+
+    monitorInterval = setInterval(async () => {
+      try { await fetchMessages(); }
+      catch(e) { addLog('抓取失敗：' + e.message, 'err'); showError(e.message); }
+      resetCountdown();
+    }, 10000);
+
+    addLog(`已恢復監控影片 ${vid}`, 'ok');
+
+  } catch(e) {
+    setStatus('error', '恢復失敗');
+    showError(e.message);
+    addLog('恢復失敗：' + e.message + '，請手動重新開始', 'err');
+    document.getElementById('btnStart').disabled = false;
+    document.getElementById('videoInput').disabled = false;
+    set(ref(db, 'yt_worker_status'), { running: false });
+  }
+}
+
+init();
+</script>
+</body>
+</html>
