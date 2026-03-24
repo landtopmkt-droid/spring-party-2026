@@ -748,6 +748,16 @@ window.toggleRoundMsgs = function(rid) {
   if (el) el.classList.toggle('open');
 };
 
+// ★ 每位用戶只取最早那一則（時間最小的），過濾重複留言
+function firstMsgPerUser(messages) {
+  const map = {};
+  (messages || [])
+    .slice()
+    .sort((a, b) => new Date(a.time) - new Date(b.time))
+    .forEach(m => { if (!map[m.ytName]) map[m.ytName] = m; });
+  return Object.values(map);
+}
+
 function renderRounds() {
   const container = document.getElementById('roundsList');
   document.getElementById('predFilterSection').style.display = rounds.length ? 'block' : 'none';
@@ -757,14 +767,18 @@ function renderRounds() {
   container.innerHTML = rounds.map((r,idx) => {
     const statusLabel = r.isOpen ? '收集中' : r.closing ? '同步中...' : (r.closeAt ? '已關閉' : '未開始');
     const statusCls   = r.isOpen ? 'open' : r.closing ? 'open' : 'closed';
-    const msgCount    = (r.messages||[]).length;
+    // ★ 每人只取第一則去重
+    const dedupedMsgs = firstMsgPerUser(r.messages);
+    const msgCount    = dedupedMsgs.length;
+    const rawCount    = (r.messages||[]).length;
     const chips = (r.options||[]).map(opt=>`
       <div class="option-chip ${r.answer===opt?'correct':''}">
         ${esc(opt)}${r.answer===opt?'<span style="font-size:1rem;margin-left:2px">✓</span>':''}
         <button class="option-chip-del" onclick="removeOptionFromRound(${r.id},'${esc(opt)}')">✕</button>
       </div>`).join('');
     const ansOpts = '<option value="">— 選擇正確答案 —</option>'+(r.options||[]).map(opt=>`<option value="${esc(opt)}" ${r.answer===opt?'selected':''}>${esc(opt)}</option>`).join('');
-    const msgRows = (r.messages||[]).length ? [...(r.messages||[])].reverse().slice(0,200).map(m=>{
+    // ★ 留言記錄只顯示去重後（每人第一則）
+    const msgRows = dedupedMsgs.length ? [...dedupedMsgs].reverse().slice(0,200).map(m=>{
       const mt = matchUser(m.ytName);
       return `<tr>
         <td style="font-size:1.1rem;white-space:nowrap">${new Date(m.time).toLocaleTimeString('zh-TW')}</td>
@@ -804,7 +818,7 @@ function renderRounds() {
           <button class="btn btn-sm" style="background:transparent;border:1px solid rgba(192,39,45,0.3);color:#e57373" onclick="deleteRound(${r.id})">刪除場次</button>
           <div class="round-time-info">${timeInfo}</div>
         </div>
-        <div class="round-msgs-toggle" onclick="toggleRoundMsgs(${r.id})">▸ 留言記錄（${msgCount} 則）${msgCount>200?'，顯示最新 200 則':''}</div>
+        <div class="round-msgs-toggle" onclick="toggleRoundMsgs(${r.id})">▸ 留言記錄（${msgCount} 人次）${rawCount>msgCount?'，已過濾重複留言':''}${msgCount>200?'，顯示最新 200 則':''}</div>
         <div class="round-msgs-body" id="msgs-body-${r.id}">
           <div class="round-msgs-table"><table>
             <thead><tr><th>時間</th><th>YouTube帳號</th><th>本名</th><th>命中選項</th><th>留言內容</th></tr></thead>
@@ -823,7 +837,8 @@ window.runFilter = function() {
   if (!answered.length) { document.getElementById('filterResult').innerHTML='<div style="color:var(--text-muted);padding:16px;font-size:1.23rem">請先為每個場次設定正確答案</div>'; return; }
   const perRound = answered.map(r => {
     const correct = new Set();
-    (r.messages||[]).forEach(m => { if(m.matched&&m.matched.toLowerCase()===r.answer.toLowerCase()) correct.add(m.ytName); });
+    // ★ 每人只取第一則再判斷答案，避免多次留言混入不同選項
+    firstMsgPerUser(r.messages).forEach(m => { if(m.matched&&m.matched.toLowerCase()===r.answer.toLowerCase()) correct.add(m.ytName); });
     return { round: r, correct };
   });
   let winners = [...perRound[0].correct];
@@ -856,7 +871,8 @@ window.exportFilterCSV = function() {
   if (!answered.length) { showToast('請先設定正確答案'); return; }
   const perRound = answered.map(r => {
     const correct = new Set();
-    (r.messages||[]).forEach(m => { if(m.matched&&m.matched.toLowerCase()===r.answer.toLowerCase()) correct.add(m.ytName); });
+    // ★ 每人只取第一則
+    firstMsgPerUser(r.messages).forEach(m => { if(m.matched&&m.matched.toLowerCase()===r.answer.toLowerCase()) correct.add(m.ytName); });
     return { round: r, correct };
   });
   let winners = [...perRound[0].correct];
