@@ -459,8 +459,11 @@ function collectRoundMessages(msg) {
   rounds.forEach(r => {
     if (!r.isOpen) return;
     if (!r.messages) r.messages = [];
+    // 防重複：同一則留言 ID 已收錄過就跳過
     if (r.messages.find(m => m.id === msg.id)) return;
     if (r.openAt && now < new Date(r.openAt)) return;
+    // ★ 同一個人只算第一次留言：此人已有紀錄就跳過
+    if (r.messages.find(m => m.ytName === msg.ytName)) return;
     const hit = (r.options || []).find(opt => msg.text.toLowerCase().includes(opt.toLowerCase()));
     if (!hit) return;
     r.messages.push({ id: msg.id, ytName: msg.ytName, text: msg.text, time: msg.time, matched: hit });
