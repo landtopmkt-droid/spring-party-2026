@@ -403,23 +403,26 @@ async function fetchMessages() {
   const newMsgs = [];
   (data.items || []).forEach(item => {
     if (item.snippet.type !== 'textMessageEvent') return;
-    if (seenIds.has(item.id)) return;   // 已處理過，跳過
+    if (seenIds.has(item.id)) return;
     seenIds.add(item.id);
-
-    const msg = {
+    newMsgs.push({
       id:     item.id,
       ytName: item.authorDetails.displayName,
       text:   item.snippet.textMessageDetails?.messageText || '',
       time:   item.snippet.publishedAt
-    };
-    newMsgs.push(msg);
+    });
+  });
 
-    // 更新計數（本地）
+  // ★ 按時間排序後再處理
+  // YouTube API 回傳的 data.items 不保證時間順序
+  // 若同一批次裡同一人有兩則留言，不排序會抓到錯的那則
+  newMsgs.sort((a, b) => new Date(a.time) - new Date(b.time));
+
+  newMsgs.forEach(msg => {
     if (!userCounts[msg.ytName]) userCounts[msg.ytName] = { count: 0, lastTime: msg.time };
     userCounts[msg.ytName].count++;
     userCounts[msg.ytName].lastTime = msg.time;
-
-    // 競猜場次收集（與舊版相同邏輯）
+    // 排序後才呼叫，保證先處理時間早的留言
     collectRoundMessages(msg);
   });
 
